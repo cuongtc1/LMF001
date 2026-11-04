@@ -1,0 +1,17 @@
+<Project Sdk="Godot.NET.Sdk/4.7.2">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <RootNamespace>LumiFeast</RootNamespace>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- These folders are separate projects or not code. -->
+    <Compile Remove="src/Logic/**" />
+    <Compile Remove="tests/**" />
+    <Compile Remove="art_source/**" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="src/Logic/LumiFeast.Logic.csproj" />
+  </ItemGroup>
+</Project>

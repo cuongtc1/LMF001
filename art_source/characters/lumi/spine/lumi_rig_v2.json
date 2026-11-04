@@ -1,0 +1,571 @@
+{
+ "skeleton": {
+  "spine": "4.2.00",
+  "images": "../skins/little_knight/",
+  "width": 1280,
+  "height": 1280
+ },
+ "bones": [
+  {
+   "name": "root"
+  },
+  {
+   "name": "hip",
+   "parent": "root",
+   "x": 7.0,
+   "y": 571.0
+  },
+  {
+   "name": "torso",
+   "parent": "hip",
+   "x": 0.0,
+   "y": 10.0
+  },
+  {
+   "name": "neck",
+   "parent": "torso",
+   "x": 7.0,
+   "y": 185.0
+  },
+  {
+   "name": "head",
+   "parent": "neck",
+   "x": 7.0,
+   "y": 35.0
+  },
+  {
+   "name": "hair_back",
+   "parent": "head",
+   "x": 0.0,
+   "y": 170.0
+  },
+  {
+   "name": "tail_L",
+   "parent": "head",
+   "x": -200.0,
+   "y": 35.0
+  },
+  {
+   "name": "tail_R",
+   "parent": "head",
+   "x": 90.0,
+   "y": 35.0
+  },
+  {
+   "name": "front_hair",
+   "parent": "head",
+   "x": 0.0,
+   "y": 320.0
+  },
+  {
+   "name": "ahoge",
+   "parent": "head",
+   "x": -10.0,
+   "y": 360.0
+  },
+  {
+   "name": "hairpin",
+   "parent": "head",
+   "x": 130.0,
+   "y": 263.0
+  },
+  {
+   "name": "eyes",
+   "parent": "head",
+   "x": 22.0,
+   "y": 125.0
+  },
+  {
+   "name": "upperarm_L",
+   "parent": "torso",
+   "x": -61.0,
+   "y": 165.0
+  },
+  {
+   "name": "forearm_L",
+   "parent": "upperarm_L",
+   "x": -33.0,
+   "y": -80.0
+  },
+  {
+   "name": "hand_L",
+   "parent": "forearm_L",
+   "x": -80.0,
+   "y": -97.0
+  },
+  {
+   "name": "upperarm_R",
+   "parent": "torso",
+   "x": 114.0,
+   "y": 165.0
+  },
+  {
+   "name": "forearm_R",
+   "parent": "upperarm_R",
+   "x": 9.0,
+   "y": -92.0
+  },
+  {
+   "name": "hand_R",
+   "parent": "forearm_R",
+   "x": 72.0,
+   "y": -90.0
+  },
+  {
+   "name": "skirt",
+   "parent": "hip",
+   "x": 4.0,
+   "y": 30.0
+  },
+  {
+   "name": "leg_L",
+   "parent": "hip",
+   "x": -73.0,
+   "y": -45.0
+  },
+  {
+   "name": "boot_L",
+   "parent": "leg_L",
+   "x": -73.0,
+   "y": -317.0
+  },
+  {
+   "name": "leg_R",
+   "parent": "hip",
+   "x": 76.0,
+   "y": -48.0
+  },
+  {
+   "name": "boot_R",
+   "parent": "leg_R",
+   "x": 13.0,
+   "y": -319.0
+  }
+ ],
+ "slots": [
+  {
+   "name": "hair_back",
+   "bone": "hair_back",
+   "attachment": "hair_back"
+  },
+  {
+   "name": "tail_R",
+   "bone": "tail_R",
+   "attachment": "tail_R"
+  },
+  {
+   "name": "tail_L",
+   "bone": "tail_L",
+   "attachment": "tail_L"
+  },
+  {
+   "name": "sleeve_in_L",
+   "bone": "upperarm_L",
+   "attachment": "sleeve_in_L"
+  },
+  {
+   "name": "forearm_L",
+   "bone": "forearm_L",
+   "attachment": "forearm_L"
+  },
+  {
+   "name": "forearm_R",
+   "bone": "forearm_R",
+   "attachment": "forearm_R"
+  },
+  {
+   "name": "upperarm_L",
+   "bone": "upperarm_L",
+   "attachment": "upperarm_L"
+  },
+  {
+   "name": "upperarm_R",
+   "bone": "upperarm_R",
+   "attachment": "upperarm_R"
+  },
+  {
+   "name": "hand_L",
+   "bone": "hand_L",
+   "attachment": "hand_L"
+  },
+  {
+   "name": "hand_R",
+   "bone": "hand_R",
+   "attachment": "hand_R"
+  },
+  {
+   "name": "neck",
+   "bone": "neck",
+   "attachment": "neck"
+  },
+  {
+   "name": "skirt_back",
+   "bone": "skirt",
+   "attachment": "skirt_back"
+  },
+  {
+   "name": "boot_inner_L",
+   "bone": "boot_L",
+   "attachment": "boot_inner_L"
+  },
+  {
+   "name": "boot_inner_R",
+   "bone": "boot_R",
+   "attachment": "boot_inner_R"
+  },
+  {
+   "name": "leg_L",
+   "bone": "leg_L",
+   "attachment": "leg_L"
+  },
+  {
+   "name": "leg_R",
+   "bone": "leg_R",
+   "attachment": "leg_R"
+  },
+  {
+   "name": "boot_L",
+   "bone": "boot_L",
+   "attachment": "boot_L"
+  },
+  {
+   "name": "boot_R",
+   "bone": "boot_R",
+   "attachment": "boot_R"
+  },
+  {
+   "name": "torso",
+   "bone": "torso",
+   "attachment": "torso"
+  },
+  {
+   "name": "skirt",
+   "bone": "skirt",
+   "attachment": "skirt"
+  },
+  {
+   "name": "head",
+   "bone": "head",
+   "attachment": "head"
+  },
+  {
+   "name": "eyewhite_L",
+   "bone": "eyes",
+   "attachment": "eyewhite_L"
+  },
+  {
+   "name": "eyewhite_R",
+   "bone": "eyes",
+   "attachment": "eyewhite_R"
+  },
+  {
+   "name": "iris_L",
+   "bone": "eyes",
+   "attachment": "iris_L"
+  },
+  {
+   "name": "iris_R",
+   "bone": "eyes",
+   "attachment": "iris_R"
+  },
+  {
+   "name": "eyelash_L",
+   "bone": "eyes",
+   "attachment": "eyelash_L"
+  },
+  {
+   "name": "eyelash_R",
+   "bone": "eyes",
+   "attachment": "eyelash_R"
+  },
+  {
+   "name": "eyebrow_L",
+   "bone": "eyes",
+   "attachment": "eyebrow_L"
+  },
+  {
+   "name": "eyebrow_R",
+   "bone": "eyes",
+   "attachment": "eyebrow_R"
+  },
+  {
+   "name": "ahoge",
+   "bone": "ahoge",
+   "attachment": "ahoge"
+  },
+  {
+   "name": "front_hair",
+   "bone": "front_hair",
+   "attachment": "front_hair"
+  },
+  {
+   "name": "hairpin",
+   "bone": "hairpin",
+   "attachment": "hairpin"
+  }
+ ],
+ "skins": [
+  {
+   "name": "little_knight",
+   "attachments": {
+    "hair_back": {
+     "hair_back": {
+      "x": -61.5,
+      "y": 24.5,
+      "width": 539,
+      "height": 365
+     }
+    },
+    "tail_R": {
+     "tail_R": {
+      "x": 51.0,
+      "y": -204.0,
+      "width": 382,
+      "height": 482
+     }
+    },
+    "tail_L": {
+     "tail_L": {
+      "x": -44.5,
+      "y": -210.0,
+      "width": 391,
+      "height": 492
+     }
+    },
+    "sleeve_in_L": {
+     "sleeve_in_L": {
+      "x": -37.0,
+      "y": -88.5,
+      "width": 94,
+      "height": 55
+     }
+    },
+    "forearm_L": {
+     "forearm_L": {
+      "x": -41.0,
+      "y": -49.5,
+      "width": 126,
+      "height": 143
+     }
+    },
+    "forearm_R": {
+     "forearm_R": {
+      "x": 36.0,
+      "y": -45.5,
+      "width": 116,
+      "height": 133
+     }
+    },
+    "upperarm_L": {
+     "upperarm_L": {
+      "x": -27.5,
+      "y": -45.0,
+      "width": 117,
+      "height": 134
+     }
+    },
+    "upperarm_R": {
+     "upperarm_R": {
+      "x": 2.0,
+      "y": -45.5,
+      "width": 104,
+      "height": 133
+     }
+    },
+    "hand_L": {
+     "hand_L": {
+      "x": -51.5,
+      "y": -47.5,
+      "width": 161,
+      "height": 143
+     }
+    },
+    "hand_R": {
+     "hand_R": {
+      "x": 46.0,
+      "y": -40.0,
+      "width": 152,
+      "height": 130
+     }
+    },
+    "neck": {
+     "neck": {
+      "x": -0.5,
+      "y": 28.5,
+      "width": 59,
+      "height": 73
+     }
+    },
+    "skirt_back": {
+     "skirt_back": {
+      "x": 7.0,
+      "y": -156.0,
+      "width": 418,
+      "height": 122
+     }
+    },
+    "boot_inner_L": {
+     "boot_inner_L": {
+      "x": 3.0,
+      "y": 4.0,
+      "width": 124,
+      "height": 40
+     }
+    },
+    "boot_inner_R": {
+     "boot_inner_R": {
+      "x": -1.5,
+      "y": 5.0,
+      "width": 123,
+      "height": 32
+     }
+    },
+    "leg_L": {
+     "leg_L": {
+      "x": -14.0,
+      "y": -176.0,
+      "width": 184,
+      "height": 370
+     }
+    },
+    "leg_R": {
+     "leg_R": {
+      "x": 3.5,
+      "y": -177.0,
+      "width": 115,
+      "height": 368
+     }
+    },
+    "boot_L": {
+     "boot_L": {
+      "x": 4.5,
+      "y": -99.5,
+      "width": 155,
+      "height": 219
+     }
+    },
+    "boot_R": {
+     "boot_R": {
+      "x": 27.0,
+      "y": -100.5,
+      "width": 178,
+      "height": 201
+     }
+    },
+    "torso": {
+     "torso": {
+      "x": 42.5,
+      "y": 115.5,
+      "width": 237,
+      "height": 215
+     }
+    },
+    "skirt": {
+     "skirt": {
+      "x": 6.5,
+      "y": -97.5,
+      "width": 423,
+      "height": 235
+     }
+    },
+    "head": {
+     "head": {
+      "x": -19.0,
+      "y": 175.0,
+      "width": 314,
+      "height": 354
+     }
+    },
+    "eyewhite_L": {
+     "eyewhite_L": {
+      "x": -46.0,
+      "y": -6.5,
+      "width": 90,
+      "height": 81
+     }
+    },
+    "eyewhite_R": {
+     "eyewhite_R": {
+      "x": 80.5,
+      "y": 6.5,
+      "width": 37,
+      "height": 75
+     }
+    },
+    "iris_L": {
+     "iris_L": {
+      "x": -32.0,
+      "y": -10.0,
+      "width": 56,
+      "height": 74
+     }
+    },
+    "iris_R": {
+     "iris_R": {
+      "x": 77.5,
+      "y": 3.0,
+      "width": 27,
+      "height": 66
+     }
+    },
+    "eyelash_L": {
+     "eyelash_L": {
+      "x": -56.5,
+      "y": 0.5,
+      "width": 113,
+      "height": 97
+     }
+    },
+    "eyelash_R": {
+     "eyelash_R": {
+      "x": 86.5,
+      "y": 12.5,
+      "width": 53,
+      "height": 87
+     }
+    },
+    "eyebrow_L": {
+     "eyebrow_L": {
+      "x": -66.5,
+      "y": 67.0,
+      "width": 81,
+      "height": 46
+     }
+    },
+    "eyebrow_R": {
+     "eyebrow_R": {
+      "x": 80.0,
+      "y": 87.0,
+      "width": 46,
+      "height": 22
+     }
+    },
+    "ahoge": {
+     "ahoge": {
+      "x": -2.0,
+      "y": 50.5,
+      "width": 170,
+      "height": 107
+     }
+    },
+    "front_hair": {
+     "front_hair": {
+      "x": -10.5,
+      "y": -161.0,
+      "width": 429,
+      "height": 396
+     }
+    },
+    "hairpin": {
+     "hairpin": {
+      "x": -0.5,
+      "y": -0.5,
+      "width": 79,
+      "height": 89
+     }
+    }
+   }
+  }
+ ],
+ "animations": {}
+}

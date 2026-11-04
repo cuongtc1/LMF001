@@ -1,0 +1,11 @@
+{
+  "character": "lumi",
+  "default_skin": "little_knight",
+  "skins": [
+    {
+      "id": "little_knight",
+      "spine_skin": "little_knight",
+      "name_key": "skin.lumi.little_knight"
+    }
+  ]
+}
