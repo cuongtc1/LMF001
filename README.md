@@ -5,7 +5,7 @@ Cute 2D side-scrolling action game for PC. Godot 4.7.2 (.NET) + Spine 4.3, C#.
 ## Setup
 1. Install Git LFS, then run `git lfs install`.
 2. Install the .NET 10 SDK.
-3. Use the Godot **C#** editor with the Spine module (`godot-editor-windows-mono.zip`, 4.7.2, from the spine-godot docs). Copy its packages from `GodotSharp/Tools/` into `godot-nuget/` and add a `nuget.config` that points to that folder, as the docs describe.
+3. Use the Godot **C#** editor with the Spine module (`godot-editor-windows-mono.zip`, branch 4.3, Godot 4.7.2, from the spine-godot docs). Copy its packages from `GodotSharp/Tools/nupkgs/` into `godot-nuget/`. `nuget.config` already takes every `Godot*` package from that folder. If the official Godot packages are already in `~/.nuget/packages`, delete them first.
 4. Run the logic tests: `dotnet test tests/LumiFeast.Logic.Tests`
 
 ## Layout
