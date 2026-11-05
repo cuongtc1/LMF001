@@ -144,7 +144,8 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             attacking is not null || _stunTicks > 0 || Health.IsDead,
             attacking is not null && !onFloor ? _def.Movement.AirAttackGravityScale : 1,
             LungeVelocity(),
-            input.DownHeld));
+            input.DownHeld,
+            HoldsInAir(attacking, onFloor)));
 
         Velocity = new Vector2(_motor.VelocityX, _motor.VelocityY);
         MoveAndSlide();
@@ -160,11 +161,15 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         ShowView(attacking);
     }
 
+    /// <summary>Lumi hangs until the last swing of the string has landed, then falls.</summary>
+    private bool HoldsInAir(AttackDef? attack, bool onFloor) =>
+        attack is { HoldInAir: true } && !onFloor && (attack.Next is not null || _combo.Phase != AttackPhase.Recovery);
+
     private ComboEntry CurrentEntry()
     {
         if (!IsOnFloor())
         {
-            return ComboEntry.Air;
+            return _motor.IsSprintJump ? ComboEntry.SprintAir : ComboEntry.Air;
         }
 
         return _motor.IsSprinting ? ComboEntry.Sprint : ComboEntry.Ground;

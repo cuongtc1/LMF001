@@ -7,10 +7,10 @@ namespace LumiFeast.Logic.Tests;
 public class ComboRunnerTests
 {
     private static readonly RectDef Box = new(0, 0, 1, 1);
-    private static readonly AttackSetDef Set = new("test", "a", "b", "b", [Attack("a", "b"), Attack("b", null)]);
+    private static readonly AttackSetDef Set = new("test", "a", "b", "a", "b", [Attack("a", "b"), Attack("b", null)]);
 
     private static AttackDef Attack(string id, string? next) =>
-        new(id, 1, 2, 2, 4, 6, next, 0, Box, 0, 0, 0, "v", "v", 0, 0, 0, 0, 0, false);
+        new(id, 1, 2, 2, 4, 6, next, 0, Box, 0, 0, 0, "v", "v", 0, 0, 0, 0, 0, false, false);
 
     private static void RunOut(ComboRunner combo, ComboEntry entry)
     {
@@ -30,6 +30,19 @@ public class ComboRunnerTests
         RunOut(combo, ComboEntry.Air);
         combo.PressAttack();
         combo.Advance(ComboEntry.Air);
+        Assert.False(combo.IsAttacking);
+    }
+
+    [Fact]
+    public void SprintJumpStartsItsOwnString()
+    {
+        var combo = new ComboRunner(Set, 8);
+        combo.PressAttack();
+        combo.Advance(ComboEntry.SprintAir);
+        Assert.Equal("a", combo.Current?.Id);
+        RunOut(combo, ComboEntry.SprintAir);
+        combo.PressAttack();
+        combo.Advance(ComboEntry.SprintAir);
         Assert.False(combo.IsAttacking);
     }
 

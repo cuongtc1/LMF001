@@ -146,10 +146,10 @@ public class PlayerMotorTests
     }
 
     [Fact]
-    public void JumpMatchesTheMeasuredElesisTiming()
+    public void JumpHasTheChosenTiming()
     {
         var (ticks, height) = MeasureJump(NewMotor());
-        Assert.InRange(ticks / 60f, 0.5f, 0.6f);
+        Assert.InRange(ticks / 60f, 0.65f, 0.75f);
         Assert.InRange(height, 280f, 320f);
     }
 
@@ -172,6 +172,46 @@ public class PlayerMotorTests
         plain.Step(Air(true));
         attacking.Step(Air(true) with { GravityScale = 0.3f });
         Assert.Equal(plain.VelocityY, attacking.VelocityY);
+    }
+
+    [Fact]
+    public void AirHoldStopsTheFallButNotTheRise()
+    {
+        var motor = NewMotor();
+        motor.Step(Ground(jump: true));
+        motor.Step(Air(true) with { AirHold = true });
+        Assert.True(motor.VelocityY < 0);
+        for (var i = 0; i < 40; i++)
+        {
+            motor.Step(Air(true) with { AirHold = true });
+        }
+
+        Assert.Equal(0, motor.VelocityY);
+        motor.Step(Air(true));
+        Assert.True(motor.VelocityY > 0);
+    }
+
+    [Fact]
+    public void SprintJumpIsRememberedUntilLanding()
+    {
+        var motor = NewMotor();
+        motor.Step(Ground(1));
+        motor.Step(Ground(0));
+        motor.Step(Ground(1));
+        motor.Step(Ground(1, jump: true));
+        Assert.True(motor.IsSprintJump);
+        motor.Step(Air(true));
+        Assert.True(motor.IsSprintJump);
+        motor.Step(Ground());
+        Assert.False(motor.IsSprintJump);
+    }
+
+    [Fact]
+    public void StandingJumpIsNotASprintJump()
+    {
+        var motor = NewMotor();
+        motor.Step(Ground(jump: true));
+        Assert.False(motor.IsSprintJump);
     }
 
     [Fact]

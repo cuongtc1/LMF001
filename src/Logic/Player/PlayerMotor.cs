@@ -12,7 +12,8 @@ public readonly record struct MotorInput(
     bool Locked,
     float GravityScale,
     float LungeVelocityX,
-    bool FastFall = false);
+    bool FastFall = false,
+    bool AirHold = false);
 
 /// <summary>Run, jump and dash rules. One Step call is one 1/60 s tick; velocities are pixels per second.</summary>
 public sealed class PlayerMotor(MovementDef move)
@@ -42,6 +43,9 @@ public sealed class PlayerMotor(MovementDef move)
     public bool IsDashing => _dashTicks > 0;
 
     public bool IsSprinting { get; private set; }
+
+    /// <summary>This jump left the ground at a sprint; it stays true until landing.</summary>
+    public bool IsSprintJump { get; private set; }
 
     public bool IsInvulnerable => _dashInvulnerable > 0;
 
@@ -84,6 +88,7 @@ public sealed class PlayerMotor(MovementDef move)
             _airJumpsLeft = move.AirJumps;
             VelocityY = Math.Min(VelocityY, 0);
             _jumpRising = false;
+            IsSprintJump = false;
         }
 
         if (!input.Locked)
@@ -180,6 +185,7 @@ public sealed class PlayerMotor(MovementDef move)
         if (_coyote > 0)
         {
             StartJump(move.JumpVelocity);
+            IsSprintJump = IsSprinting;
             _coyote = 0;
         }
         else if (!input.OnFloor && AirJumpUnlocked && _airJumpsLeft > 0)
@@ -218,10 +224,14 @@ public sealed class PlayerMotor(MovementDef move)
             _jumpRising = false;
         }
 
-        var fastFall = input.FastFall && !input.OnFloor;
+        var fastFall = input.FastFall && !input.OnFloor && !input.AirHold;
         var falling = VelocityY > 0;
         var scale = fastFall ? move.FastFallGravityScale : falling ? move.FallGravityScale * input.GravityScale : 1;
         VelocityY += move.Gravity * Tempo * Tempo * scale * TickSeconds;
         VelocityY = Math.Min(VelocityY, (fastFall ? move.FastFallMaxSpeed : move.MaxFallSpeed) * Tempo);
+        if (input.AirHold)
+        {
+            VelocityY = Math.Min(VelocityY, 0);
+        }
     }
 }

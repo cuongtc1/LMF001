@@ -11,10 +11,10 @@
     "run_speed": 460,
     "ground_acceleration": 5200,
     "air_acceleration": 3400,
-    "gravity": 7100,
+    "gravity": 4400,
     "fall_gravity_scale": 1.35,
-    "max_fall_speed": 2500,
-    "jump_velocity": 2060,
+    "max_fall_speed": 2000,
+    "jump_velocity": 1625,
     "jump_cut_scale": 0.6,
     "coyote_ticks": 6,
     "jump_buffer_ticks": 8,
@@ -27,9 +27,9 @@
     "sprint_speed": 720,
     "sprint_tap_ticks": 14,
     "air_jumps": 1,
-    "air_jump_velocity": 1760,
+    "air_jump_velocity": 1390,
     "fast_fall_gravity_scale": 2.0,
-    "fast_fall_max_speed": 3400
+    "fast_fall_max_speed": 3000
   },
   "combat": {
     "attack_set": "lumi_sword",

@@ -70,15 +70,17 @@ public sealed record AttackDef(
     float SwingFromDegrees,
     float SwingToDegrees,
     float LaunchSpeed,
-    bool EndsOnLanding)
+    bool EndsOnLanding,
+    bool HoldInAir)
 {
     public int TotalTicks => StartupTicks + ActiveTicks + RecoveryTicks;
 }
 
 /// <param name="First">Starts the combo on the ground.</param>
-/// <param name="FirstAir">Starts it in the air.</param>
+/// <param name="FirstAir">Starts it in the air after a standing jump.</param>
+/// <param name="FirstSprintAir">Starts it in the air after a sprint jump.</param>
 /// <param name="FirstSprint">Starts it while sprinting.</param>
-public sealed record AttackSetDef(string Id, string First, string FirstAir, string FirstSprint, IReadOnlyList<AttackDef> Attacks);
+public sealed record AttackSetDef(string Id, string First, string FirstAir, string FirstSprintAir, string FirstSprint, IReadOnlyList<AttackDef> Attacks);
 
 public sealed record MonsterStatsDef(int MaxHp, int Attack, float Defense, float Speed);
 
