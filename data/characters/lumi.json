@@ -29,13 +29,14 @@
     "air_jumps": 1,
     "air_jump_velocity": 1390,
     "fast_fall_gravity_scale": 2.0,
-    "fast_fall_max_speed": 3000
+    "fast_fall_max_speed": 3000,
+    "drop_through_ticks": 14
   },
   "combat": {
     "attack_set": "lumi_sword",
     "mp_per_hit": 3,
     "mp_per_second": 1,
-    "attack_buffer_ticks": 12
+    "attack_buffer_ticks": 18
   },
   "body": {
     "width": 70,
@@ -45,7 +46,7 @@
     "sprite": "assets/characters/lumi/placeholder/lumi.png",
     "height": 240,
     "sword_sprite": "assets/characters/lumi/placeholder/sword.png",
-    "sword_length": 165,
+    "sword_length": 250,
     "hand_x": 62,
     "hand_y": -96,
     "sword_rest_degrees": 150

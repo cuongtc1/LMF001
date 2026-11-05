@@ -27,7 +27,8 @@ public sealed record MovementDef(
     int AirJumps,
     float AirJumpVelocity,
     float FastFallGravityScale,
-    float FastFallMaxSpeed);
+    float FastFallMaxSpeed,
+    int DropThroughTicks);
 
 public sealed record CharacterCombatDef(string AttackSet, float MpPerHit, float MpPerSecond, int AttackBufferTicks);
 
@@ -71,7 +72,8 @@ public sealed record AttackDef(
     float SwingToDegrees,
     float LaunchSpeed,
     bool EndsOnLanding,
-    bool HoldInAir)
+    bool HoldInAir,
+    string? NextHeavy)
 {
     public int TotalTicks => StartupTicks + ActiveTicks + RecoveryTicks;
 }
@@ -80,7 +82,9 @@ public sealed record AttackDef(
 /// <param name="FirstAir">Starts it in the air after a standing jump.</param>
 /// <param name="FirstSprintAir">Starts it in the air after a sprint jump.</param>
 /// <param name="FirstSprint">Starts it while sprinting.</param>
-public sealed record AttackSetDef(string Id, string First, string FirstAir, string FirstSprintAir, string FirstSprint, IReadOnlyList<AttackDef> Attacks);
+/// <param name="FirstHeavy">X on the ground.</param>
+/// <param name="FirstSprintHeavy">X while sprinting.</param>
+public sealed record AttackSetDef(string Id, string First, string FirstAir, string FirstSprintAir, string FirstSprint, string FirstHeavy, string FirstSprintHeavy, IReadOnlyList<AttackDef> Attacks);
 
 public sealed record MonsterStatsDef(int MaxHp, int Attack, float Defense, float Speed);
 
@@ -95,7 +99,9 @@ public sealed record MonsterAiDef(
     int StunTicks,
     float LungeSpeed,
     float HopVelocity,
-    int HopIntervalTicks);
+    int HopIntervalTicks,
+    float HoverHeight,
+    bool SuperArmor);
 
 public sealed record MonsterAttackDef(float DamageMultiplier, RectDef Hitbox, float KnockbackSpeed, int HitstopTicks, string HitVfx);
 
@@ -146,6 +152,11 @@ public sealed record PlatformDef(string Sprite, float X, float Y, float Width, f
 
 public sealed record SpawnDef(string Monster, float X);
 
+public sealed record WaveDef(IReadOnlyList<SpawnDef> Spawns);
+
+/// <summary>A closed fight: walls rise at the trigger and fall when every wave is healed.</summary>
+public sealed record ArenaDef(float TriggerX, float LeftX, float RightX, int WaveDelayTicks, IReadOnlyList<WaveDef> Waves);
+
 public sealed record StageDef(
     string Id,
     int Tier,
@@ -155,7 +166,8 @@ public sealed record StageDef(
     int MonsterRespawnTicks,
     IReadOnlyList<LayerDef> Layers,
     IReadOnlyList<PlatformDef> Platforms,
-    IReadOnlyList<SpawnDef> Spawns);
+    IReadOnlyList<SpawnDef> Spawns,
+    ArenaDef? Arena);
 
 public sealed record InputActionDef(string Action, IReadOnlyList<string> Keys, IReadOnlyList<int> PadButtons, IReadOnlyList<int> PadAxes);
 

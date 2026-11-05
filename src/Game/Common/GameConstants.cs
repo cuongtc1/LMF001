@@ -17,6 +17,7 @@ public static class PhysicsLayers
     public const uint World = 1;
     public const uint PlayerHurtbox = 2;
     public const uint EnemyHurtbox = 4;
+    public const uint Platform = 8;
 }
 
 public static class InputActions
@@ -26,6 +27,7 @@ public static class InputActions
     public const string MoveDown = "move_down";
     public const string Jump = "jump";
     public const string AttackLight = "attack_light";
+    public const string AttackHeavy = "attack_heavy";
     public const string Dash = "dash";
     public const string DebugPanel = "debug_panel";
     public const string DebugReload = "debug_reload";

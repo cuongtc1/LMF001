@@ -25,6 +25,7 @@ public sealed class ComboRunner(AttackSetDef set, int bufferTicks)
     private int _buffer;
     private float _tickRemainder;
     private bool _airStringSpent;
+    private bool _heavyBuffered;
 
     /// <summary>Attack ticks that pass per game tick.</summary>
     public float AttackSpeed { get; set; } = 1;
@@ -63,7 +64,11 @@ public sealed class ComboRunner(AttackSetDef set, int bufferTicks)
     /// <summary>0 to 1 across the whole attack.</summary>
     public float Progress => Current is { } attack ? (float)Tick / attack.TotalTicks : 0;
 
-    public void PressAttack() => _buffer = bufferTicks;
+    public void PressAttack(bool heavy = false)
+    {
+        _buffer = bufferTicks;
+        _heavyBuffered = heavy;
+    }
 
     public void Cancel()
     {
@@ -86,7 +91,8 @@ public sealed class ComboRunner(AttackSetDef set, int bufferTicks)
             _tickRemainder += AttackSpeed;
             Tick += (int)_tickRemainder;
             _tickRemainder -= (int)_tickRemainder;
-            if (Phase == AttackPhase.Recovery && _buffer > 0 && attack.Next is { } next)
+            var follow = _heavyBuffered ? attack.NextHeavy : attack.Next;
+            if (CanCancel && _buffer > 0 && follow is { } next)
             {
                 Start(next);
             }
@@ -96,20 +102,26 @@ public sealed class ComboRunner(AttackSetDef set, int bufferTicks)
             }
         }
 
-        if (Current is null && _buffer > 0 && !(inAir && _airStringSpent))
+        if (Current is null && _buffer > 0 && !(inAir && _airStringSpent) && FirstAttack(entry) is { } first)
         {
             _airStringSpent = inAir;
-            Start(entry switch
-            {
-                ComboEntry.Air => set.FirstAir,
-                ComboEntry.SprintAir => set.FirstSprintAir,
-                ComboEntry.Sprint => set.FirstSprint,
-                _ => set.First,
-            });
+            Start(first);
         }
 
         _buffer = Math.Max(0, _buffer - 1);
     }
+
+    /// <summary>X has no air version yet, so it does nothing in the air.</summary>
+    private string? FirstAttack(ComboEntry entry) => (entry, _heavyBuffered) switch
+    {
+        (ComboEntry.Air, false) => set.FirstAir,
+        (ComboEntry.SprintAir, false) => set.FirstSprintAir,
+        (ComboEntry.Air or ComboEntry.SprintAir, true) => null,
+        (ComboEntry.Sprint, false) => set.FirstSprint,
+        (ComboEntry.Sprint, true) => set.FirstSprintHeavy,
+        (_, true) => set.FirstHeavy,
+        _ => set.First,
+    };
 
     private void Start(string id)
     {

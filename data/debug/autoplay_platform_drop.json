@@ -1,0 +1,26 @@
+{
+  "start_x": 1320,
+  "end_tick": 150,
+  "steps": [
+    {
+      "tick": 20,
+      "action": "jump",
+      "pressed": true
+    },
+    {
+      "tick": 60,
+      "action": "jump",
+      "pressed": false
+    },
+    {
+      "tick": 110,
+      "action": "move_down",
+      "pressed": true
+    },
+    {
+      "tick": 114,
+      "action": "move_down",
+      "pressed": false
+    }
+  ]
+}

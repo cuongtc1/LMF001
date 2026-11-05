@@ -17,6 +17,10 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
     private const float WindupSquash = 0.14f;
     private const float FlashStrength = 2.2f;
     private const float HealRisePixels = 90;
+    private const float BobPixels = 10;
+    private const float BobPerTick = 0.09f;
+
+    private static readonly Color TelegraphColor = new(1.6f, 0.55f, 0.45f);
 
     private MonsterDef _def = null!;
     private MonsterStats _stats = null!;
@@ -37,12 +41,15 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
     private float _velocityY;
     private int _flashTicks;
     private bool _healing;
+    private bool _flying;
+    private float _hoverY;
+    private int _age;
 
     public event Action<MonsterController>? Healed;
 
     public string DefinitionId => _def.Id;
 
-    public bool BlocksBody => !_healing;
+    public bool BlocksBody => !_healing && !_flying;
 
     public Vector2 FeetPosition => GlobalPosition;
 
@@ -58,8 +65,10 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         _brain = new MonsterBrain(def.Ai, stats);
         _health = new Health(stats.MaxHp);
         GlobalPosition = position;
+        _flying = def.Ai.Behavior == MonsterBehaviors.Flyer;
+        _hoverY = position.Y;
         CollisionLayer = 0;
-        CollisionMask = PhysicsLayers.World;
+        CollisionMask = _flying ? 0 : PhysicsLayers.World | PhysicsLayers.Platform;
 
         var size = new Vector2(def.Body.Width, def.Body.Height);
         AddChild(new CollisionShape2D { Shape = new RectangleShape2D { Size = size }, Position = new Vector2(0, -size.Y / 2) });
@@ -96,15 +105,19 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
 
         GameLog.Info(MessageKeys.CombatMonsterHit, _def.Id, damage, hit.SourceId, _health.Current, _health.Max);
         _gameFeel.ShowDamage(GlobalPosition + new Vector2(0, -_def.Art.Height), damage, Colors.White);
-        _knockback = hit.Direction * hit.KnockbackSpeed * _def.KnockbackScale;
-        if (hit.LaunchSpeed > 0)
+        _flashTicks = 6;
+        if (!_brain.IsArmored)
         {
-            _velocityY = -hit.LaunchSpeed * _def.KnockbackScale;
+            _knockback = hit.Direction * hit.KnockbackSpeed * _def.KnockbackScale;
+            if (hit.LaunchSpeed > 0)
+            {
+                _velocityY = -hit.LaunchSpeed * _def.KnockbackScale;
+            }
+
+            _brain.Stun();
+            _hitbox.Close();
         }
 
-        _flashTicks = 6;
-        _brain.Stun();
-        _hitbox.Close();
         if (_health.IsDead)
         {
             BeginHeal();
@@ -120,22 +133,33 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
             return;
         }
 
-        var onFloor = IsOnFloor();
-        _brain.Step(_player.GlobalPosition.X - GlobalPosition.X, onFloor);
+        var onFloor = _flying || IsOnFloor();
+        _brain.Step(_player.GlobalPosition.X - GlobalPosition.X, onFloor, GlobalPosition.Y - _hoverY);
         if (_brain.WantsHop)
         {
             _velocityY = -_def.Ai.HopVelocity;
         }
 
-        var juggled = _brain.State == MonsterState.Stunned && !onFloor;
-        var gravity = _feel.EnemyGravity * (juggled ? _feel.JuggleGravityScale : 1);
-        _velocityY = onFloor && _velocityY > 0 ? 0 : _velocityY + gravity * (float)delta;
+        StepVertical((float)delta, onFloor);
         _knockback = Mathf.MoveToward(_knockback, 0, _feel.KnockbackDecay * (float)delta);
-        Velocity = new Vector2(_brain.MoveVelocityX + _knockback, _velocityY);
+        Velocity = new Vector2(_brain.MoveVelocityX + _knockback, _velocityY + _brain.MoveVelocityY);
         MoveAndSlide();
 
         StepStrike();
         ShowState();
+    }
+
+    private void StepVertical(float delta, bool onFloor)
+    {
+        if (_flying)
+        {
+            _velocityY = Mathf.MoveToward(_velocityY, 0, _feel.KnockbackDecay * delta);
+            return;
+        }
+
+        var juggled = _brain.State == MonsterState.Stunned && !onFloor;
+        var gravity = _feel.EnemyGravity * (juggled ? _feel.JuggleGravityScale : 1);
+        _velocityY = onFloor && _velocityY > 0 ? 0 : _velocityY + gravity * delta;
     }
 
     private void StepStrike()
@@ -158,7 +182,13 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
     private void ShowState()
     {
         _flashTicks = Mathf.Max(0, _flashTicks - 1);
-        _sprite.Modulate = _flashTicks > 0 ? Colors.White * FlashStrength : Colors.White;
+        var telegraph = _brain.State == MonsterState.Windup;
+        _sprite.Modulate = _flashTicks > 0 ? Colors.White * FlashStrength : telegraph ? TelegraphColor : Colors.White;
+        if (_flying)
+        {
+            _sprite.Position = new Vector2(0, -_def.Art.Height / 2 + Mathf.Sin(++_age * BobPerTick) * BobPixels);
+        }
+
         _sprite.Texture = _brain.State switch
         {
             MonsterState.Windup => _windup,

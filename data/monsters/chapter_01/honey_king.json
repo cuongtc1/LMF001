@@ -1,0 +1,51 @@
+{
+  "id": "honey_king",
+  "stats": {
+    "max_hp": 420,
+    "attack": 45,
+    "defense": 0,
+    "speed": 230
+  },
+  "ai": {
+    "behavior": "chaser",
+    "aggro_range": 1600,
+    "attack_range": 330,
+    "windup_ticks": 38,
+    "active_ticks": 16,
+    "recovery_ticks": 40,
+    "cooldown_ticks": 40,
+    "stun_ticks": 6,
+    "lunge_speed": 820,
+    "hop_velocity": 760,
+    "hop_interval_ticks": 40,
+    "hover_height": 0,
+    "super_armor": true
+  },
+  "attack": {
+    "damage_multiplier": 1.0,
+    "hitbox": {
+      "x": -60,
+      "y": -200,
+      "width": 300,
+      "height": 200
+    },
+    "knockback_speed": 620,
+    "hitstop_ticks": 7,
+    "hit_vfx": "hit_heavy"
+  },
+  "body": {
+    "width": 210,
+    "height": 180
+  },
+  "knockback_scale": 0.25,
+  "immortal": false,
+  "art": {
+    "folder": "assets/monsters/chapter_01/honey_slime",
+    "height": 230,
+    "faces_left": true,
+    "idle": "idle.png",
+    "windup": "windup.png",
+    "hit": "windup.png",
+    "healed": "healed.png"
+  }
+}

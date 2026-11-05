@@ -24,16 +24,21 @@ public static class MessageKeys
     public const string DebugGodMode = "debug.god_mode";
     public const string DebugAirJump = "debug.air_jump";
     public const string DebugHeal = "debug.heal";
+    public const string DebugArena = "debug.arena";
     public const string DebugRespawn = "debug.respawn";
     public const string DebugReload = "debug.reload";
     public const string DebugHelp = "debug.help";
     public const string HudCombo = "hud.combo";
+    public const string HudWave = "hud.wave";
+    public const string HudClear = "hud.clear";
+    public const string ArenaWave = "stage.arena_wave";
+    public const string ArenaCleared = "stage.arena_cleared";
 
     public static readonly string[] All =
     [
         DataFileMissing, DataFileInvalid, DataUnknownId, DataDuplicateId, DataBadValue, DataLoaded, DataReloaded,
         GameBooted, StageLoaded, AssetMissing, CombatPlayerHit, CombatMonsterHit, CombatMonsterHealed,
-        AutoplayStarted, AutoplayFinished, DebugTitle, DebugDifficulty, DebugTier, DebugGodMode, DebugAirJump, DebugHeal,
+        AutoplayStarted, AutoplayFinished, DebugTitle, DebugDifficulty, DebugTier, DebugGodMode, DebugAirJump, DebugHeal, DebugArena, HudWave, HudClear, ArenaWave, ArenaCleared,
         DebugRespawn, DebugReload, DebugHelp, HudCombo,
     ];
 }

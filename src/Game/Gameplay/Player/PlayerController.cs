@@ -25,10 +25,15 @@ public partial class PlayerController : CharacterBody2D, IDamageable
     private int _invulnerableTicks;
     private int _respawnTicks;
     private int _comboResetTicks;
+    private int _dropTicks;
+    private int _vfxSwingId;
+    private bool _onPlatform;
 
     public IPlayerInput InputSource { get; set; } = new DeviceInput();
 
     public IReadOnlyList<IBodyBlocker> Blockers { get; set; } = [];
+
+    public event System.Action? Respawned;
 
     public Health Health { get; private set; } = null!;
 
@@ -52,7 +57,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         Health = new Health(def.Stats.MaxHp);
         GlobalPosition = spawn;
         CollisionLayer = 0;
-        CollisionMask = PhysicsLayers.World;
+        CollisionMask = PhysicsLayers.World | PhysicsLayers.Platform;
 
         var size = new Vector2(def.Body.Width, def.Body.Height);
         AddChild(new CollisionShape2D { Shape = new RectangleShape2D { Size = size }, Position = new Vector2(0, -size.Y / 2) });
@@ -69,6 +74,15 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         _hitbox = new AttackHitbox();
         AddChild(_hitbox);
         _hitbox.Setup(PhysicsLayers.EnemyHurtbox);
+    }
+
+    /// <summary>Where Lumi comes back after she falls.</summary>
+    public void SetRespawnPoint(Vector2 point) => _spawn = point;
+
+    public void Teleport(float x)
+    {
+        GlobalPosition = new Vector2(x, GlobalPosition.Y);
+        _motor.Knockback(0, 0);
     }
 
     public void Heal()
@@ -115,9 +129,9 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         }
 
         var input = InputSource.Read();
-        if (input.AttackPressed && _stunTicks == 0)
+        if ((input.AttackPressed || input.HeavyPressed) && _stunTicks == 0)
         {
-            _combo.PressAttack();
+            _combo.PressAttack(input.HeavyPressed);
         }
 
         _combo.Advance(CurrentEntry());
@@ -134,6 +148,12 @@ public partial class PlayerController : CharacterBody2D, IDamageable
 
         var attacking = _combo.Current;
         var onFloor = IsOnFloor();
+        if (input.DownPressed && _onPlatform && attacking is null && _stunTicks == 0)
+        {
+            _dropTicks = _def.Movement.DropThroughTicks;
+            CollisionMask = PhysicsLayers.World;
+        }
+
         _motor.AirJumpUnlocked = GameServices.AirJumpUnlocked;
         _motor.Step(new MotorInput(
             input.MoveX,
@@ -149,6 +169,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
 
         Velocity = new Vector2(_motor.VelocityX, _motor.VelocityY);
         MoveAndSlide();
+        _onPlatform = StandsOnPlatform();
         PushOutOfBodies();
         if (_combo.Current is { EndsOnLanding: true } && IsOnFloor())
         {
@@ -164,6 +185,20 @@ public partial class PlayerController : CharacterBody2D, IDamageable
     /// <summary>Lumi hangs until the last swing of the string has landed, then falls.</summary>
     private bool HoldsInAir(AttackDef? attack, bool onFloor) =>
         attack is { HoldInAir: true } && !onFloor && (attack.Next is not null || _combo.Phase != AttackPhase.Recovery);
+
+    private bool StandsOnPlatform()
+    {
+        for (var i = 0; i < GetSlideCollisionCount(); i++)
+        {
+            var hit = GetSlideCollision(i);
+            if (hit.GetCollider() is CollisionObject2D body && (body.CollisionLayer & PhysicsLayers.Platform) != 0)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     private ComboEntry CurrentEntry()
     {
@@ -210,8 +245,9 @@ public partial class PlayerController : CharacterBody2D, IDamageable
 
     private void StepAttack()
     {
-        if (_combo.Phase == AttackPhase.Startup && _combo.Tick == 0 && _combo.Current is { } starting)
+        if (_combo.Phase == AttackPhase.Active && _combo.SwingId != _vfxSwingId && _combo.Current is { } starting)
         {
+            _vfxSwingId = _combo.SwingId;
             var position = GlobalPosition + new Vector2(starting.VfxX * _motor.Facing, starting.VfxY);
             _gameFeel.PlayEffect(starting.Vfx, position, _motor.Facing);
         }
@@ -247,6 +283,12 @@ public partial class PlayerController : CharacterBody2D, IDamageable
     private void StepTimers()
     {
         _stunTicks = Mathf.Max(0, _stunTicks - 1);
+        _dropTicks = Mathf.Max(0, _dropTicks - 1);
+        if (_dropTicks == 0)
+        {
+            CollisionMask = PhysicsLayers.World | PhysicsLayers.Platform;
+        }
+
         _invulnerableTicks = Mathf.Max(0, _invulnerableTicks - 1);
         Mp = Mathf.Min(MaxMp, Mp + _def.Combat.MpPerSecond / GameConstants.TicksPerSecond);
         _comboResetTicks = Mathf.Max(0, _comboResetTicks - 1);
@@ -265,6 +307,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             GlobalPosition = _spawn;
             _motor.Knockback(0, 0);
             _invulnerableTicks = _feel.HurtInvulnerableTicks;
+            Respawned?.Invoke();
         }
     }
 

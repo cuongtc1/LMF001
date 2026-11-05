@@ -10,6 +10,7 @@ public partial class DebugPanel : CanvasLayer
 {
     private PlayerController _player = null!;
     private System.Action _respawn = null!;
+    private System.Action _goToArena = null!;
     private PanelContainer _panel = null!;
     private Button _difficulty = null!;
     private Button _tier = null!;
@@ -17,11 +18,12 @@ public partial class DebugPanel : CanvasLayer
     private Button _airJump = null!;
     private int _stageTier;
 
-    public void Setup(PlayerController player, int stageTier, System.Action respawn)
+    public void Setup(PlayerController player, int stageTier, System.Action respawn, System.Action goToArena)
     {
         _player = player;
         _stageTier = stageTier;
         _respawn = respawn;
+        _goToArena = goToArena;
         Layer = 20;
         _panel = new PanelContainer { Visible = false, Position = new Vector2(1500, 24) };
         var column = new VBoxContainer();
@@ -36,6 +38,7 @@ public partial class DebugPanel : CanvasLayer
         _airJump = AddButton(column, string.Empty, ToggleAirJump);
         AddButton(column, messages.Get(MessageKeys.DebugHeal), _player.Heal);
         AddButton(column, messages.Get(MessageKeys.DebugRespawn), () => _respawn());
+        AddButton(column, messages.Get(MessageKeys.DebugArena), () => _goToArena());
         AddButton(column, messages.Get(MessageKeys.DebugReload), Reload);
         Refresh();
     }

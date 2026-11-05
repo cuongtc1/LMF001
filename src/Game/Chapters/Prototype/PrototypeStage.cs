@@ -6,6 +6,7 @@ using LumiFeast.Game.Gameplay.Enemies;
 using LumiFeast.Game.Gameplay.Player;
 using LumiFeast.Game.Systems.Debug;
 using LumiFeast.Game.UI;
+using LumiFeast.Logic.Combat;
 using LumiFeast.Logic.Common;
 using LumiFeast.Logic.Data;
 using LumiFeast.Logic.Stats;
@@ -17,12 +18,21 @@ public partial class PrototypeStage : Node2D
 {
     private const float WallThickness = 200;
     private const float GroundThickness = 400;
+    private const float ArenaRespawnOffset = 120;
+
+    private static readonly Color ArenaWallColor = new(1f, 0.82f, 0.3f, 0.45f);
 
     private readonly List<MonsterController> _monsters = [];
     private readonly Dictionary<MonsterController, SpawnDef> _spawnOf = [];
+    private readonly HashSet<MonsterController> _arenaMonsters = [];
     private StageDef _stage = null!;
     private GameFeel _gameFeel = null!;
     private PlayerController _player = null!;
+    private PrototypeHud _hud = null!;
+    private WaveRunner? _waves;
+    private StaticBody2D _arenaWalls = null!;
+    private Node2D _arenaWallView = null!;
+    private Vector2 _playerStart;
 
     public override void _Ready()
     {
@@ -61,21 +71,23 @@ public partial class PrototypeStage : Node2D
         var lumi = data.Character(GameConstants.PlayerCharacterId);
         _player = new PlayerController();
         AddChild(_player);
-        _player.Setup(lumi, data.AttackSet(lumi.Combat.AttackSet), data.Feel, _gameFeel, new Vector2(_stage.PlayerSpawnX, _stage.GroundY - 4));
+        _playerStart = new Vector2(_stage.PlayerSpawnX, _stage.GroundY - 4);
+        _player.Setup(lumi, data.AttackSet(lumi.Combat.AttackSet), data.Feel, _gameFeel, _playerStart);
+        _player.Respawned += OnPlayerRespawned;
         _player.Blockers = _monsters;
         _player.AddChild(camera);
         camera.Position = new Vector2(0, -160);
         camera.MakeCurrent();
 
+        BuildArena();
+        _hud = new PrototypeHud();
+        AddChild(_hud);
+        _hud.Setup(_player);
         RespawnAll();
-
-        var hud = new PrototypeHud();
-        AddChild(hud);
-        hud.Setup(_player);
 
         var debug = new DebugPanel();
         AddChild(debug);
-        debug.Setup(_player, _stage.Tier, RespawnAll);
+        debug.Setup(_player, _stage.Tier, RespawnAll, GoToArena);
 
         if (AutoplayRunner.RequestedScript() is { } script)
         {
@@ -87,7 +99,111 @@ public partial class PrototypeStage : Node2D
         GameLog.Info(MessageKeys.StageLoaded, _stage.Id, CurrentTier, GameServices.DifficultyId);
     }
 
+    public override void _PhysicsProcess(double delta)
+    {
+        if (_waves is null || _stage.Arena is not { } arena || _gameFeel.Frozen)
+        {
+            return;
+        }
+
+        if (!_waves.IsRunning && !_waves.IsCleared && _player.GlobalPosition.X >= arena.TriggerX)
+        {
+            _waves.Start();
+            SetArenaClosed(true);
+            _player.SetRespawnPoint(new Vector2(arena.TriggerX - ArenaRespawnOffset, _stage.GroundY - 4));
+        }
+
+        switch (_waves.Step(_arenaMonsters.Count))
+        {
+            case WaveEvent.SpawnWave:
+                foreach (var spawn in arena.Waves[_waves.Wave].Spawns)
+                {
+                    _arenaMonsters.Add(Spawn(spawn));
+                }
+
+                GameLog.Info(MessageKeys.ArenaWave, _waves.Wave + 1, arena.Waves.Count);
+                _hud.ShowStatus(GameServices.Messages.Get(MessageKeys.HudWave, _waves.Wave + 1, arena.Waves.Count));
+                break;
+            case WaveEvent.Cleared:
+                SetArenaClosed(false);
+                GameLog.Info(MessageKeys.ArenaCleared);
+                _hud.ShowStatus(GameServices.Messages.Get(MessageKeys.HudClear));
+                break;
+        }
+    }
+
     private int CurrentTier => GameServices.TierOverride ?? _stage.Tier;
+
+    private void BuildArena()
+    {
+        if (_stage.Arena is not { } arena)
+        {
+            return;
+        }
+
+        _waves = new WaveRunner(arena.Waves.Count, arena.WaveDelayTicks);
+        _arenaWalls = new StaticBody2D { CollisionLayer = 0, CollisionMask = 0 };
+        _arenaWallView = new Node2D { Visible = false, ZIndex = 5 };
+        var size = new Vector2(WallThickness, _stage.GroundY * 2);
+        foreach (var side in new[] { arena.LeftX - WallThickness / 2, arena.RightX + WallThickness / 2 })
+        {
+            AddSolid(_arenaWalls, new Vector2(side, 0), size);
+            _arenaWallView.AddChild(new ColorRect
+            {
+                Color = ArenaWallColor,
+                Position = new Vector2(side - WallThickness / 2, 0),
+                Size = new Vector2(WallThickness, _stage.GroundY),
+            });
+        }
+
+        AddChild(_arenaWalls);
+        AddChild(_arenaWallView);
+    }
+
+    private void SetArenaClosed(bool closed)
+    {
+        _arenaWalls.CollisionLayer = closed ? PhysicsLayers.World : 0;
+        _arenaWallView.Visible = closed;
+    }
+
+    private void ResetArena()
+    {
+        if (_waves is null)
+        {
+            return;
+        }
+
+        foreach (var monster in _arenaMonsters)
+        {
+            _monsters.Remove(monster);
+            monster.QueueFree();
+        }
+
+        _arenaMonsters.Clear();
+        _waves.Reset();
+        SetArenaClosed(false);
+        _player.SetRespawnPoint(_playerStart);
+        _hud.ShowStatus(string.Empty);
+    }
+
+    private void OnPlayerRespawned()
+    {
+        if (_waves is { IsRunning: true })
+        {
+            var point = _player.GlobalPosition;
+            ResetArena();
+            _player.SetRespawnPoint(point);
+        }
+    }
+
+    private void GoToArena()
+    {
+        if (_stage.Arena is { } arena)
+        {
+            ResetArena();
+            _player.Teleport(arena.TriggerX - ArenaRespawnOffset);
+        }
+    }
 
     private void AddLayer(LayerDef layer)
     {
@@ -130,7 +246,7 @@ public partial class PrototypeStage : Node2D
             ZIndex = -5,
         });
 
-        var body = new StaticBody2D { CollisionLayer = PhysicsLayers.World, CollisionMask = 0 };
+        var body = new StaticBody2D { CollisionLayer = PhysicsLayers.Platform, CollisionMask = 0 };
         body.AddChild(new CollisionShape2D
         {
             Position = new Vector2(platform.X, platform.Y + 8),
@@ -142,6 +258,7 @@ public partial class PrototypeStage : Node2D
 
     private void RespawnAll()
     {
+        ResetArena();
         foreach (var monster in _monsters)
         {
             monster.QueueFree();
@@ -151,34 +268,39 @@ public partial class PrototypeStage : Node2D
         _spawnOf.Clear();
         foreach (var spawn in _stage.Spawns)
         {
-            Spawn(spawn);
+            _spawnOf[Spawn(spawn)] = spawn;
         }
     }
 
-    private void Spawn(SpawnDef spawn)
+    private MonsterController Spawn(SpawnDef spawn)
     {
         var data = GameServices.Data;
         var def = data.Monster(spawn.Monster);
         var stats = StatScaler.ForMonster(def, CurrentTier, data.Difficulty(GameServices.DifficultyId), data.Scaling);
         var monster = new MonsterController();
         AddChild(monster);
-        monster.Setup(def, stats, data.Feel, _gameFeel, _player, new Vector2(spawn.X, _stage.GroundY - 4));
+        monster.Setup(def, stats, data.Feel, _gameFeel, _player, new Vector2(spawn.X, _stage.GroundY - 4 - def.Ai.HoverHeight));
         monster.Healed += OnHealed;
         _monsters.Add(monster);
-        _spawnOf[monster] = spawn;
+        return monster;
     }
 
     private void OnHealed(MonsterController monster)
     {
-        var spawn = _spawnOf[monster];
         _monsters.Remove(monster);
+        if (_arenaMonsters.Remove(monster))
+        {
+            return;
+        }
+
+        var spawn = _spawnOf[monster];
         _spawnOf.Remove(monster);
         var seconds = _stage.MonsterRespawnTicks / GameConstants.TicksPerSecond;
         GetTree().CreateTimer(seconds, false).Timeout += () =>
         {
             if (IsInsideTree() && !_spawnOf.ContainsValue(spawn))
             {
-                Spawn(spawn);
+                _spawnOf[Spawn(spawn)] = spawn;
             }
         };
     }

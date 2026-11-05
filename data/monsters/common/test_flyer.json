@@ -1,0 +1,51 @@
+{
+  "id": "test_flyer",
+  "stats": {
+    "max_hp": 40,
+    "attack": 25,
+    "defense": 0,
+    "speed": 260
+  },
+  "ai": {
+    "behavior": "flyer",
+    "aggro_range": 1400,
+    "attack_range": 170,
+    "windup_ticks": 30,
+    "active_ticks": 22,
+    "recovery_ticks": 30,
+    "cooldown_ticks": 70,
+    "stun_ticks": 20,
+    "lunge_speed": 620,
+    "hop_velocity": 0,
+    "hop_interval_ticks": 0,
+    "hover_height": 300,
+    "super_armor": false
+  },
+  "attack": {
+    "damage_multiplier": 1.0,
+    "hitbox": {
+      "x": -30,
+      "y": -100,
+      "width": 160,
+      "height": 120
+    },
+    "knockback_speed": 420,
+    "hitstop_ticks": 5,
+    "hit_vfx": "hit_light"
+  },
+  "body": {
+    "width": 100,
+    "height": 90
+  },
+  "knockback_scale": 1.0,
+  "immortal": false,
+  "art": {
+    "folder": "assets/monsters/common/test_flyer",
+    "height": 110,
+    "faces_left": true,
+    "idle": "idle.png",
+    "windup": "windup.png",
+    "hit": "windup.png",
+    "healed": "healed.png"
+  }
+}

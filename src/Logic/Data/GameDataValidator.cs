@@ -32,10 +32,13 @@ public static class GameDataValidator
             Require(ids.Contains(set.First), $"{set.Id}.first");
             Require(ids.Contains(set.FirstAir), $"{set.Id}.first_air");
             Require(ids.Contains(set.FirstSprintAir), $"{set.Id}.first_sprint_air");
+            Require(ids.Contains(set.FirstHeavy), $"{set.Id}.first_heavy");
+            Require(ids.Contains(set.FirstSprintHeavy), $"{set.Id}.first_sprint_heavy");
             Require(ids.Contains(set.FirstSprint), $"{set.Id}.first_sprint");
             foreach (var attack in set.Attacks)
             {
                 Require(attack.Next is null || ids.Contains(attack.Next), $"{set.Id}.{attack.Id}.next");
+                Require(attack.NextHeavy is null || ids.Contains(attack.NextHeavy), $"{set.Id}.{attack.Id}.next_heavy");
                 Require(attack.ActiveTicks > 0 && attack.DamageMultiplier > 0, $"{set.Id}.{attack.Id}");
                 Require(attack.CancelFromTick <= attack.TotalTicks, $"{set.Id}.{attack.Id}.cancel_from_tick");
                 RequireVfx(data, attack.Vfx);
@@ -53,7 +56,8 @@ public static class GameDataValidator
         {
             Require(stage.Tier >= data.Scaling.MinTier && stage.Tier <= data.Scaling.MaxTier, $"{stage.Id}.tier");
             Require(stage.Width > 0, $"{stage.Id}.width");
-            foreach (var spawn in stage.Spawns)
+            var waves = stage.Arena?.Waves.SelectMany(wave => wave.Spawns) ?? [];
+            foreach (var spawn in stage.Spawns.Concat(waves))
             {
                 data.Monster(spawn.Monster);
             }

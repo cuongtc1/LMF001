@@ -17,11 +17,14 @@ public static class MonsterBehaviors
 {
     public const string Passive = "passive";
     public const string Chaser = "chaser";
+    public const string Flyer = "flyer";
 }
 
-/// <summary>Shared AI: walk or hop to the target, wind up, strike, recover. Numbers come from data.</summary>
+/// <summary>Shared AI: walk, hop or fly to the target, wind up, strike, recover. Numbers come from data.</summary>
 public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats)
 {
+    private const float TicksPerSecond = 60;
+
     private int _timer;
     private int _cooldown;
     private int _hopTimer;
@@ -32,6 +35,8 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats)
 
     public float MoveVelocityX { get; private set; }
 
+    public float MoveVelocityY { get; private set; }
+
     public bool WantsHop { get; private set; }
 
     public bool StrikeActive => State == MonsterState.Attack;
@@ -39,16 +44,24 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats)
     /// <summary>Starts a new swing id each time it enters the attack state.</summary>
     public int SwingId { get; private set; }
 
+    /// <summary>Hits land but do not stop this attack.</summary>
+    public bool IsArmored => ai.SuperArmor && State is MonsterState.Windup or MonsterState.Attack;
+
     public void Stun()
     {
-        Set(MonsterState.Stunned, ai.StunTicks);
+        if (!IsArmored)
+        {
+            Set(MonsterState.Stunned, ai.StunTicks);
+        }
     }
 
     /// <param name="deltaX">Target x minus monster x.</param>
-    public void Step(float deltaX, bool onFloor)
+    /// <param name="hoverError">Flyers only: pixels below the hover height.</param>
+    public void Step(float deltaX, bool onFloor, float hoverError = 0)
     {
         WantsHop = false;
         MoveVelocityX = 0;
+        MoveVelocityY = 0;
         _cooldown = Math.Max(0, _cooldown - 1);
         _hopTimer = Math.Max(0, _hopTimer - 1);
         _timer = Math.Max(0, _timer - 1);
@@ -87,6 +100,24 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats)
             case MonsterState.Stunned when _timer == 0:
                 State = MonsterState.Idle;
                 break;
+        }
+
+        if (ai.Behavior == MonsterBehaviors.Flyer)
+        {
+            Fly(hoverError);
+        }
+    }
+
+    /// <summary>Dives during the strike; otherwise climbs back to its hover height.</summary>
+    private void Fly(float hoverError)
+    {
+        if (State == MonsterState.Attack)
+        {
+            MoveVelocityY = ai.LungeSpeed;
+        }
+        else if (State != MonsterState.Stunned)
+        {
+            MoveVelocityY = Math.Clamp(-hoverError * TicksPerSecond, -stats.Speed, stats.Speed);
         }
     }
 

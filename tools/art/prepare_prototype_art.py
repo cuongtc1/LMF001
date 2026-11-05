@@ -120,6 +120,11 @@ def monsters():
     folder = 'assets/monsters/chapter_01/sprout_mushroom/'
     save(idle, folder + 'idle.png')
     save(healed, folder + 'healed.png')
+    idle, windup, healed = panels(V + 'D/D1/ver12_D1_HoneySlime_2.png')
+    folder = 'assets/monsters/common/test_flyer/'  # stand-in until a real flying monster is drawn
+    save(idle, folder + 'idle.png')
+    save(windup, folder + 'windup.png')
+    save(healed, folder + 'healed.png')
     idle, hit, knocked = panels(V + 'B/ver12_B_14.png')
     folder = 'assets/monsters/common/training_dummy/'
     save(idle, folder + 'idle.png')

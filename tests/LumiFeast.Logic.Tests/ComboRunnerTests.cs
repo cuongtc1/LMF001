@@ -7,10 +7,10 @@ namespace LumiFeast.Logic.Tests;
 public class ComboRunnerTests
 {
     private static readonly RectDef Box = new(0, 0, 1, 1);
-    private static readonly AttackSetDef Set = new("test", "a", "b", "a", "b", [Attack("a", "b"), Attack("b", null)]);
+    private static readonly AttackSetDef Set = new("test", "a", "b", "a", "b", "h", "h", [Attack("a", "b", "h"), Attack("b", null), Attack("h", null)]);
 
-    private static AttackDef Attack(string id, string? next) =>
-        new(id, 1, 2, 2, 4, 6, next, 0, Box, 0, 0, 0, "v", "v", 0, 0, 0, 0, 0, false, false);
+    private static AttackDef Attack(string id, string? next, string? heavy = null) =>
+        new(id, 1, 2, 2, 4, 4, next, 0, Box, 0, 0, 0, "v", "v", 0, 0, 0, 0, 0, false, false, heavy);
 
     private static void RunOut(ComboRunner combo, ComboEntry entry)
     {
@@ -43,6 +43,34 @@ public class ComboRunnerTests
         RunOut(combo, ComboEntry.SprintAir);
         combo.PressAttack();
         combo.Advance(ComboEntry.SprintAir);
+        Assert.False(combo.IsAttacking);
+    }
+
+    [Fact]
+    public void HeavyStartsAndBranchesFromTheCombo()
+    {
+        var combo = new ComboRunner(Set, 8);
+        combo.PressAttack(heavy: true);
+        combo.Advance();
+        Assert.Equal("h", combo.Current?.Id);
+        combo.Cancel();
+        combo.PressAttack();
+        combo.Advance();
+        combo.PressAttack(heavy: true);
+        for (var i = 0; i < 4; i++)
+        {
+            combo.Advance();
+        }
+
+        Assert.Equal("h", combo.Current?.Id);
+    }
+
+    [Fact]
+    public void HeavyDoesNothingInTheAir()
+    {
+        var combo = new ComboRunner(Set, 8);
+        combo.PressAttack(heavy: true);
+        combo.Advance(ComboEntry.Air);
         Assert.False(combo.IsAttacking);
     }
 

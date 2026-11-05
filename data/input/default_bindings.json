@@ -57,6 +57,17 @@
       "pad_axes": []
     },
     {
+      "action": "attack_heavy",
+      "keys": [
+        "X",
+        "K"
+      ],
+      "pad_buttons": [
+        3
+      ],
+      "pad_axes": []
+    },
+    {
       "action": "dash",
       "keys": [
         "Shift",

@@ -5,13 +5,14 @@ using LumiFeast.Logic.Common;
 
 namespace LumiFeast.Game.UI;
 
-/// <summary>HP, MP and combo counter.</summary>
+/// <summary>HP, MP, combo counter and the arena wave.</summary>
 public partial class PrototypeHud : CanvasLayer
 {
     private PlayerController _player = null!;
     private ProgressBar _hp = null!;
     private ProgressBar _mp = null!;
     private Label _combo = null!;
+    private Label _status = null!;
 
     public void Setup(PlayerController player)
     {
@@ -28,6 +29,18 @@ public partial class PrototypeHud : CanvasLayer
         _combo.AddThemeColorOverride("font_outline_color", Colors.Black);
         _combo.AddThemeConstantOverride("outline_size", 10);
         AddChild(_combo);
+
+        _status = new Label { Position = new Vector2(860, 40), Visible = false };
+        _status.AddThemeFontSizeOverride("font_size", 42);
+        _status.AddThemeColorOverride("font_outline_color", Colors.Black);
+        _status.AddThemeConstantOverride("outline_size", 10);
+        AddChild(_status);
+    }
+
+    public void ShowStatus(string text)
+    {
+        _status.Text = text;
+        _status.Visible = text.Length > 0;
     }
 
     public override void _Process(double delta)

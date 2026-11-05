@@ -34,6 +34,16 @@ public class StatScalerTests
         Assert.Equal(0.5f, stats.CooldownScale);
     }
 
+    [Fact]
+    public void ComboHitsAreAboutPointThreeSecondsApart()
+    {
+        var set = TestData.Game.AttackSet("lumi_sword");
+        var z1 = set.Attacks.First(attack => attack.Id == "z1");
+        var z2 = set.Attacks.First(attack => attack.Id == z1.Next);
+        var ticks = z1.CancelFromTick + z2.StartupTicks - z1.StartupTicks;
+        Assert.Equal(0.3f, ticks / 60f, 2);
+    }
+
     [Theory]
     [InlineData(1f, 1f, 1f)]
     [InlineData(1.2f, 1.2f, 1.07f)]

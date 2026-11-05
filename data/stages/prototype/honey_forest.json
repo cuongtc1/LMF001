@@ -55,6 +55,20 @@
       "y": 720,
       "width": 420,
       "top_inset": 40
+    },
+    {
+      "sprite": "assets/backgrounds/chapter_01/honey_forest/platforms/ledge_wide.png",
+      "x": 4560,
+      "y": 660,
+      "width": 460,
+      "top_inset": 34
+    },
+    {
+      "sprite": "assets/backgrounds/chapter_01/honey_forest/platforms/ledge_wide.png",
+      "x": 5120,
+      "y": 660,
+      "width": 460,
+      "top_inset": 34
     }
   ],
   "spawns": [
@@ -81,18 +95,62 @@
     {
       "monster": "honey_slime",
       "x": 3400
-    },
-    {
-      "monster": "sprout_mushroom",
-      "x": 3800
-    },
-    {
-      "monster": "sprout_mushroom",
-      "x": 4300
-    },
-    {
-      "monster": "honey_slime",
-      "x": 4500
     }
-  ]
+  ],
+  "arena": {
+    "trigger_x": 4100,
+    "left_x": 3920,
+    "right_x": 5660,
+    "wave_delay_ticks": 75,
+    "waves": [
+      {
+        "spawns": [
+          {
+            "monster": "honey_slime",
+            "x": 4700
+          },
+          {
+            "monster": "honey_slime",
+            "x": 5000
+          },
+          {
+            "monster": "sprout_mushroom",
+            "x": 5300
+          }
+        ]
+      },
+      {
+        "spawns": [
+          {
+            "monster": "test_flyer",
+            "x": 4400
+          },
+          {
+            "monster": "sprout_mushroom",
+            "x": 4300
+          },
+          {
+            "monster": "sprout_mushroom",
+            "x": 5200
+          },
+          {
+            "monster": "test_flyer",
+            "x": 5100
+          }
+        ]
+      },
+      {
+        "spawns": [
+          {
+            "monster": "honey_king",
+            "x": 5100
+          },
+          {
+            "monster": "test_flyer",
+            "x": 4600
+          }
+        ]
+      }
+    ]
+  }
 }

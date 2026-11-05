@@ -7,8 +7,8 @@ namespace LumiFeast.Logic.Tests;
 
 public class MonsterBrainTests
 {
-    private static MonsterAiDef Ai(string behavior = MonsterBehaviors.Chaser, float hop = 0) =>
-        new(behavior, 500, 100, 10, 5, 10, 20, 12, 300, hop, 30);
+    private static MonsterAiDef Ai(string behavior = MonsterBehaviors.Chaser, float hop = 0, bool armor = false) =>
+        new(behavior, 500, 100, 10, 5, 10, 20, 12, 300, hop, 30, 200, armor);
 
     private static readonly MonsterStats Stats = new(100, 10, 0, 200, 1);
 
@@ -58,6 +58,48 @@ public class MonsterBrainTests
         brain.Step(80, true);
         brain.Stun();
         Assert.Equal(MonsterState.Stunned, brain.State);
+    }
+
+    [Fact]
+    public void SuperArmorKeepsTheAttackGoing()
+    {
+        var brain = new MonsterBrain(Ai(armor: true), Stats);
+        brain.Step(80, true);
+        brain.Stun();
+        Assert.Equal(MonsterState.Windup, brain.State);
+    }
+
+    [Fact]
+    public void ArmorDoesNotProtectBetweenAttacks()
+    {
+        var brain = new MonsterBrain(Ai(armor: true), Stats);
+        brain.Step(300, true);
+        brain.Stun();
+        Assert.Equal(MonsterState.Stunned, brain.State);
+    }
+
+    [Fact]
+    public void FlyerClimbsBackToItsHoverHeight()
+    {
+        var brain = new MonsterBrain(Ai(MonsterBehaviors.Flyer), Stats);
+        brain.Step(300, true, 100);
+        Assert.Equal(-200, brain.MoveVelocityY);
+        brain.Step(300, true, 0);
+        Assert.Equal(0, brain.MoveVelocityY);
+    }
+
+    [Fact]
+    public void FlyerDivesDuringTheStrike()
+    {
+        var brain = new MonsterBrain(Ai(MonsterBehaviors.Flyer), Stats);
+        brain.Step(80, true);
+        for (var i = 0; i < 11; i++)
+        {
+            brain.Step(80, true);
+        }
+
+        Assert.True(brain.StrikeActive);
+        Assert.Equal(300, brain.MoveVelocityY);
     }
 
     [Fact]

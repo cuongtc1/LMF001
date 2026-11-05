@@ -29,6 +29,12 @@ public partial class AutoplayRunner : Node, IPlayerInput
         player.InputSource = this;
         using var document = JsonDocument.Parse(new GodotDataSource().ReadText(path));
         _endTick = document.RootElement.GetProperty("end_tick").GetInt32();
+        if (document.RootElement.TryGetProperty("start_x", out var startX))
+        {
+            _player.Teleport(startX.GetSingle());
+        }
+
+        GameServices.GodMode = document.RootElement.TryGetProperty("god_mode", out var god) && god.GetBoolean();
         foreach (var step in document.RootElement.GetProperty("steps").EnumerateArray())
         {
             _steps.Add(new Step(step.GetProperty("tick").GetInt32(), step.GetProperty("action").GetString()!, step.GetProperty("pressed").GetBoolean()));
@@ -62,7 +68,8 @@ public partial class AutoplayRunner : Node, IPlayerInput
                 _player.Health.Current,
                 _player.Health.Max,
                 (int)_player.Mp,
-                _player.TotalHits);
+                _player.TotalHits,
+                (int)_player.GlobalPosition.Y);
             GetTree().Quit();
         }
     }
@@ -73,7 +80,9 @@ public partial class AutoplayRunner : Node, IPlayerInput
         _held.Contains(InputActions.Jump),
         _pressedNow.Contains(InputActions.Dash),
         _pressedNow.Contains(InputActions.AttackLight),
-        _held.Contains(InputActions.MoveDown));
+        _held.Contains(InputActions.MoveDown),
+        _pressedNow.Contains(InputActions.AttackHeavy),
+        _pressedNow.Contains(InputActions.MoveDown));
 
     private readonly record struct Step(int Tick, string Action, bool Pressed);
 }
