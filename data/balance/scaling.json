@@ -2,5 +2,10 @@
   "hp_growth_per_tier": 1.35,
   "damage_growth_per_tier": 1.25,
   "min_tier": 1,
-  "max_tier": 9
+  "max_tier": 9,
+  "speed": {
+    "attack_weight": 1.0,
+    "move_weight": 0.35,
+    "max_speed": 1.5
+  }
 }

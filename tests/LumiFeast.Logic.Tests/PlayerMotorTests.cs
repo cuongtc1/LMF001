@@ -10,6 +10,26 @@ public class PlayerMotorTests
     private static MotorInput Ground(float move = 0, bool jump = false, bool dash = false) =>
         new(move, jump, jump, dash, true, false, 1, 0);
 
+    private static PlayerMotor Unlocked() => new(TestData.Game.Character("lumi").Movement) { AirJumpUnlocked = true };
+
+    /// <summary>Full held jump: airtime in ticks and peak height in pixels.</summary>
+    private static (int Ticks, float Height) MeasureJump(PlayerMotor motor)
+    {
+        motor.Step(Ground(jump: true));
+        float y = 0, peak = 0;
+        var ticks = 0;
+        do
+        {
+            y += motor.VelocityY / 60f;
+            peak = Math.Min(peak, y);
+            ticks++;
+            motor.Step(Air(true));
+        }
+        while (y < 0);
+
+        return (ticks, -peak);
+    }
+
     private static MotorInput Air(bool held = false) => new(0, false, held, false, false, false, 1, 0);
 
     [Fact]
@@ -36,7 +56,7 @@ public class PlayerMotorTests
     [Fact]
     public void AirJumpsRunOut()
     {
-        var motor = NewMotor();
+        var motor = Unlocked();
         motor.Step(Ground());
         for (var i = 0; i < 30; i++)
         {
@@ -86,7 +106,7 @@ public class PlayerMotorTests
     [Fact]
     public void AirJumpLiftsAgainWhileFalling()
     {
-        var motor = NewMotor();
+        var motor = Unlocked();
         for (var i = 0; i < 30; i++)
         {
             motor.Step(Air());
@@ -100,7 +120,7 @@ public class PlayerMotorTests
     [Fact]
     public void AirJumpsRefillOnLanding()
     {
-        var motor = NewMotor();
+        var motor = Unlocked();
         motor.Step(new MotorInput(0, true, true, false, false, false, 1, 0));
         motor.Step(Ground());
         for (var i = 0; i < 30; i++)
@@ -110,6 +130,48 @@ public class PlayerMotorTests
 
         motor.Step(new MotorInput(0, true, true, false, false, false, 1, 0));
         Assert.True(motor.VelocityY < 0);
+    }
+
+    [Fact]
+    public void AirJumpStaysLockedUntilUnlocked()
+    {
+        var motor = NewMotor();
+        for (var i = 0; i < 30; i++)
+        {
+            motor.Step(Air());
+        }
+
+        motor.Step(new MotorInput(0, true, true, false, false, false, 1, 0));
+        Assert.True(motor.VelocityY > 0);
+    }
+
+    [Fact]
+    public void JumpMatchesTheMeasuredElesisTiming()
+    {
+        var (ticks, height) = MeasureJump(NewMotor());
+        Assert.InRange(ticks / 60f, 0.5f, 0.6f);
+        Assert.InRange(height, 280f, 320f);
+    }
+
+    [Fact]
+    public void TempoShortensTheJumpButKeepsItsHeight()
+    {
+        var normal = MeasureJump(NewMotor());
+        var fast = MeasureJump(new PlayerMotor(TestData.Game.Character("lumi").Movement) { Tempo = 1.2f });
+        Assert.True(fast.Ticks < normal.Ticks);
+        Assert.InRange(fast.Height, normal.Height * 0.97f, normal.Height * 1.03f);
+    }
+
+    [Fact]
+    public void AttackGravityOnlySlowsTheFall()
+    {
+        var plain = NewMotor();
+        var attacking = NewMotor();
+        plain.Step(Ground(jump: true));
+        attacking.Step(Ground(jump: true));
+        plain.Step(Air(true));
+        attacking.Step(Air(true) with { GravityScale = 0.3f });
+        Assert.Equal(plain.VelocityY, attacking.VelocityY);
     }
 
     [Fact]

@@ -2,8 +2,8 @@ namespace LumiFeast.Logic.Data;
 
 public sealed record RectDef(float X, float Y, float Width, float Height);
 
-/// <param name="AttackSpeed">1 is the timing in the attack data; 1.5 plays attacks 50% faster.</param>
-public sealed record CharacterStatsDef(int MaxHp, int MaxMp, int Attack, float Defense, float AttackSpeed);
+/// <param name="Speed">The one speed stat; 1 is the timing in the data. See SpeedRuleDef.</param>
+public sealed record CharacterStatsDef(int MaxHp, int MaxMp, int Attack, float Defense, float Speed);
 
 public sealed record MovementDef(
     float RunSpeed,
@@ -113,7 +113,10 @@ public sealed record DifficultyDef(string Id, float EnemyHp, float EnemyDamage, 
 
 public sealed record DifficultySetDef(string Default, IReadOnlyList<DifficultyDef> Modes);
 
-public sealed record ScalingDef(float HpGrowthPerTier, float DamageGrowthPerTier, int MinTier, int MaxTier);
+/// <summary>How much of the speed stat reaches attacks and movement, and its ceiling.</summary>
+public sealed record SpeedRuleDef(float AttackWeight, float MoveWeight, float MaxSpeed);
+
+public sealed record ScalingDef(float HpGrowthPerTier, float DamageGrowthPerTier, int MinTier, int MaxTier, SpeedRuleDef Speed);
 
 public sealed record GameFeelDef(
     int HurtStunTicks,

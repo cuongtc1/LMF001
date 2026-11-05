@@ -6,6 +6,7 @@ using LumiFeast.Logic.Combat;
 using LumiFeast.Logic.Common;
 using LumiFeast.Logic.Data;
 using LumiFeast.Logic.Player;
+using LumiFeast.Logic.Stats;
 
 namespace LumiFeast.Game.Gameplay.Player;
 
@@ -45,8 +46,9 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         _feel = feel;
         _gameFeel = gameFeel;
         _spawn = spawn;
-        _motor = new PlayerMotor(def.Movement);
-        _combo = new ComboRunner(attacks, def.Combat.AttackBufferTicks) { AttackSpeed = def.Stats.AttackSpeed };
+        var speed = StatScaler.ForSpeed(def.Stats.Speed, GameServices.Data.Scaling.Speed);
+        _motor = new PlayerMotor(def.Movement) { Tempo = speed.Move };
+        _combo = new ComboRunner(attacks, def.Combat.AttackBufferTicks) { AttackSpeed = speed.Attack };
         Health = new Health(def.Stats.MaxHp);
         GlobalPosition = spawn;
         CollisionLayer = 0;
@@ -132,6 +134,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
 
         var attacking = _combo.Current;
         var onFloor = IsOnFloor();
+        _motor.AirJumpUnlocked = GameServices.AirJumpUnlocked;
         _motor.Step(new MotorInput(
             input.MoveX,
             input.JumpPressed,

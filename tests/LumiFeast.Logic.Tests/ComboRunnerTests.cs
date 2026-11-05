@@ -12,6 +12,40 @@ public class ComboRunnerTests
     private static AttackDef Attack(string id, string? next) =>
         new(id, 1, 2, 2, 4, 6, next, 0, Box, 0, 0, 0, "v", "v", 0, 0, 0, 0, 0, false);
 
+    private static void RunOut(ComboRunner combo, ComboEntry entry)
+    {
+        for (var tick = 0; tick < 40; tick++)
+        {
+            combo.Advance(entry);
+        }
+    }
+
+    [Fact]
+    public void OnlyOneAirStringPerJump()
+    {
+        var combo = new ComboRunner(Set, 8);
+        combo.PressAttack();
+        combo.Advance(ComboEntry.Air);
+        Assert.True(combo.IsAttacking);
+        RunOut(combo, ComboEntry.Air);
+        combo.PressAttack();
+        combo.Advance(ComboEntry.Air);
+        Assert.False(combo.IsAttacking);
+    }
+
+    [Fact]
+    public void LandingGivesTheAirStringBack()
+    {
+        var combo = new ComboRunner(Set, 8);
+        combo.PressAttack();
+        combo.Advance(ComboEntry.Air);
+        RunOut(combo, ComboEntry.Air);
+        combo.Advance(ComboEntry.Ground);
+        combo.PressAttack();
+        combo.Advance(ComboEntry.Air);
+        Assert.True(combo.IsAttacking);
+    }
+
     private static ComboRunner Run(params int[] pressTicks)
     {
         var combo = new ComboRunner(Set, 8);

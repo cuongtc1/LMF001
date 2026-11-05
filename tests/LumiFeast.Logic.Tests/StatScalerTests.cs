@@ -7,7 +7,8 @@ namespace LumiFeast.Logic.Tests;
 
 public class StatScalerTests
 {
-    private static readonly ScalingDef Scaling = new(2f, 1.5f, 1, 9);
+    private static readonly SpeedRuleDef Speed = new(1, 0.35f, 1.5f);
+    private static readonly ScalingDef Scaling = new(2f, 1.5f, 1, 9, Speed);
     private static readonly DifficultyDef Normal = new("normal", 1, 1, 1, 1);
     private static readonly DifficultyDef Hard = new("hard", 1.5f, 2, 1.2f, 0.5f);
 
@@ -31,6 +32,17 @@ public class StatScalerTests
         Assert.Equal(45, stats.Attack);    // 10 x 1.5^2 x 2
         Assert.Equal(240f, stats.Speed, 3);
         Assert.Equal(0.5f, stats.CooldownScale);
+    }
+
+    [Theory]
+    [InlineData(1f, 1f, 1f)]
+    [InlineData(1.2f, 1.2f, 1.07f)]
+    [InlineData(3f, 1.5f, 1.175f)]
+    public void SpeedHelpsAttacksMoreThanMovementAndHasACeiling(float speed, float attack, float move)
+    {
+        var stats = StatScaler.ForSpeed(speed, Speed);
+        Assert.Equal(attack, stats.Attack, 3);
+        Assert.Equal(move, stats.Move, 3);
     }
 
     [Theory]

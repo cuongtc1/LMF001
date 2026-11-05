@@ -5,7 +5,7 @@ using LumiFeast.Logic.Common;
 
 namespace LumiFeast.Game.Systems.Debug;
 
-/// <summary>F1 panel for testing: difficulty, tier, god mode, heal, respawn, reload data.</summary>
+/// <summary>F1 panel for testing: difficulty, tier, god mode, double jump, heal, respawn, reload data.</summary>
 public partial class DebugPanel : CanvasLayer
 {
     private PlayerController _player = null!;
@@ -14,6 +14,7 @@ public partial class DebugPanel : CanvasLayer
     private Button _difficulty = null!;
     private Button _tier = null!;
     private Button _god = null!;
+    private Button _airJump = null!;
     private int _stageTier;
 
     public void Setup(PlayerController player, int stageTier, System.Action respawn)
@@ -32,6 +33,7 @@ public partial class DebugPanel : CanvasLayer
         _difficulty = AddButton(column, string.Empty, NextDifficulty);
         _tier = AddButton(column, string.Empty, NextTier);
         _god = AddButton(column, string.Empty, ToggleGod);
+        _airJump = AddButton(column, string.Empty, ToggleAirJump);
         AddButton(column, messages.Get(MessageKeys.DebugHeal), _player.Heal);
         AddButton(column, messages.Get(MessageKeys.DebugRespawn), () => _respawn());
         AddButton(column, messages.Get(MessageKeys.DebugReload), Reload);
@@ -90,12 +92,19 @@ public partial class DebugPanel : CanvasLayer
         Refresh();
     }
 
+    private void ToggleAirJump()
+    {
+        GameServices.AirJumpUnlocked = !GameServices.AirJumpUnlocked;
+        Refresh();
+    }
+
     private void Refresh()
     {
         var messages = GameServices.Messages;
         _difficulty.Text = messages.Get(MessageKeys.DebugDifficulty, GameServices.DifficultyId);
         _tier.Text = messages.Get(MessageKeys.DebugTier, CurrentTier);
         _god.Text = messages.Get(MessageKeys.DebugGodMode, GameServices.GodMode);
+        _airJump.Text = messages.Get(MessageKeys.DebugAirJump, GameServices.AirJumpUnlocked);
     }
 
     private void Reload()

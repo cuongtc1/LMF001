@@ -16,10 +16,12 @@ public static class GameDataValidator
 
         Require(data.Scaling.HpGrowthPerTier > 0 && data.Scaling.DamageGrowthPerTier > 0, "scaling");
         Require(data.Scaling.MinTier >= 1 && data.Scaling.MaxTier >= data.Scaling.MinTier, "scaling.tier");
+        Require(data.Scaling.Speed.AttackWeight >= 0 && data.Scaling.Speed.MoveWeight >= 0, "scaling.speed");
+        Require(data.Scaling.Speed.MaxSpeed >= 1, "scaling.speed.max_speed");
 
         foreach (var character in data.Characters.Values)
         {
-            Require(character.Stats.MaxHp > 0 && character.Stats.Attack > 0 && character.Stats.AttackSpeed > 0, character.Id);
+            Require(character.Stats.MaxHp > 0 && character.Stats.Attack > 0 && character.Stats.Speed > 0, character.Id);
             Require(character.Movement.RunSpeed > 0 && character.Movement.Gravity > 0, character.Id);
             data.AttackSet(character.Combat.AttackSet);
         }

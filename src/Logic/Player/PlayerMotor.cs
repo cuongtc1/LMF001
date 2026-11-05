@@ -45,6 +45,12 @@ public sealed class PlayerMotor(MovementDef move)
 
     public bool IsInvulnerable => _dashInvulnerable > 0;
 
+    /// <summary>The double jump is a story reward, so it starts locked.</summary>
+    public bool AirJumpUnlocked { get; set; }
+
+    /// <summary>Plays run and jump faster. Jump height and jump distance stay the same, so levels never change.</summary>
+    public float Tempo { get; set; } = 1;
+
     /// <summary>A jump or dash is waiting for the current lock (attack, stun) to end.</summary>
     public bool HasQueuedAction => _jumpBuffer > 0 || _dashQueued || _sprintQueued;
 
@@ -176,7 +182,7 @@ public sealed class PlayerMotor(MovementDef move)
             StartJump(move.JumpVelocity);
             _coyote = 0;
         }
-        else if (!input.OnFloor && _airJumpsLeft > 0)
+        else if (!input.OnFloor && AirJumpUnlocked && _airJumpsLeft > 0)
         {
             StartJump(move.AirJumpVelocity);
             _airJumpsLeft--;
@@ -185,7 +191,7 @@ public sealed class PlayerMotor(MovementDef move)
 
     private void StartJump(float velocity)
     {
-        VelocityY = -velocity;
+        VelocityY = -velocity * Tempo;
         _jumpBuffer = 0;
         _jumpRising = true;
     }
@@ -198,7 +204,7 @@ public sealed class PlayerMotor(MovementDef move)
             return;
         }
 
-        var speed = IsSprinting ? move.SprintSpeed : move.RunSpeed;
+        var speed = (IsSprinting ? move.SprintSpeed : move.RunSpeed) * Tempo;
         var target = input.Locked ? 0 : input.MoveX * speed;
         var acceleration = input.OnFloor ? move.GroundAcceleration : move.AirAcceleration;
         VelocityX = MathUtils.Approach(VelocityX, target, acceleration * TickSeconds);
@@ -213,8 +219,9 @@ public sealed class PlayerMotor(MovementDef move)
         }
 
         var fastFall = input.FastFall && !input.OnFloor;
-        var scale = fastFall ? move.FastFallGravityScale : VelocityY > 0 ? move.FallGravityScale : 1;
-        VelocityY += move.Gravity * scale * input.GravityScale * TickSeconds;
-        VelocityY = Math.Min(VelocityY, fastFall ? move.FastFallMaxSpeed : move.MaxFallSpeed);
+        var falling = VelocityY > 0;
+        var scale = fastFall ? move.FastFallGravityScale : falling ? move.FallGravityScale * input.GravityScale : 1;
+        VelocityY += move.Gravity * Tempo * Tempo * scale * TickSeconds;
+        VelocityY = Math.Min(VelocityY, (fastFall ? move.FastFallMaxSpeed : move.MaxFallSpeed) * Tempo);
     }
 }

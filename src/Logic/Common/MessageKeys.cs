@@ -22,6 +22,7 @@ public static class MessageKeys
     public const string DebugDifficulty = "debug.difficulty";
     public const string DebugTier = "debug.tier";
     public const string DebugGodMode = "debug.god_mode";
+    public const string DebugAirJump = "debug.air_jump";
     public const string DebugHeal = "debug.heal";
     public const string DebugRespawn = "debug.respawn";
     public const string DebugReload = "debug.reload";
@@ -32,7 +33,7 @@ public static class MessageKeys
     [
         DataFileMissing, DataFileInvalid, DataUnknownId, DataDuplicateId, DataBadValue, DataLoaded, DataReloaded,
         GameBooted, StageLoaded, AssetMissing, CombatPlayerHit, CombatMonsterHit, CombatMonsterHealed,
-        AutoplayStarted, AutoplayFinished, DebugTitle, DebugDifficulty, DebugTier, DebugGodMode, DebugHeal,
+        AutoplayStarted, AutoplayFinished, DebugTitle, DebugDifficulty, DebugTier, DebugGodMode, DebugAirJump, DebugHeal,
         DebugRespawn, DebugReload, DebugHelp, HudCombo,
     ];
 }

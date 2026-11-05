@@ -23,6 +23,7 @@ public sealed class ComboRunner(AttackSetDef set, int bufferTicks)
 {
     private int _buffer;
     private float _tickRemainder;
+    private bool _airStringSpent;
 
     /// <summary>Attack ticks that pass per game tick.</summary>
     public float AttackSpeed { get; set; } = 1;
@@ -69,9 +70,15 @@ public sealed class ComboRunner(AttackSetDef set, int bufferTicks)
         Tick = 0;
     }
 
+    /// <summary>Only one air string per jump: if it ends or breaks, the next one waits for the ground.</summary>
     public void Advance(ComboEntry entry = ComboEntry.Ground)
     {
         JustStarted = false;
+        if (entry != ComboEntry.Air)
+        {
+            _airStringSpent = false;
+        }
+
         if (Current is { } attack)
         {
             _tickRemainder += AttackSpeed;
@@ -87,8 +94,9 @@ public sealed class ComboRunner(AttackSetDef set, int bufferTicks)
             }
         }
 
-        if (Current is null && _buffer > 0)
+        if (Current is null && _buffer > 0 && !(entry == ComboEntry.Air && _airStringSpent))
         {
+            _airStringSpent = entry == ComboEntry.Air;
             Start(entry switch
             {
                 ComboEntry.Air => set.FirstAir,

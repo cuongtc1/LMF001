@@ -19,6 +19,8 @@ public static class GameServices
 
     public static bool GodMode { get; set; }
 
+    public static bool AirJumpUnlocked { get; set; }
+
     public static void Load()
     {
         Messages = MessageCatalog.Parse(Source.ReadText(DataPaths.Messages));
