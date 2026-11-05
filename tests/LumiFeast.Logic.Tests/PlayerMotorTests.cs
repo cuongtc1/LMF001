@@ -34,7 +34,7 @@ public class PlayerMotorTests
     }
 
     [Fact]
-    public void NoJumpLongAfterLeavingTheFloor()
+    public void AirJumpsRunOut()
     {
         var motor = NewMotor();
         motor.Step(Ground());
@@ -43,7 +43,9 @@ public class PlayerMotorTests
             motor.Step(Air());
         }
 
+        motor.Step(new MotorInput(0, true, true, false, false, false, 1, 0));
         var before = motor.VelocityY;
+        motor.Step(Air(true));
         motor.Step(new MotorInput(0, true, true, false, false, false, 1, 0));
         Assert.True(motor.VelocityY >= before);
     }
@@ -79,6 +81,102 @@ public class PlayerMotorTests
         Assert.True(motor.VelocityY >= 0);
         motor.Step(new MotorInput(0, false, true, false, true, false, 1, 0));
         Assert.True(motor.VelocityY < 0);
+    }
+
+    [Fact]
+    public void AirJumpLiftsAgainWhileFalling()
+    {
+        var motor = NewMotor();
+        for (var i = 0; i < 30; i++)
+        {
+            motor.Step(Air());
+        }
+
+        Assert.True(motor.VelocityY > 0);
+        motor.Step(new MotorInput(0, true, true, false, false, false, 1, 0));
+        Assert.True(motor.VelocityY < 0);
+    }
+
+    [Fact]
+    public void AirJumpsRefillOnLanding()
+    {
+        var motor = NewMotor();
+        motor.Step(new MotorInput(0, true, true, false, false, false, 1, 0));
+        motor.Step(Ground());
+        for (var i = 0; i < 30; i++)
+        {
+            motor.Step(Air());
+        }
+
+        motor.Step(new MotorInput(0, true, true, false, false, false, 1, 0));
+        Assert.True(motor.VelocityY < 0);
+    }
+
+    [Fact]
+    public void DownFallsFaster()
+    {
+        var plain = NewMotor();
+        var fast = NewMotor();
+        for (var i = 0; i < 20; i++)
+        {
+            plain.Step(Air());
+            fast.Step(Air() with { FastFall = true });
+        }
+
+        Assert.True(fast.VelocityY > plain.VelocityY);
+    }
+
+    [Fact]
+    public void DoubleTapSprintsUntilReleased()
+    {
+        var motor = NewMotor();
+        motor.Step(Ground(1));
+        motor.Step(Ground(0));
+        motor.Step(Ground(1));
+        Assert.True(motor.IsSprinting);
+        motor.Step(Ground(0));
+        Assert.False(motor.IsSprinting);
+    }
+
+    [Fact]
+    public void SlowTapsDoNotSprint()
+    {
+        var motor = NewMotor();
+        motor.Step(Ground(1));
+        for (var i = 0; i < 40; i++)
+        {
+            motor.Step(Ground(0));
+        }
+
+        motor.Step(Ground(1));
+        Assert.False(motor.IsSprinting);
+    }
+
+    [Fact]
+    public void SprintIsFasterThanRun()
+    {
+        var motor = NewMotor();
+        motor.Step(Ground(1));
+        motor.Step(Ground(0));
+        for (var i = 0; i < 60; i++)
+        {
+            motor.Step(Ground(1));
+        }
+
+        Assert.Equal(TestData.Game.Character("lumi").Movement.SprintSpeed, motor.VelocityX);
+    }
+
+    [Fact]
+    public void DoubleTapDuringAttackQueuesForCancel()
+    {
+        var motor = NewMotor();
+        var locked = Ground(1) with { Locked = true };
+        motor.Step(locked);
+        motor.Step(Ground(0) with { Locked = true });
+        motor.Step(locked);
+        Assert.True(motor.HasQueuedAction);
+        motor.Step(Ground(1));
+        Assert.True(motor.IsSprinting);
     }
 
     private readonly struct PlayerMotorProbe(PlayerMotor motor)

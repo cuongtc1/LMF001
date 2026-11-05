@@ -9,7 +9,7 @@ Cute 2D side-scrolling action game for PC. Godot 4.7.2 (.NET) + Spine 4.3, C#.
 4. Run the logic tests: `dotnet test tests/LumiFeast.Logic.Tests`
 
 ## Run
-Open this folder with the editor from step 3 and press F5. Controls: arrows move, Z attack, C jump, Shift dash, F1 debug panel, F5 in game reloads `data/`.
+Open this folder with the editor from step 3 and press F5. Controls: arrows move, Up jump (again in the air), Down fast fall, tap a direction twice to sprint, Z attack, Shift dash, F1 debug panel, F5 in game reloads `data/`.
 Smoke test: add `-- --autoplay=data/debug/autoplay_smoke.json` to the command line.
 Prototype art comes from `python tools/art/prepare_prototype_art.py`.
 

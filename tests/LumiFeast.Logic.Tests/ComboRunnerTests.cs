@@ -7,10 +7,10 @@ namespace LumiFeast.Logic.Tests;
 public class ComboRunnerTests
 {
     private static readonly RectDef Box = new(0, 0, 1, 1);
-    private static readonly AttackSetDef Set = new("test", "a", [Attack("a", "b"), Attack("b", null)]);
+    private static readonly AttackSetDef Set = new("test", "a", "b", "b", [Attack("a", "b"), Attack("b", null)]);
 
     private static AttackDef Attack(string id, string? next) =>
-        new(id, 1, 2, 2, 4, 6, next, 0, Box, 0, 0, 0, "v", "v", 0, 0, 0, 0);
+        new(id, 1, 2, 2, 4, 6, next, 0, Box, 0, 0, 0, "v", "v", 0, 0, 0, 0, 0, false);
 
     private static ComboRunner Run(params int[] pressTicks)
     {
@@ -58,6 +58,36 @@ public class ComboRunnerTests
 
         Assert.Equal("b", combo.Current!.Id);
         Assert.Equal(2, combo.SwingId);
+    }
+
+    [Theory]
+    [InlineData(ComboEntry.Ground, "a")]
+    [InlineData(ComboEntry.Air, "b")]
+    [InlineData(ComboEntry.Sprint, "b")]
+    public void EntryPicksTheFirstAttack(ComboEntry entry, string expected)
+    {
+        var combo = new ComboRunner(Set, 8);
+        combo.PressAttack();
+        combo.Advance(entry);
+        Assert.Equal(expected, combo.Current!.Id);
+    }
+
+    [Theory]
+    [InlineData(1f, 8)]
+    [InlineData(2f, 4)]
+    public void AttackSpeedShortensTheAttack(float speed, int expectedTicks)
+    {
+        var combo = new ComboRunner(Set, 8) { AttackSpeed = speed };
+        combo.PressAttack();
+        combo.Advance();
+        var ticks = 0;
+        while (combo.IsAttacking)
+        {
+            combo.Advance();
+            ticks++;
+        }
+
+        Assert.Equal(expectedTicks, ticks);
     }
 
     [Fact]

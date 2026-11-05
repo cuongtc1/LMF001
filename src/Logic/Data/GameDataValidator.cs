@@ -19,7 +19,7 @@ public static class GameDataValidator
 
         foreach (var character in data.Characters.Values)
         {
-            Require(character.Stats.MaxHp > 0 && character.Stats.Attack > 0, character.Id);
+            Require(character.Stats.MaxHp > 0 && character.Stats.Attack > 0 && character.Stats.AttackSpeed > 0, character.Id);
             Require(character.Movement.RunSpeed > 0 && character.Movement.Gravity > 0, character.Id);
             data.AttackSet(character.Combat.AttackSet);
         }
@@ -28,6 +28,8 @@ public static class GameDataValidator
         {
             var ids = set.Attacks.Select(attack => attack.Id).ToHashSet();
             Require(ids.Contains(set.First), $"{set.Id}.first");
+            Require(ids.Contains(set.FirstAir), $"{set.Id}.first_air");
+            Require(ids.Contains(set.FirstSprint), $"{set.Id}.first_sprint");
             foreach (var attack in set.Attacks)
             {
                 Require(attack.Next is null || ids.Contains(attack.Next), $"{set.Id}.{attack.Id}.next");

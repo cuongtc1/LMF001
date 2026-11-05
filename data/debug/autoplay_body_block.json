@@ -1,0 +1,15 @@
+{
+  "end_tick": 230,
+  "steps": [
+    {
+      "tick": 20,
+      "action": "move_right",
+      "pressed": true
+    },
+    {
+      "tick": 210,
+      "action": "move_right",
+      "pressed": false
+    }
+  ]
+}

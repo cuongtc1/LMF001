@@ -5,12 +5,22 @@ using LumiFeast.Logic.Data;
 namespace LumiFeast.Game.Gameplay.Combat;
 
 /// <summary>What one hit does to its target. Damage is before the target's defense.</summary>
-public readonly record struct HitInfo(int Attack, float Multiplier, int Direction, float KnockbackSpeed, string SourceId);
+public readonly record struct HitInfo(int Attack, float Multiplier, int Direction, float KnockbackSpeed, float LaunchSpeed, string SourceId);
 
 public interface IDamageable
 {
     /// <returns>True when the hit landed.</returns>
     bool TakeHit(in HitInfo hit);
+}
+
+/// <summary>Something Lumi cannot walk through.</summary>
+public interface IBodyBlocker
+{
+    bool BlocksBody { get; }
+
+    Vector2 FeetPosition { get; }
+
+    Vector2 BodySize { get; }
 }
 
 /// <summary>The body area that receives hits.</summary>

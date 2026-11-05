@@ -12,7 +12,7 @@ using LumiFeast.Logic.Stats;
 namespace LumiFeast.Game.Gameplay.Enemies;
 
 /// <summary>Runs any plain monster from its data file. New monsters normally need no new code.</summary>
-public partial class MonsterController : CharacterBody2D, IDamageable
+public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBlocker
 {
     private const float WindupSquash = 0.14f;
     private const float FlashStrength = 2.2f;
@@ -41,6 +41,12 @@ public partial class MonsterController : CharacterBody2D, IDamageable
     public event Action<MonsterController>? Healed;
 
     public string DefinitionId => _def.Id;
+
+    public bool BlocksBody => !_healing;
+
+    public Vector2 FeetPosition => GlobalPosition;
+
+    public Vector2 BodySize => new(_def.Body.Width, _def.Body.Height);
 
     public void Setup(MonsterDef def, MonsterStats stats, GameFeelDef feel, GameFeel gameFeel, PlayerController player, Vector2 position)
     {
@@ -91,6 +97,11 @@ public partial class MonsterController : CharacterBody2D, IDamageable
         GameLog.Info(MessageKeys.CombatMonsterHit, _def.Id, damage, hit.SourceId, _health.Current, _health.Max);
         _gameFeel.ShowDamage(GlobalPosition + new Vector2(0, -_def.Art.Height), damage, Colors.White);
         _knockback = hit.Direction * hit.KnockbackSpeed * _def.KnockbackScale;
+        if (hit.LaunchSpeed > 0)
+        {
+            _velocityY = -hit.LaunchSpeed * _def.KnockbackScale;
+        }
+
         _flashTicks = 6;
         _brain.Stun();
         _hitbox.Close();
@@ -116,7 +127,9 @@ public partial class MonsterController : CharacterBody2D, IDamageable
             _velocityY = -_def.Ai.HopVelocity;
         }
 
-        _velocityY = onFloor && _velocityY > 0 ? 0 : _velocityY + _feel.EnemyGravity * (float)delta;
+        var juggled = _brain.State == MonsterState.Stunned && !onFloor;
+        var gravity = _feel.EnemyGravity * (juggled ? _feel.JuggleGravityScale : 1);
+        _velocityY = onFloor && _velocityY > 0 ? 0 : _velocityY + gravity * (float)delta;
         _knockback = Mathf.MoveToward(_knockback, 0, _feel.KnockbackDecay * (float)delta);
         Velocity = new Vector2(_brain.MoveVelocityX + _knockback, _velocityY);
         MoveAndSlide();
@@ -133,7 +146,7 @@ public partial class MonsterController : CharacterBody2D, IDamageable
             return;
         }
 
-        var hit = new HitInfo(_stats.Attack, _def.Attack.DamageMultiplier, _brain.Facing, _def.Attack.KnockbackSpeed, _def.Id);
+        var hit = new HitInfo(_stats.Attack, _def.Attack.DamageMultiplier, _brain.Facing, _def.Attack.KnockbackSpeed, 0, _def.Id);
         var landed = _hitbox.Sweep(_brain.SwingId, _def.Attack.Hitbox, _brain.Facing, hit);
         if (landed.Count > 0)
         {

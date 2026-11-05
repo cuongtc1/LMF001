@@ -4,7 +4,8 @@
     "max_hp": 300,
     "max_mp": 100,
     "attack": 20,
-    "defense": 0
+    "defense": 0,
+    "attack_speed": 1.0
   },
   "movement": {
     "run_speed": 460,
@@ -22,7 +23,13 @@
     "dash_cooldown_ticks": 30,
     "dash_invulnerable_ticks": 14,
     "air_dashes": 1,
-    "air_attack_gravity_scale": 0.3
+    "air_attack_gravity_scale": 0.3,
+    "sprint_speed": 720,
+    "sprint_tap_ticks": 14,
+    "air_jumps": 1,
+    "air_jump_velocity": 1060,
+    "fast_fall_gravity_scale": 3.2,
+    "fast_fall_max_speed": 2100
   },
   "combat": {
     "attack_set": "lumi_sword",

@@ -2,7 +2,8 @@ namespace LumiFeast.Logic.Data;
 
 public sealed record RectDef(float X, float Y, float Width, float Height);
 
-public sealed record CharacterStatsDef(int MaxHp, int MaxMp, int Attack, float Defense);
+/// <param name="AttackSpeed">1 is the timing in the attack data; 1.5 plays attacks 50% faster.</param>
+public sealed record CharacterStatsDef(int MaxHp, int MaxMp, int Attack, float Defense, float AttackSpeed);
 
 public sealed record MovementDef(
     float RunSpeed,
@@ -20,7 +21,13 @@ public sealed record MovementDef(
     int DashCooldownTicks,
     int DashInvulnerableTicks,
     int AirDashes,
-    float AirAttackGravityScale);
+    float AirAttackGravityScale,
+    float SprintSpeed,
+    int SprintTapTicks,
+    int AirJumps,
+    float AirJumpVelocity,
+    float FastFallGravityScale,
+    float FastFallMaxSpeed);
 
 public sealed record CharacterCombatDef(string AttackSet, float MpPerHit, float MpPerSecond, int AttackBufferTicks);
 
@@ -61,12 +68,17 @@ public sealed record AttackDef(
     float VfxX,
     float VfxY,
     float SwingFromDegrees,
-    float SwingToDegrees)
+    float SwingToDegrees,
+    float LaunchSpeed,
+    bool EndsOnLanding)
 {
     public int TotalTicks => StartupTicks + ActiveTicks + RecoveryTicks;
 }
 
-public sealed record AttackSetDef(string Id, string First, IReadOnlyList<AttackDef> Attacks);
+/// <param name="First">Starts the combo on the ground.</param>
+/// <param name="FirstAir">Starts it in the air.</param>
+/// <param name="FirstSprint">Starts it while sprinting.</param>
+public sealed record AttackSetDef(string Id, string First, string FirstAir, string FirstSprint, IReadOnlyList<AttackDef> Attacks);
 
 public sealed record MonsterStatsDef(int MaxHp, int Attack, float Defense, float Speed);
 
@@ -116,7 +128,8 @@ public sealed record GameFeelDef(
     float ShakeDecay,
     int ComboResetTicks,
     float DamageNumberRise,
-    int DamageNumberTicks);
+    int DamageNumberTicks,
+    float JuggleGravityScale);
 
 public sealed record VfxDef(string Id, int Frames, int TicksPerFrame, float Scale);
 

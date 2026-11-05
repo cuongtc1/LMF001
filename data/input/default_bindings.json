@@ -4,8 +4,7 @@
     {
       "action": "move_left",
       "keys": [
-        "Left",
-        "A"
+        "Left"
       ],
       "pad_buttons": [
         13
@@ -17,8 +16,7 @@
     {
       "action": "move_right",
       "keys": [
-        "Right",
-        "D"
+        "Right"
       ],
       "pad_buttons": [
         14
@@ -28,10 +26,19 @@
       ]
     },
     {
+      "action": "move_down",
+      "keys": [
+        "Down"
+      ],
+      "pad_buttons": [
+        12
+      ],
+      "pad_axes": []
+    },
+    {
       "action": "jump",
       "keys": [
-        "C",
-        "Space"
+        "Up"
       ],
       "pad_buttons": [
         0

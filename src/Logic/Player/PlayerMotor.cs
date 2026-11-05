@@ -11,7 +11,8 @@ public readonly record struct MotorInput(
     bool OnFloor,
     bool Locked,
     float GravityScale,
-    float LungeVelocityX);
+    float LungeVelocityX,
+    bool FastFall = false);
 
 /// <summary>Run, jump and dash rules. One Step call is one 1/60 s tick; velocities are pixels per second.</summary>
 public sealed class PlayerMotor(MovementDef move)
@@ -25,6 +26,11 @@ public sealed class PlayerMotor(MovementDef move)
     private int _dashCooldown;
     private int _dashInvulnerable;
     private int _airDashesLeft = move.AirDashes;
+    private int _airJumpsLeft = move.AirJumps;
+    private int _tapDirection;
+    private int _tapTimer;
+    private int _lastMoveDirection;
+    private bool _sprintQueued;
     private bool _jumpRising;
 
     public float VelocityX { get; private set; }
@@ -35,10 +41,12 @@ public sealed class PlayerMotor(MovementDef move)
 
     public bool IsDashing => _dashTicks > 0;
 
+    public bool IsSprinting { get; private set; }
+
     public bool IsInvulnerable => _dashInvulnerable > 0;
 
     /// <summary>A jump or dash is waiting for the current lock (attack, stun) to end.</summary>
-    public bool HasQueuedAction => _jumpBuffer > 0 || _dashQueued;
+    public bool HasQueuedAction => _jumpBuffer > 0 || _dashQueued || _sprintQueued;
 
     public void Face(int direction) => Facing = direction;
 
@@ -62,10 +70,12 @@ public sealed class PlayerMotor(MovementDef move)
             _dashQueued = true;
         }
 
+        TrackDoubleTap(input);
         if (input.OnFloor)
         {
             _coyote = move.CoyoteTicks;
             _airDashesLeft = move.AirDashes;
+            _airJumpsLeft = move.AirJumps;
             VelocityY = Math.Min(VelocityY, 0);
             _jumpRising = false;
         }
@@ -78,7 +88,16 @@ public sealed class PlayerMotor(MovementDef move)
             }
 
             TryStartDash(input);
-            TryJump();
+            TryJump(input);
+            if (_sprintQueued)
+            {
+                _sprintQueued = false;
+                IsSprinting = true;
+            }
+        }
+        else
+        {
+            IsSprinting = false;
         }
 
         if (IsDashing)
@@ -90,6 +109,27 @@ public sealed class PlayerMotor(MovementDef move)
 
         StepHorizontal(input);
         StepVertical(input);
+    }
+
+    /// <summary>Two quick presses of one direction start a sprint; it lasts while the direction is held.</summary>
+    private void TrackDoubleTap(in MotorInput input)
+    {
+        var direction = Math.Sign(input.MoveX);
+        _tapTimer = Math.Max(0, _tapTimer - 1);
+        if (direction != 0 && _lastMoveDirection == 0)
+        {
+            _sprintQueued = direction == _tapDirection && _tapTimer > 0;
+            _tapDirection = direction;
+            _tapTimer = move.SprintTapTicks;
+        }
+
+        if (direction != _tapDirection || direction == 0)
+        {
+            IsSprinting = false;
+            _sprintQueued = false;
+        }
+
+        _lastMoveDirection = direction;
     }
 
     private void Tickdown()
@@ -124,15 +164,30 @@ public sealed class PlayerMotor(MovementDef move)
         _dashInvulnerable = move.DashInvulnerableTicks;
     }
 
-    private void TryJump()
+    private void TryJump(in MotorInput input)
     {
-        if (_jumpBuffer > 0 && _coyote > 0)
+        if (_jumpBuffer == 0)
         {
-            VelocityY = -move.JumpVelocity;
-            _jumpBuffer = 0;
-            _coyote = 0;
-            _jumpRising = true;
+            return;
         }
+
+        if (_coyote > 0)
+        {
+            StartJump(move.JumpVelocity);
+            _coyote = 0;
+        }
+        else if (!input.OnFloor && _airJumpsLeft > 0)
+        {
+            StartJump(move.AirJumpVelocity);
+            _airJumpsLeft--;
+        }
+    }
+
+    private void StartJump(float velocity)
+    {
+        VelocityY = -velocity;
+        _jumpBuffer = 0;
+        _jumpRising = true;
     }
 
     private void StepHorizontal(in MotorInput input)
@@ -143,7 +198,8 @@ public sealed class PlayerMotor(MovementDef move)
             return;
         }
 
-        var target = input.Locked ? 0 : input.MoveX * move.RunSpeed;
+        var speed = IsSprinting ? move.SprintSpeed : move.RunSpeed;
+        var target = input.Locked ? 0 : input.MoveX * speed;
         var acceleration = input.OnFloor ? move.GroundAcceleration : move.AirAcceleration;
         VelocityX = MathUtils.Approach(VelocityX, target, acceleration * TickSeconds);
     }
@@ -156,8 +212,9 @@ public sealed class PlayerMotor(MovementDef move)
             _jumpRising = false;
         }
 
-        var scale = VelocityY > 0 ? move.FallGravityScale : 1;
+        var fastFall = input.FastFall && !input.OnFloor;
+        var scale = fastFall ? move.FastFallGravityScale : VelocityY > 0 ? move.FallGravityScale : 1;
         VelocityY += move.Gravity * scale * input.GravityScale * TickSeconds;
-        VelocityY = Math.Min(VelocityY, move.MaxFallSpeed);
+        VelocityY = Math.Min(VelocityY, fastFall ? move.FastFallMaxSpeed : move.MaxFallSpeed);
     }
 }

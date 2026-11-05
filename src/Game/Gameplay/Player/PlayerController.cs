@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Godot;
 using LumiFeast.Game.Common;
 using LumiFeast.Game.Gameplay.Combat;
@@ -26,6 +27,8 @@ public partial class PlayerController : CharacterBody2D, IDamageable
 
     public IPlayerInput InputSource { get; set; } = new DeviceInput();
 
+    public IReadOnlyList<IBodyBlocker> Blockers { get; set; } = [];
+
     public Health Health { get; private set; } = null!;
 
     public float Mp { get; private set; }
@@ -43,7 +46,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         _gameFeel = gameFeel;
         _spawn = spawn;
         _motor = new PlayerMotor(def.Movement);
-        _combo = new ComboRunner(attacks, def.Combat.AttackBufferTicks);
+        _combo = new ComboRunner(attacks, def.Combat.AttackBufferTicks) { AttackSpeed = def.Stats.AttackSpeed };
         Health = new Health(def.Stats.MaxHp);
         GlobalPosition = spawn;
         CollisionLayer = 0;
@@ -115,7 +118,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             _combo.PressAttack();
         }
 
-        _combo.Advance();
+        _combo.Advance(CurrentEntry());
         if (_combo.JustStarted && input.MoveX != 0)
         {
             _motor.Face(Mathf.Sign(input.MoveX));
@@ -137,14 +140,54 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             onFloor,
             attacking is not null || _stunTicks > 0 || Health.IsDead,
             attacking is not null && !onFloor ? _def.Movement.AirAttackGravityScale : 1,
-            LungeVelocity()));
+            LungeVelocity(),
+            input.DownHeld));
 
         Velocity = new Vector2(_motor.VelocityX, _motor.VelocityY);
         MoveAndSlide();
+        PushOutOfBodies();
+        if (_combo.Current is { EndsOnLanding: true } && IsOnFloor())
+        {
+            _combo.Cancel();
+            _hitbox.Close();
+        }
 
         StepTimers();
         StepAttack();
         ShowView(attacking);
+    }
+
+    private ComboEntry CurrentEntry()
+    {
+        if (!IsOnFloor())
+        {
+            return ComboEntry.Air;
+        }
+
+        return _motor.IsSprinting ? ComboEntry.Sprint : ComboEntry.Ground;
+    }
+
+    /// <summary>Monsters stop Lumi, except while she dashes through them.</summary>
+    private void PushOutOfBodies()
+    {
+        if (_motor.IsDashing || Health.IsDead)
+        {
+            return;
+        }
+
+        foreach (var body in Blockers)
+        {
+            var feet = body.FeetPosition;
+            var overlapsHeight = GlobalPosition.Y > feet.Y - body.BodySize.Y && GlobalPosition.Y - _def.Body.Height < feet.Y;
+            if (body.BlocksBody && overlapsHeight)
+            {
+                var push = BodyBlock.PushOut(GlobalPosition.X, _def.Body.Width / 2, feet.X, body.BodySize.X / 2);
+                if (push != 0)
+                {
+                    MoveAndCollide(new Vector2(push, 0));
+                }
+            }
+        }
     }
 
     private float LungeVelocity()
@@ -154,7 +197,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             return 0;
         }
 
-        return _motor.Facing * attack.LungePixels / (attack.StartupTicks + attack.ActiveTicks) * GameConstants.TicksPerSecond;
+        return _motor.Facing * attack.LungePixels / (attack.StartupTicks + attack.ActiveTicks) * GameConstants.TicksPerSecond * _combo.AttackSpeed;
     }
 
     private void StepAttack()
@@ -171,7 +214,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             return;
         }
 
-        var hit = new HitInfo(_def.Stats.Attack, attack.DamageMultiplier, _motor.Facing, attack.KnockbackSpeed, _def.Id);
+        var hit = new HitInfo(_def.Stats.Attack, attack.DamageMultiplier, _motor.Facing, attack.KnockbackSpeed, attack.LaunchSpeed, _def.Id);
         var landed = _hitbox.Sweep(_combo.SwingId, attack.Hitbox, _motor.Facing, hit);
         foreach (var target in landed)
         {

@@ -62,6 +62,7 @@ public partial class PrototypeStage : Node2D
         _player = new PlayerController();
         AddChild(_player);
         _player.Setup(lumi, data.AttackSet(lumi.Combat.AttackSet), data.Feel, _gameFeel, new Vector2(_stage.PlayerSpawnX, _stage.GroundY - 4));
+        _player.Blockers = _monsters;
         _player.AddChild(camera);
         camera.Position = new Vector2(0, -160);
         camera.MakeCurrent();

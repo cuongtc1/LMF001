@@ -23,6 +23,7 @@ public static class InputActions
 {
     public const string MoveLeft = "move_left";
     public const string MoveRight = "move_right";
+    public const string MoveDown = "move_down";
     public const string Jump = "jump";
     public const string AttackLight = "attack_light";
     public const string Dash = "dash";

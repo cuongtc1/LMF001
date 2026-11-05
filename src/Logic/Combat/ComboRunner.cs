@@ -2,6 +2,14 @@ using LumiFeast.Logic.Data;
 
 namespace LumiFeast.Logic.Combat;
 
+/// <summary>How the current attack press starts a combo.</summary>
+public enum ComboEntry
+{
+    Ground,
+    Air,
+    Sprint,
+}
+
 public enum AttackPhase
 {
     None,
@@ -14,6 +22,10 @@ public enum AttackPhase
 public sealed class ComboRunner(AttackSetDef set, int bufferTicks)
 {
     private int _buffer;
+    private float _tickRemainder;
+
+    /// <summary>Attack ticks that pass per game tick.</summary>
+    public float AttackSpeed { get; set; } = 1;
 
     public AttackDef? Current { get; private set; }
 
@@ -57,12 +69,14 @@ public sealed class ComboRunner(AttackSetDef set, int bufferTicks)
         Tick = 0;
     }
 
-    public void Advance()
+    public void Advance(ComboEntry entry = ComboEntry.Ground)
     {
         JustStarted = false;
         if (Current is { } attack)
         {
-            Tick++;
+            _tickRemainder += AttackSpeed;
+            Tick += (int)_tickRemainder;
+            _tickRemainder -= (int)_tickRemainder;
             if (Phase == AttackPhase.Recovery && _buffer > 0 && attack.Next is { } next)
             {
                 Start(next);
@@ -75,7 +89,12 @@ public sealed class ComboRunner(AttackSetDef set, int bufferTicks)
 
         if (Current is null && _buffer > 0)
         {
-            Start(set.First);
+            Start(entry switch
+            {
+                ComboEntry.Air => set.FirstAir,
+                ComboEntry.Sprint => set.FirstSprint,
+                _ => set.First,
+            });
         }
 
         _buffer = Math.Max(0, _buffer - 1);
@@ -85,6 +104,7 @@ public sealed class ComboRunner(AttackSetDef set, int bufferTicks)
     {
         Current = set.Attacks.First(attack => attack.Id == id);
         Tick = 0;
+        _tickRemainder = 0;
         SwingId++;
         JustStarted = true;
         _buffer = 0;

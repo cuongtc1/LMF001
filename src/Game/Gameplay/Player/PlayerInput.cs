@@ -3,7 +3,7 @@ using LumiFeast.Game.Common;
 
 namespace LumiFeast.Game.Gameplay.Player;
 
-public readonly record struct PlayerFrameInput(float MoveX, bool JumpPressed, bool JumpHeld, bool DashPressed, bool AttackPressed);
+public readonly record struct PlayerFrameInput(float MoveX, bool JumpPressed, bool JumpHeld, bool DashPressed, bool AttackPressed, bool DownHeld);
 
 /// <summary>Where the player's buttons come from: the device, or a script in smoke tests.</summary>
 public interface IPlayerInput
@@ -18,5 +18,6 @@ public sealed class DeviceInput : IPlayerInput
         Input.IsActionJustPressed(InputActions.Jump),
         Input.IsActionPressed(InputActions.Jump),
         Input.IsActionJustPressed(InputActions.Dash),
-        Input.IsActionJustPressed(InputActions.AttackLight));
+        Input.IsActionJustPressed(InputActions.AttackLight),
+        Input.IsActionPressed(InputActions.MoveDown));
 }
