@@ -1,0 +1,49 @@
+{
+  "id": "honey_slime",
+  "stats": {
+    "max_hp": 60,
+    "attack": 30,
+    "defense": 0,
+    "speed": 190
+  },
+  "ai": {
+    "behavior": "chaser",
+    "aggro_range": 720,
+    "attack_range": 150,
+    "windup_ticks": 26,
+    "active_ticks": 12,
+    "recovery_ticks": 30,
+    "cooldown_ticks": 50,
+    "stun_ticks": 18,
+    "lunge_speed": 480,
+    "hop_velocity": 620,
+    "hop_interval_ticks": 46
+  },
+  "attack": {
+    "damage_multiplier": 1.0,
+    "hitbox": {
+      "x": -30,
+      "y": -90,
+      "width": 120,
+      "height": 90
+    },
+    "knockback_speed": 420,
+    "hitstop_ticks": 5,
+    "hit_vfx": "hit_light"
+  },
+  "body": {
+    "width": 96,
+    "height": 80
+  },
+  "knockback_scale": 1.0,
+  "immortal": false,
+  "art": {
+    "folder": "assets/monsters/chapter_01/honey_slime",
+    "height": 100,
+    "faces_left": true,
+    "idle": "idle.png",
+    "windup": "windup.png",
+    "hit": "windup.png",
+    "healed": "healed.png"
+  }
+}

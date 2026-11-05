@@ -1,0 +1,80 @@
+{
+  "pad_deadzone": 0.3,
+  "actions": [
+    {
+      "action": "move_left",
+      "keys": [
+        "Left",
+        "A"
+      ],
+      "pad_buttons": [
+        13
+      ],
+      "pad_axes": [
+        -1
+      ]
+    },
+    {
+      "action": "move_right",
+      "keys": [
+        "Right",
+        "D"
+      ],
+      "pad_buttons": [
+        14
+      ],
+      "pad_axes": [
+        1
+      ]
+    },
+    {
+      "action": "jump",
+      "keys": [
+        "C",
+        "Space"
+      ],
+      "pad_buttons": [
+        0
+      ],
+      "pad_axes": []
+    },
+    {
+      "action": "attack_light",
+      "keys": [
+        "Z",
+        "J"
+      ],
+      "pad_buttons": [
+        2
+      ],
+      "pad_axes": []
+    },
+    {
+      "action": "dash",
+      "keys": [
+        "Shift",
+        "L"
+      ],
+      "pad_buttons": [
+        10
+      ],
+      "pad_axes": []
+    },
+    {
+      "action": "debug_panel",
+      "keys": [
+        "F1"
+      ],
+      "pad_buttons": [],
+      "pad_axes": []
+    },
+    {
+      "action": "debug_reload",
+      "keys": [
+        "F5"
+      ],
+      "pad_buttons": [],
+      "pad_axes": []
+    }
+  ]
+}

@@ -10,6 +10,7 @@
     <Compile Remove="src/Logic/**" />
     <Compile Remove="tests/**" />
     <Compile Remove="art_source/**" />
+    <Compile Remove="tools/**" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="src/Logic/LumiFeast.Logic.csproj" />

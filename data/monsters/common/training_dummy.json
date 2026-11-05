@@ -1,0 +1,49 @@
+{
+  "id": "training_dummy",
+  "stats": {
+    "max_hp": 1,
+    "attack": 0,
+    "defense": 0,
+    "speed": 0
+  },
+  "ai": {
+    "behavior": "passive",
+    "aggro_range": 0,
+    "attack_range": 0,
+    "windup_ticks": 0,
+    "active_ticks": 0,
+    "recovery_ticks": 0,
+    "cooldown_ticks": 0,
+    "stun_ticks": 16,
+    "lunge_speed": 0,
+    "hop_velocity": 0,
+    "hop_interval_ticks": 0
+  },
+  "attack": {
+    "damage_multiplier": 0,
+    "hitbox": {
+      "x": 0,
+      "y": 0,
+      "width": 1,
+      "height": 1
+    },
+    "knockback_speed": 0,
+    "hitstop_ticks": 0,
+    "hit_vfx": "hit_light"
+  },
+  "body": {
+    "width": 70,
+    "height": 200
+  },
+  "knockback_scale": 0,
+  "immortal": true,
+  "art": {
+    "folder": "assets/monsters/common/training_dummy",
+    "height": 225,
+    "faces_left": true,
+    "idle": "idle.png",
+    "windup": "idle.png",
+    "hit": "hit.png",
+    "healed": "knocked.png"
+  }
+}

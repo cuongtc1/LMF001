@@ -1,0 +1,46 @@
+{
+  "id": "lumi",
+  "stats": {
+    "max_hp": 300,
+    "max_mp": 100,
+    "attack": 20,
+    "defense": 0
+  },
+  "movement": {
+    "run_speed": 460,
+    "ground_acceleration": 5200,
+    "air_acceleration": 3400,
+    "gravity": 2500,
+    "fall_gravity_scale": 1.35,
+    "max_fall_speed": 1400,
+    "jump_velocity": 1240,
+    "jump_cut_scale": 0.45,
+    "coyote_ticks": 6,
+    "jump_buffer_ticks": 8,
+    "dash_speed": 1150,
+    "dash_ticks": 12,
+    "dash_cooldown_ticks": 30,
+    "dash_invulnerable_ticks": 14,
+    "air_dashes": 1,
+    "air_attack_gravity_scale": 0.3
+  },
+  "combat": {
+    "attack_set": "lumi_sword",
+    "mp_per_hit": 3,
+    "mp_per_second": 1,
+    "attack_buffer_ticks": 12
+  },
+  "body": {
+    "width": 70,
+    "height": 200
+  },
+  "placeholder_view": {
+    "sprite": "assets/characters/lumi/placeholder/lumi.png",
+    "height": 240,
+    "sword_sprite": "assets/characters/lumi/placeholder/sword.png",
+    "sword_length": 165,
+    "hand_x": 62,
+    "hand_y": -96,
+    "sword_rest_degrees": 150
+  }
+}

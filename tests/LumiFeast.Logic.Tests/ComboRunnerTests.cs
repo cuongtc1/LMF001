@@ -1,0 +1,96 @@
+using LumiFeast.Logic.Combat;
+using LumiFeast.Logic.Data;
+using Xunit;
+
+namespace LumiFeast.Logic.Tests;
+
+public class ComboRunnerTests
+{
+    private static readonly RectDef Box = new(0, 0, 1, 1);
+    private static readonly AttackSetDef Set = new("test", "a", [Attack("a", "b"), Attack("b", null)]);
+
+    private static AttackDef Attack(string id, string? next) =>
+        new(id, 1, 2, 2, 4, 6, next, 0, Box, 0, 0, 0, "v", "v", 0, 0, 0, 0);
+
+    private static ComboRunner Run(params int[] pressTicks)
+    {
+        var combo = new ComboRunner(Set, 8);
+        for (var tick = 0; tick < 40; tick++)
+        {
+            if (pressTicks.Contains(tick))
+            {
+                combo.PressAttack();
+            }
+
+            combo.Advance();
+        }
+
+        return combo;
+    }
+
+    [Fact]
+    public void PhasesFollowTheAttackTiming()
+    {
+        var combo = new ComboRunner(Set, 8);
+        combo.PressAttack();
+        combo.Advance();
+        Assert.True(combo.JustStarted);
+        Assert.Equal(AttackPhase.Startup, combo.Phase);
+        combo.Advance();
+        combo.Advance();
+        Assert.Equal(AttackPhase.Active, combo.Phase);
+        combo.Advance();
+        combo.Advance();
+        Assert.Equal(AttackPhase.Recovery, combo.Phase);
+    }
+
+    [Fact]
+    public void PressDuringAttackChainsToNext()
+    {
+        var combo = new ComboRunner(Set, 8);
+        combo.PressAttack();
+        combo.Advance();
+        combo.PressAttack();
+        for (var i = 0; i < 4; i++)
+        {
+            combo.Advance();
+        }
+
+        Assert.Equal("b", combo.Current!.Id);
+        Assert.Equal(2, combo.SwingId);
+    }
+
+    [Fact]
+    public void NoPressEndsTheCombo() => Assert.False(Run(0).IsAttacking);
+
+    [Fact]
+    public void LastAttackDoesNotLoop()
+    {
+        var combo = new ComboRunner(Set, 8);
+        combo.PressAttack();
+        combo.Advance();
+        combo.PressAttack();
+        for (var i = 0; i < 12; i++)
+        {
+            combo.Advance();
+        }
+
+        Assert.Equal(2, combo.SwingId);
+        Assert.False(combo.IsAttacking);
+    }
+
+    [Fact]
+    public void CancelOnlyOpensAtTheCancelTick()
+    {
+        var combo = new ComboRunner(Set, 8);
+        combo.PressAttack();
+        combo.Advance();
+        Assert.False(combo.CanCancel);
+        for (var i = 0; i < 6; i++)
+        {
+            combo.Advance();
+        }
+
+        Assert.True(combo.CanCancel);
+    }
+}

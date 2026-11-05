@@ -1,0 +1,81 @@
+{
+  "id": "lumi_sword",
+  "first": "z1",
+  "attacks": [
+    {
+      "id": "z1",
+      "damage_multiplier": 1.0,
+      "startup_ticks": 6,
+      "active_ticks": 5,
+      "recovery_ticks": 14,
+      "cancel_from_tick": 16,
+      "next": "z2",
+      "lunge_pixels": 46,
+      "hitbox": {
+        "x": 20,
+        "y": -170,
+        "width": 210,
+        "height": 150
+      },
+      "hitstop_ticks": 3,
+      "shake_pixels": 0,
+      "knockback_speed": 260,
+      "vfx": "slash_horizontal",
+      "hit_vfx": "hit_light",
+      "vfx_x": 135,
+      "vfx_y": -105,
+      "swing_from_degrees": -60,
+      "swing_to_degrees": 95
+    },
+    {
+      "id": "z2",
+      "damage_multiplier": 1.1,
+      "startup_ticks": 6,
+      "active_ticks": 5,
+      "recovery_ticks": 15,
+      "cancel_from_tick": 16,
+      "next": "z3",
+      "lunge_pixels": 54,
+      "hitbox": {
+        "x": 20,
+        "y": -190,
+        "width": 210,
+        "height": 180
+      },
+      "hitstop_ticks": 3,
+      "shake_pixels": 0,
+      "knockback_speed": 300,
+      "vfx": "slash_diagonal",
+      "hit_vfx": "hit_light",
+      "vfx_x": 130,
+      "vfx_y": -110,
+      "swing_from_degrees": 120,
+      "swing_to_degrees": -20
+    },
+    {
+      "id": "z3",
+      "damage_multiplier": 1.8,
+      "startup_ticks": 10,
+      "active_ticks": 8,
+      "recovery_ticks": 26,
+      "cancel_from_tick": 30,
+      "next": null,
+      "lunge_pixels": 80,
+      "hitbox": {
+        "x": -40,
+        "y": -210,
+        "width": 310,
+        "height": 220
+      },
+      "hitstop_ticks": 7,
+      "shake_pixels": 7,
+      "knockback_speed": 620,
+      "vfx": "slash_ring",
+      "hit_vfx": "hit_heavy",
+      "vfx_x": 110,
+      "vfx_y": -105,
+      "swing_from_degrees": -120,
+      "swing_to_degrees": 300
+    }
+  ]
+}

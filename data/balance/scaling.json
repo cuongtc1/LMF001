@@ -1,0 +1,6 @@
+{
+  "hp_growth_per_tier": 1.35,
+  "damage_growth_per_tier": 1.25,
+  "min_tier": 1,
+  "max_tier": 9
+}

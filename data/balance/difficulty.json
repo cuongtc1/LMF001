@@ -1,0 +1,19 @@
+{
+  "default": "normal",
+  "modes": [
+    {
+      "id": "normal",
+      "enemy_hp": 1.0,
+      "enemy_damage": 1.0,
+      "enemy_speed": 1.0,
+      "enemy_cooldown": 1.0
+    },
+    {
+      "id": "hard",
+      "enemy_hp": 1.25,
+      "enemy_damage": 1.4,
+      "enemy_speed": 1.2,
+      "enemy_cooldown": 0.75
+    }
+  ]
+}

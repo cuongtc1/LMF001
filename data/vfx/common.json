@@ -1,0 +1,35 @@
+{
+  "folder": "assets/vfx/common",
+  "effects": [
+    {
+      "id": "slash_horizontal",
+      "frames": 4,
+      "ticks_per_frame": 2,
+      "scale": 0.62
+    },
+    {
+      "id": "slash_diagonal",
+      "frames": 4,
+      "ticks_per_frame": 2,
+      "scale": 0.62
+    },
+    {
+      "id": "slash_ring",
+      "frames": 4,
+      "ticks_per_frame": 3,
+      "scale": 0.72
+    },
+    {
+      "id": "hit_light",
+      "frames": 4,
+      "ticks_per_frame": 2,
+      "scale": 0.28
+    },
+    {
+      "id": "hit_heavy",
+      "frames": 4,
+      "ticks_per_frame": 3,
+      "scale": 0.42
+    }
+  ]
+}

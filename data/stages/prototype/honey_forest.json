@@ -1,0 +1,98 @@
+{
+  "id": "prototype_honey_forest",
+  "tier": 1,
+  "width": 5760,
+  "ground_y": 918,
+  "player_spawn_x": 260,
+  "monster_respawn_ticks": 300,
+  "layers": [
+    {
+      "sprite": "assets/backgrounds/chapter_01/honey_forest/far.png",
+      "scroll_scale": 0.15,
+      "z_index": -30
+    },
+    {
+      "sprite": "assets/backgrounds/chapter_01/honey_forest/mid.png",
+      "scroll_scale": 0.45,
+      "z_index": -20
+    },
+    {
+      "sprite": "assets/backgrounds/chapter_01/honey_forest/play.png",
+      "scroll_scale": 1.0,
+      "z_index": -10
+    },
+    {
+      "sprite": "assets/backgrounds/chapter_01/honey_forest/front.png",
+      "scroll_scale": 1.25,
+      "z_index": 30
+    }
+  ],
+  "platforms": [
+    {
+      "sprite": "assets/backgrounds/chapter_01/honey_forest/platforms/ledge_wide.png",
+      "x": 1320,
+      "y": 660,
+      "width": 460,
+      "top_inset": 34
+    },
+    {
+      "sprite": "assets/backgrounds/chapter_01/honey_forest/platforms/log.png",
+      "x": 2300,
+      "y": 770,
+      "width": 340,
+      "top_inset": 26
+    },
+    {
+      "sprite": "assets/backgrounds/chapter_01/honey_forest/platforms/ledge_short.png",
+      "x": 2780,
+      "y": 620,
+      "width": 240,
+      "top_inset": 30
+    },
+    {
+      "sprite": "assets/backgrounds/chapter_01/honey_forest/platforms/bridge.png",
+      "x": 3500,
+      "y": 720,
+      "width": 420,
+      "top_inset": 40
+    }
+  ],
+  "spawns": [
+    {
+      "monster": "training_dummy",
+      "x": 760
+    },
+    {
+      "monster": "training_dummy",
+      "x": 1040
+    },
+    {
+      "monster": "honey_slime",
+      "x": 1750
+    },
+    {
+      "monster": "honey_slime",
+      "x": 2250
+    },
+    {
+      "monster": "sprout_mushroom",
+      "x": 2850
+    },
+    {
+      "monster": "honey_slime",
+      "x": 3400
+    },
+    {
+      "monster": "sprout_mushroom",
+      "x": 3800
+    },
+    {
+      "monster": "sprout_mushroom",
+      "x": 4300
+    },
+    {
+      "monster": "honey_slime",
+      "x": 4500
+    }
+  ]
+}

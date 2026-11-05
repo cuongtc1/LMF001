@@ -1,0 +1,73 @@
+using LumiFeast.Logic.Common;
+
+namespace LumiFeast.Logic.Data;
+
+/// <summary>Catches impossible numbers and broken references when the game starts.</summary>
+public static class GameDataValidator
+{
+    public static void Validate(GameData data)
+    {
+        Require(data.Difficulties.Modes.Count > 0, "difficulty.modes");
+        data.Difficulty(data.Difficulties.Default);
+        foreach (var mode in data.Difficulties.Modes)
+        {
+            Require(mode.EnemyHp > 0 && mode.EnemyDamage > 0 && mode.EnemySpeed > 0 && mode.EnemyCooldown > 0, mode.Id);
+        }
+
+        Require(data.Scaling.HpGrowthPerTier > 0 && data.Scaling.DamageGrowthPerTier > 0, "scaling");
+        Require(data.Scaling.MinTier >= 1 && data.Scaling.MaxTier >= data.Scaling.MinTier, "scaling.tier");
+
+        foreach (var character in data.Characters.Values)
+        {
+            Require(character.Stats.MaxHp > 0 && character.Stats.Attack > 0, character.Id);
+            Require(character.Movement.RunSpeed > 0 && character.Movement.Gravity > 0, character.Id);
+            data.AttackSet(character.Combat.AttackSet);
+        }
+
+        foreach (var set in data.AttackSets.Values)
+        {
+            var ids = set.Attacks.Select(attack => attack.Id).ToHashSet();
+            Require(ids.Contains(set.First), $"{set.Id}.first");
+            foreach (var attack in set.Attacks)
+            {
+                Require(attack.Next is null || ids.Contains(attack.Next), $"{set.Id}.{attack.Id}.next");
+                Require(attack.ActiveTicks > 0 && attack.DamageMultiplier > 0, $"{set.Id}.{attack.Id}");
+                Require(attack.CancelFromTick <= attack.TotalTicks, $"{set.Id}.{attack.Id}.cancel_from_tick");
+                RequireVfx(data, attack.Vfx);
+                RequireVfx(data, attack.HitVfx);
+            }
+        }
+
+        foreach (var monster in data.Monsters.Values)
+        {
+            Require(monster.Stats.MaxHp > 0 && monster.Attack.DamageMultiplier >= 0, monster.Id);
+            RequireVfx(data, monster.Attack.HitVfx);
+        }
+
+        foreach (var stage in data.Stages.Values)
+        {
+            Require(stage.Tier >= data.Scaling.MinTier && stage.Tier <= data.Scaling.MaxTier, $"{stage.Id}.tier");
+            Require(stage.Width > 0, $"{stage.Id}.width");
+            foreach (var spawn in stage.Spawns)
+            {
+                data.Monster(spawn.Monster);
+            }
+        }
+    }
+
+    private static void RequireVfx(GameData data, string id)
+    {
+        if (data.Vfx.Effects.All(effect => effect.Id != id))
+        {
+            throw new GameDataException(MessageKeys.DataUnknownId, id);
+        }
+    }
+
+    private static void Require(bool condition, string where)
+    {
+        if (!condition)
+        {
+            throw new GameDataException(MessageKeys.DataBadValue, where);
+        }
+    }
+}

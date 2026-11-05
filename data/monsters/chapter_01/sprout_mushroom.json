@@ -1,0 +1,49 @@
+{
+  "id": "sprout_mushroom",
+  "stats": {
+    "max_hp": 110,
+    "attack": 40,
+    "defense": 0.1,
+    "speed": 130
+  },
+  "ai": {
+    "behavior": "chaser",
+    "aggro_range": 640,
+    "attack_range": 135,
+    "windup_ticks": 32,
+    "active_ticks": 10,
+    "recovery_ticks": 34,
+    "cooldown_ticks": 60,
+    "stun_ticks": 14,
+    "lunge_speed": 520,
+    "hop_velocity": 0,
+    "hop_interval_ticks": 0
+  },
+  "attack": {
+    "damage_multiplier": 1.0,
+    "hitbox": {
+      "x": 10,
+      "y": -130,
+      "width": 115,
+      "height": 120
+    },
+    "knockback_speed": 480,
+    "hitstop_ticks": 6,
+    "hit_vfx": "hit_heavy"
+  },
+  "body": {
+    "width": 90,
+    "height": 130
+  },
+  "knockback_scale": 0.7,
+  "immortal": false,
+  "art": {
+    "folder": "assets/monsters/chapter_01/sprout_mushroom",
+    "height": 150,
+    "faces_left": true,
+    "idle": "idle.png",
+    "windup": "idle.png",
+    "hit": "idle.png",
+    "healed": "healed.png"
+  }
+}
