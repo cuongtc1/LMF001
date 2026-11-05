@@ -13,7 +13,8 @@ public readonly record struct MotorInput(
     float GravityScale,
     float LungeVelocityX,
     bool FastFall = false,
-    bool AirHold = false);
+    bool AirHold = false,
+    bool SprintHeld = false);
 
 /// <summary>Run, jump and dash rules. One Step call is one 1/60 s tick; velocities are pixels per second.</summary>
 public sealed class PlayerMotor(MovementDef move)
@@ -33,6 +34,7 @@ public sealed class PlayerMotor(MovementDef move)
     private int _lastMoveDirection;
     private bool _sprintQueued;
     private bool _jumpRising;
+    private bool _sprintButtonHeld;
 
     public float VelocityX { get; private set; }
 
@@ -81,6 +83,7 @@ public sealed class PlayerMotor(MovementDef move)
         }
 
         TrackDoubleTap(input);
+        TrackSprintButton(input);
         if (input.OnFloor)
         {
             _coyote = move.CoyoteTicks;
@@ -141,6 +144,21 @@ public sealed class PlayerMotor(MovementDef move)
         }
 
         _lastMoveDirection = direction;
+    }
+
+    /// <summary>The sprint button needs no double tap: hold it with a direction. Made for gamepads.</summary>
+    private void TrackSprintButton(in MotorInput input)
+    {
+        if (input.SprintHeld && input.MoveX != 0 && !input.Locked)
+        {
+            IsSprinting = true;
+        }
+        else if (_sprintButtonHeld && !input.SprintHeld)
+        {
+            IsSprinting = false;
+        }
+
+        _sprintButtonHeld = input.SprintHeld;
     }
 
     private void Tickdown()

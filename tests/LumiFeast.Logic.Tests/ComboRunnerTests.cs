@@ -10,7 +10,7 @@ public class ComboRunnerTests
     private static readonly AttackSetDef Set = new("test", "a", "b", "a", "b", "h", "h", [Attack("a", "b", "h"), Attack("b", null), Attack("h", null)]);
 
     private static AttackDef Attack(string id, string? next, string? heavy = null) =>
-        new(id, 1, 2, 2, 4, 4, next, 0, Box, 0, 0, 0, "v", "v", 0, 0, 0, 0, 0, false, false, heavy);
+        new(id, 1, 2, 2, 4, 4, next, 0, Box, 0, 0, 0, "v", "v", 0, 0, 0, 0, 0, false, false, heavy, 4, 0, false);
 
     private static void RunOut(ComboRunner combo, ComboEntry entry)
     {
@@ -63,6 +63,20 @@ public class ComboRunnerTests
         }
 
         Assert.Equal("h", combo.Current?.Id);
+    }
+
+    [Fact]
+    public void CancelCanComeBeforeTheChain()
+    {
+        var late = Attack("a", "b") with { CancelFromTick = 1, ChainFromTick = 6 };
+        var combo = new ComboRunner(new AttackSetDef("t", "a", "a", "a", "a", "a", "a", [late, Attack("b", null)]), 8);
+        combo.PressAttack();
+        combo.Advance();
+        combo.PressAttack();
+        combo.Advance();
+        combo.Advance();
+        Assert.True(combo.CanCancel);
+        Assert.Equal("a", combo.Current?.Id);
     }
 
     [Fact]

@@ -22,6 +22,19 @@ public class GameDataTests
     }
 
     [Fact]
+    public void OnlyHeavyAttacksMoveMonstersUpOrDown()
+    {
+        var attacks = TestData.Game.AttackSet("lumi_sword").Attacks;
+        Assert.All(attacks, attack =>
+        {
+            var heavy = attack.Id.Contains('x');
+            Assert.True(heavy || attack is { LaunchSpeed: 0, Knockdown: false }, attack.Id);
+        });
+        Assert.Contains(attacks, attack => attack.LaunchSpeed > 0);
+        Assert.Contains(attacks, attack => attack.Knockdown);
+    }
+
+    [Fact]
     public void RealDataLoads()
     {
         Assert.NotEmpty(TestData.Game.Monsters);

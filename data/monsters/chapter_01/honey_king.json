@@ -14,12 +14,21 @@
     "active_ticks": 16,
     "recovery_ticks": 40,
     "cooldown_ticks": 40,
-    "stun_ticks": 6,
     "lunge_speed": 820,
     "hop_velocity": 760,
     "hop_interval_ticks": 40,
     "hover_height": 0,
-    "super_armor": true
+    "super_armor": true,
+    "stun_scale": 0.4,
+    "stoic_threshold": 12,
+    "stoic_ticks": 150,
+    "stoic_reset_ticks": 120,
+    "stoic_hp_marks": [
+      0.66,
+      0.33
+    ],
+    "down_ticks": 70,
+    "getup_armor_ticks": 90
   },
   "attack": {
     "damage_multiplier": 1.0,

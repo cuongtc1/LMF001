@@ -40,7 +40,7 @@ public class StatScalerTests
         var set = TestData.Game.AttackSet("lumi_sword");
         var z1 = set.Attacks.First(attack => attack.Id == "z1");
         var z2 = set.Attacks.First(attack => attack.Id == z1.Next);
-        var ticks = z1.CancelFromTick + z2.StartupTicks - z1.StartupTicks;
+        var ticks = z1.ChainFromTick + z2.StartupTicks - z1.StartupTicks;
         Assert.Equal(0.3f, ticks / 60f, 2);
     }
 

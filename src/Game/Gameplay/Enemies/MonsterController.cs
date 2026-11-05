@@ -19,6 +19,9 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
     private const float HealRisePixels = 90;
     private const float BobPixels = 10;
     private const float BobPerTick = 0.09f;
+    private const float AuraScale = 1.12f;
+    private const float DownSinkShare = 0.25f;
+    private const string AuraShaderCode = "shader_type canvas_item; void fragment() { COLOR.rgb = vec3(1.0, 0.12, 0.1); }";
 
     private static readonly Color TelegraphColor = new(1.6f, 0.55f, 0.45f);
 
@@ -31,6 +34,7 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
     private Health _health = null!;
     private AttackHitbox _hitbox = null!;
     private Sprite2D _sprite = null!;
+    private Sprite2D _aura = null!;
     private Hurtbox _hurtbox = null!;
     private Texture2D _idle = null!;
     private Texture2D _windup = null!;
@@ -80,6 +84,14 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         _spriteScale = def.Art.Height / _idle.GetHeight();
         _sprite = new Sprite2D { Texture = _idle, Position = new Vector2(0, -def.Art.Height / 2) };
         AddChild(_sprite);
+        _aura = new Sprite2D
+        {
+            Scale = Vector2.One * AuraScale,
+            ShowBehindParent = true,
+            Visible = false,
+            Material = new ShaderMaterial { Shader = new Shader { Code = AuraShaderCode } },
+        };
+        _sprite.AddChild(_aura);
 
         _hurtbox = new Hurtbox();
         AddChild(_hurtbox);
@@ -104,9 +116,14 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         }
 
         GameLog.Info(MessageKeys.CombatMonsterHit, _def.Id, damage, hit.SourceId, _health.Current, _health.Max);
+        if (_brain.RegisterHit((float)_health.Current / _health.Max))
+        {
+            GameLog.Info(MessageKeys.CombatStoic, _def.Id);
+        }
+
         _gameFeel.ShowDamage(GlobalPosition + new Vector2(0, -_def.Art.Height), damage, Colors.White);
         _flashTicks = 6;
-        if (!_brain.IsArmored)
+        if (_brain.CanBeMoved)
         {
             _knockback = hit.Direction * hit.KnockbackSpeed * _def.KnockbackScale;
             if (hit.LaunchSpeed > 0)
@@ -114,7 +131,7 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
                 _velocityY = -hit.LaunchSpeed * _def.KnockbackScale;
             }
 
-            _brain.Stun();
+            _brain.Stun(hit.StunTicks, hit.Knockdown);
             _hitbox.Close();
         }
 
@@ -192,7 +209,7 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         _sprite.Texture = _brain.State switch
         {
             MonsterState.Windup => _windup,
-            MonsterState.Stunned => _hit,
+            MonsterState.Stunned or MonsterState.Down => _hit,
             _ => _idle,
         };
 
@@ -201,6 +218,15 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         var flip = _brain.Facing == artDirection ? 1 : -1;
         var textureScale = _def.Art.Height / _sprite.Texture.GetHeight();
         _sprite.Scale = new Vector2(textureScale * flip * (1 + squash), textureScale * (1 - squash));
+        var down = _brain.State == MonsterState.Down;
+        _sprite.Rotation = down ? Mathf.Pi / 2 * flip : 0;
+        if (!_flying)
+        {
+            _sprite.Position = new Vector2(0, -_def.Art.Height * (down ? DownSinkShare : 0.5f));
+        }
+
+        _aura.Texture = _sprite.Texture;
+        _aura.Visible = _brain.IsArmored;
     }
 
     private void BeginHeal()

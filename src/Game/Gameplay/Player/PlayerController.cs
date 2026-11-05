@@ -140,7 +140,8 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             _motor.Face(Mathf.Sign(input.MoveX));
         }
 
-        if (_combo.CanCancel && _motor.HasQueuedAction)
+        var sprintButton = input.SprintHeld && input.MoveX != 0;
+        if (_combo.CanCancel && (_motor.HasQueuedAction || sprintButton))
         {
             _combo.Cancel();
             _hitbox.Close();
@@ -162,10 +163,11 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             input.DashPressed,
             onFloor,
             attacking is not null || _stunTicks > 0 || Health.IsDead,
-            attacking is not null && !onFloor ? _def.Movement.AirAttackGravityScale : 1,
+            attacking is not null && !onFloor && _combo.Phase != AttackPhase.Recovery ? _def.Movement.AirAttackGravityScale : 1,
             LungeVelocity(),
             input.DownHeld,
-            HoldsInAir(attacking, onFloor)));
+            HoldsInAir(attacking, onFloor),
+            input.SprintHeld));
 
         Velocity = new Vector2(_motor.VelocityX, _motor.VelocityY);
         MoveAndSlide();
@@ -182,9 +184,9 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         ShowView(attacking);
     }
 
-    /// <summary>Lumi hangs until the last swing of the string has landed, then falls.</summary>
+    /// <summary>Lumi hangs only while a swing is out or the next one is pressed; one Z lets her fall at once.</summary>
     private bool HoldsInAir(AttackDef? attack, bool onFloor) =>
-        attack is { HoldInAir: true } && !onFloor && (attack.Next is not null || _combo.Phase != AttackPhase.Recovery);
+        attack is { HoldInAir: true } && !onFloor && (_combo.Phase != AttackPhase.Recovery || _combo.HasBufferedFollow);
 
     private bool StandsOnPlatform()
     {
@@ -258,7 +260,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             return;
         }
 
-        var hit = new HitInfo(_def.Stats.Attack, attack.DamageMultiplier, _motor.Facing, attack.KnockbackSpeed, attack.LaunchSpeed, _def.Id);
+        var hit = new HitInfo(_def.Stats.Attack, attack.DamageMultiplier, _motor.Facing, attack.KnockbackSpeed, attack.LaunchSpeed, _def.Id, attack.StunTicks, attack.Knockdown);
         var landed = _hitbox.Sweep(_combo.SwingId, attack.Hitbox, _motor.Facing, hit);
         foreach (var target in landed)
         {

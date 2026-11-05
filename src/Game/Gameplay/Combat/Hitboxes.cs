@@ -5,7 +5,7 @@ using LumiFeast.Logic.Data;
 namespace LumiFeast.Game.Gameplay.Combat;
 
 /// <summary>What one hit does to its target. Damage is before the target's defense.</summary>
-public readonly record struct HitInfo(int Attack, float Multiplier, int Direction, float KnockbackSpeed, float LaunchSpeed, string SourceId);
+public readonly record struct HitInfo(int Attack, float Multiplier, int Direction, float KnockbackSpeed, float LaunchSpeed, string SourceId, int StunTicks = 0, bool Knockdown = false);
 
 public interface IDamageable
 {

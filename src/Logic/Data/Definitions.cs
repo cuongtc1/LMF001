@@ -73,7 +73,10 @@ public sealed record AttackDef(
     float LaunchSpeed,
     bool EndsOnLanding,
     bool HoldInAir,
-    string? NextHeavy)
+    string? NextHeavy,
+    int ChainFromTick,
+    int StunTicks,
+    bool Knockdown)
 {
     public int TotalTicks => StartupTicks + ActiveTicks + RecoveryTicks;
 }
@@ -88,6 +91,9 @@ public sealed record AttackSetDef(string Id, string First, string FirstAir, stri
 
 public sealed record MonsterStatsDef(int MaxHp, int Attack, float Defense, float Speed);
 
+/// <param name="SuperArmor">Armored during its own windup and strike.</param>
+/// <param name="StoicThreshold">Hits before it armors up and fights back; 0 means never.</param>
+/// <param name="StoicHpMarks">HP fractions, high to low, that also trigger armor once each.</param>
 public sealed record MonsterAiDef(
     string Behavior,
     float AggroRange,
@@ -96,12 +102,18 @@ public sealed record MonsterAiDef(
     int ActiveTicks,
     int RecoveryTicks,
     int CooldownTicks,
-    int StunTicks,
+    float StunScale,
     float LungeSpeed,
     float HopVelocity,
     int HopIntervalTicks,
     float HoverHeight,
-    bool SuperArmor);
+    bool SuperArmor,
+    int StoicThreshold,
+    int StoicTicks,
+    int StoicResetTicks,
+    IReadOnlyList<float> StoicHpMarks,
+    int DownTicks,
+    int GetupArmorTicks);
 
 public sealed record MonsterAttackDef(float DamageMultiplier, RectDef Hitbox, float KnockbackSpeed, int HitstopTicks, string HitVfx);
 

@@ -215,6 +215,24 @@ public class PlayerMotorTests
     }
 
     [Fact]
+    public void SprintButtonNeedsNoDoubleTap()
+    {
+        var motor = NewMotor();
+        motor.Step(Ground(1) with { SprintHeld = true });
+        Assert.True(motor.IsSprinting);
+        motor.Step(Ground(1));
+        Assert.False(motor.IsSprinting);
+    }
+
+    [Fact]
+    public void SprintButtonDoesNothingWithoutADirection()
+    {
+        var motor = NewMotor();
+        motor.Step(Ground(0) with { SprintHeld = true });
+        Assert.False(motor.IsSprinting);
+    }
+
+    [Fact]
     public void DownFallsFaster()
     {
         var plain = NewMotor();

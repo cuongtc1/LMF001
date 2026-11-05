@@ -7,8 +7,8 @@ namespace LumiFeast.Logic.Tests;
 
 public class MonsterBrainTests
 {
-    private static MonsterAiDef Ai(string behavior = MonsterBehaviors.Chaser, float hop = 0, bool armor = false) =>
-        new(behavior, 500, 100, 10, 5, 10, 20, 12, 300, hop, 30, 200, armor);
+    private static MonsterAiDef Ai(string behavior = MonsterBehaviors.Chaser, float hop = 0, bool armor = false, int threshold = 0, float[]? marks = null) =>
+        new(behavior, 500, 100, 10, 5, 10, 20, 1, 300, hop, 30, 200, armor, threshold, 100, 50, marks ?? [], 40, 30);
 
     private static readonly MonsterStats Stats = new(100, 10, 0, 200, 1);
 
@@ -56,7 +56,7 @@ public class MonsterBrainTests
     {
         var brain = new MonsterBrain(Ai(), Stats);
         brain.Step(80, true);
-        brain.Stun();
+        brain.Stun(12);
         Assert.Equal(MonsterState.Stunned, brain.State);
     }
 
@@ -65,7 +65,7 @@ public class MonsterBrainTests
     {
         var brain = new MonsterBrain(Ai(armor: true), Stats);
         brain.Step(80, true);
-        brain.Stun();
+        brain.Stun(12);
         Assert.Equal(MonsterState.Windup, brain.State);
     }
 
@@ -74,7 +74,7 @@ public class MonsterBrainTests
     {
         var brain = new MonsterBrain(Ai(armor: true), Stats);
         brain.Step(300, true);
-        brain.Stun();
+        brain.Stun(12);
         Assert.Equal(MonsterState.Stunned, brain.State);
     }
 
@@ -100,6 +100,99 @@ public class MonsterBrainTests
 
         Assert.True(brain.StrikeActive);
         Assert.Equal(300, brain.MoveVelocityY);
+    }
+
+    [Fact]
+    public void StoicStartsAtTheHitThreshold()
+    {
+        var brain = new MonsterBrain(Ai(threshold: 3), Stats);
+        Assert.False(brain.RegisterHit(0.9f));
+        Assert.False(brain.RegisterHit(0.9f));
+        Assert.True(brain.RegisterHit(0.9f));
+        Assert.True(brain.IsArmored);
+    }
+
+    [Fact]
+    public void HitsDuringStoicDoNotCount()
+    {
+        var brain = new MonsterBrain(Ai(threshold: 2), Stats);
+        brain.RegisterHit(0.9f);
+        brain.RegisterHit(0.9f);
+        for (var i = 0; i < 5; i++)
+        {
+            Assert.False(brain.RegisterHit(0.9f));
+        }
+    }
+
+    [Fact]
+    public void HitCountForgetsAfterAPause()
+    {
+        var brain = new MonsterBrain(Ai(threshold: 2), Stats);
+        brain.RegisterHit(0.9f);
+        for (var i = 0; i < 60; i++)
+        {
+            brain.Step(900, true);
+        }
+
+        Assert.False(brain.RegisterHit(0.9f));
+    }
+
+    [Fact]
+    public void EachHpMarkTriggersOnce()
+    {
+        var brain = new MonsterBrain(Ai(marks: [0.5f]), Stats);
+        Assert.False(brain.RegisterHit(0.8f));
+        Assert.True(brain.RegisterHit(0.5f));
+        for (var i = 0; i < 101; i++)
+        {
+            brain.Step(900, true);
+        }
+
+        Assert.False(brain.IsArmored);
+        Assert.False(brain.RegisterHit(0.4f));
+    }
+
+    [Fact]
+    public void StoicBreaksOutOfStunAndCannotBeStunned()
+    {
+        var brain = new MonsterBrain(Ai(threshold: 1), Stats);
+        brain.Stun(30);
+        brain.RegisterHit(0.9f);
+        Assert.Equal(MonsterState.Idle, brain.State);
+        brain.Stun(30, knockdown: true);
+        Assert.Equal(MonsterState.Idle, brain.State);
+    }
+
+    [Fact]
+    public void KnockdownCannotBeExtendedAndEndsInArmor()
+    {
+        var brain = new MonsterBrain(Ai(), Stats);
+        brain.Stun(30, knockdown: true);
+        Assert.Equal(MonsterState.Down, brain.State);
+        for (var i = 0; i < 39; i++)
+        {
+            brain.Stun(30);
+            brain.Step(900, true);
+        }
+
+        brain.Step(900, true);
+        Assert.Equal(MonsterState.Idle, brain.State);
+        Assert.True(brain.IsArmored);
+    }
+
+    [Fact]
+    public void StunUsesTheAttackTicksAndTheScale()
+    {
+        var brain = new MonsterBrain(Ai() with { StunScale = 0.5f }, Stats);
+        brain.Stun(20);
+        for (var i = 0; i < 9; i++)
+        {
+            brain.Step(900, true);
+        }
+
+        Assert.Equal(MonsterState.Stunned, brain.State);
+        brain.Step(900, true);
+        Assert.Equal(MonsterState.Idle, brain.State);
     }
 
     [Fact]

@@ -41,6 +41,7 @@ public static class GameDataValidator
                 Require(attack.NextHeavy is null || ids.Contains(attack.NextHeavy), $"{set.Id}.{attack.Id}.next_heavy");
                 Require(attack.ActiveTicks > 0 && attack.DamageMultiplier > 0, $"{set.Id}.{attack.Id}");
                 Require(attack.CancelFromTick <= attack.TotalTicks, $"{set.Id}.{attack.Id}.cancel_from_tick");
+                Require(attack.ChainFromTick <= attack.TotalTicks, $"{set.Id}.{attack.Id}.chain_from_tick");
                 RequireVfx(data, attack.Vfx);
                 RequireVfx(data, attack.HitVfx);
             }
@@ -49,6 +50,7 @@ public static class GameDataValidator
         foreach (var monster in data.Monsters.Values)
         {
             Require(monster.Stats.MaxHp > 0 && monster.Attack.DamageMultiplier >= 0, monster.Id);
+            Require(monster.Ai.StunScale >= 0 && monster.Ai.StoicHpMarks.All(mark => mark is > 0 and < 1), monster.Id);
             RequireVfx(data, monster.Attack.HitVfx);
         }
 

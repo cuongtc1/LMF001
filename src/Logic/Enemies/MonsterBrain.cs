@@ -11,6 +11,7 @@ public enum MonsterState
     Attack,
     Recover,
     Stunned,
+    Down,
 }
 
 public static class MonsterBehaviors
@@ -28,6 +29,10 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats)
     private int _timer;
     private int _cooldown;
     private int _hopTimer;
+    private int _stoicTimer;
+    private int _hitsTaken;
+    private int _hitResetTimer;
+    private int _nextHpMark;
 
     public MonsterState State { get; private set; } = MonsterState.Idle;
 
@@ -45,14 +50,51 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats)
     public int SwingId { get; private set; }
 
     /// <summary>Hits land but do not stop this attack.</summary>
-    public bool IsArmored => ai.SuperArmor && State is MonsterState.Windup or MonsterState.Attack;
+    public bool IsArmored => _stoicTimer > 0 || (ai.SuperArmor && State is MonsterState.Windup or MonsterState.Attack);
 
-    public void Stun()
+    /// <summary>Hits can push, launch or stun it right now.</summary>
+    public bool CanBeMoved => !IsArmored && State != MonsterState.Down;
+
+    /// <summary>Armor from the hit count, an HP mark, or standing up. Counts only hits outside armor.</summary>
+    public bool RegisterHit(float hpFraction)
     {
-        if (!IsArmored)
+        if (_stoicTimer > 0)
         {
-            Set(MonsterState.Stunned, ai.StunTicks);
+            return false;
         }
+
+        _hitsTaken++;
+        _hitResetTimer = ai.StoicResetTicks;
+        var crossedMark = false;
+        while (_nextHpMark < ai.StoicHpMarks.Count && hpFraction <= ai.StoicHpMarks[_nextHpMark])
+        {
+            crossedMark = true;
+            _nextHpMark++;
+        }
+
+        if (!crossedMark && (ai.StoicThreshold == 0 || _hitsTaken < ai.StoicThreshold))
+        {
+            return false;
+        }
+
+        EnterStoic(ai.StoicTicks);
+        return true;
+    }
+
+    public void Stun(int ticks, bool knockdown = false)
+    {
+        if (!CanBeMoved)
+        {
+            return;
+        }
+
+        if (knockdown && ai.Behavior != MonsterBehaviors.Flyer)
+        {
+            Set(MonsterState.Down, ai.DownTicks);
+            return;
+        }
+
+        Set(MonsterState.Stunned, (int)MathF.Round(ticks * ai.StunScale));
     }
 
     /// <param name="deltaX">Target x minus monster x.</param>
@@ -65,9 +107,11 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats)
         _cooldown = Math.Max(0, _cooldown - 1);
         _hopTimer = Math.Max(0, _hopTimer - 1);
         _timer = Math.Max(0, _timer - 1);
+        _stoicTimer = Math.Max(0, _stoicTimer - 1);
+        StepHitMemory();
         if (ai.Behavior == MonsterBehaviors.Passive)
         {
-            if (State == MonsterState.Stunned && _timer == 0)
+            if (State is MonsterState.Stunned or MonsterState.Down && _timer == 0)
             {
                 State = MonsterState.Idle;
             }
@@ -99,6 +143,10 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats)
                 break;
             case MonsterState.Stunned when _timer == 0:
                 State = MonsterState.Idle;
+                break;
+            case MonsterState.Down when _timer == 0:
+                State = MonsterState.Idle;
+                _stoicTimer = ai.GetupArmorTicks;
                 break;
         }
 
@@ -156,6 +204,26 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats)
             WantsHop = true;
             MoveVelocityX = Facing * stats.Speed;
             _hopTimer = Scaled(ai.HopIntervalTicks);
+        }
+    }
+
+    private void EnterStoic(int ticks)
+    {
+        _stoicTimer = ticks;
+        _hitsTaken = 0;
+        _cooldown = 0;
+        if (State is MonsterState.Stunned or MonsterState.Down)
+        {
+            State = MonsterState.Idle;
+        }
+    }
+
+    private void StepHitMemory()
+    {
+        _hitResetTimer = Math.Max(0, _hitResetTimer - 1);
+        if (_hitResetTimer == 0)
+        {
+            _hitsTaken = 0;
         }
     }
 

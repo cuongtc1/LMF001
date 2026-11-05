@@ -43,6 +43,9 @@ public sealed class ComboRunner(AttackSetDef set, int bufferTicks)
 
     public bool CanCancel => Current is { } attack && Tick >= attack.CancelFromTick;
 
+    /// <summary>A press is waiting that continues this string.</summary>
+    public bool HasBufferedFollow => _buffer > 0 && Current is { } attack && FollowOf(attack) is not null;
+
     public AttackPhase Phase
     {
         get
@@ -91,8 +94,7 @@ public sealed class ComboRunner(AttackSetDef set, int bufferTicks)
             _tickRemainder += AttackSpeed;
             Tick += (int)_tickRemainder;
             _tickRemainder -= (int)_tickRemainder;
-            var follow = _heavyBuffered ? attack.NextHeavy : attack.Next;
-            if (CanCancel && _buffer > 0 && follow is { } next)
+            if (Tick >= attack.ChainFromTick && _buffer > 0 && FollowOf(attack) is { } next)
             {
                 Start(next);
             }
@@ -122,6 +124,8 @@ public sealed class ComboRunner(AttackSetDef set, int bufferTicks)
         (_, true) => set.FirstHeavy,
         _ => set.First,
     };
+
+    private string? FollowOf(AttackDef attack) => _heavyBuffered ? attack.NextHeavy : attack.Next;
 
     private void Start(string id)
     {
