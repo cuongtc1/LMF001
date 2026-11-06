@@ -1,6 +1,6 @@
 {
   "start_x": 1560,
-  "end_tick": 300,
+  "end_tick": 280,
   "steps": [
     {
       "tick": 40,
@@ -33,72 +33,62 @@
       "pressed": false
     },
     {
-      "tick": 118,
+      "tick": 116,
       "action": "move_right",
+      "pressed": true
+    },
+    {
+      "tick": 118,
+      "action": "dash",
       "pressed": true
     },
     {
       "tick": 120,
-      "action": "move_right",
+      "action": "dash",
       "pressed": false
     },
     {
       "tick": 124,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 126,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 134,
       "action": "move_right",
-      "pressed": true
-    },
-    {
-      "tick": 130,
-      "action": "jump",
-      "pressed": true
-    },
-    {
-      "tick": 136,
-      "action": "move_right",
       "pressed": false
     },
     {
-      "tick": 140,
+      "tick": 160,
       "action": "attack_light",
       "pressed": true
     },
     {
-      "tick": 142,
-      "action": "jump",
-      "pressed": false
-    },
-    {
-      "tick": 142,
+      "tick": 162,
       "action": "attack_light",
       "pressed": false
     },
     {
-      "tick": 176,
+      "tick": 180,
       "action": "attack_light",
       "pressed": true
     },
     {
-      "tick": 178,
+      "tick": 182,
       "action": "attack_light",
       "pressed": false
     },
     {
-      "tick": 196,
+      "tick": 200,
       "action": "attack_light",
       "pressed": true
     },
     {
-      "tick": 198,
-      "action": "attack_light",
-      "pressed": false
-    },
-    {
-      "tick": 216,
-      "action": "attack_light",
-      "pressed": true
-    },
-    {
-      "tick": 218,
+      "tick": 202,
       "action": "attack_light",
       "pressed": false
     }

@@ -7,18 +7,16 @@ namespace LumiFeast.Logic.Tests;
 public class GameDataTests
 {
     [Fact]
-    public void StandingAirAttackIsOneHitAndSprintAirStringHoldsForThree()
+    public void LevelOneSetMatchesTheDesign()
     {
         var set = TestData.Game.AttackSet("lumi_sword");
-        Assert.Null(set.Attacks.First(attack => attack.Id == set.FirstAir).Next);
-        var chain = new List<AttackDef>();
-        for (var id = set.FirstSprintAir; id is not null; id = chain[^1].Next)
-        {
-            chain.Add(set.Attacks.First(attack => attack.Id == id));
-        }
-
-        Assert.Equal(3, chain.Count);
-        Assert.All(chain, attack => Assert.True(attack.HoldInAir));
+        AttackDef Get(string id) => set.Attacks.First(attack => attack.Id == id);
+        Assert.Equal(set.First, Get(Get(Get(set.First).Next!).Next!).Next);
+        Assert.True(Get(Get(set.First).NextHeavy!).LaunchSpeed > 0);
+        Assert.NotNull(Get(set.FirstHeavy).NextHeavy);
+        Assert.Null(Get(set.FirstAir).Next);
+        Assert.True(Get(set.FirstAirHeavy).PlungeSpeed > 0);
+        Assert.Equal((3f, 5f, 4f), (Get(set.First).Mana, Get(set.FirstHeavy).Mana, Get(set.FirstSprint).Mana));
     }
 
     [Fact]

@@ -31,9 +31,8 @@ public static class GameDataValidator
             var ids = set.Attacks.Select(attack => attack.Id).ToHashSet();
             Require(ids.Contains(set.First), $"{set.Id}.first");
             Require(ids.Contains(set.FirstAir), $"{set.Id}.first_air");
-            Require(ids.Contains(set.FirstSprintAir), $"{set.Id}.first_sprint_air");
+            Require(ids.Contains(set.FirstAirHeavy), $"{set.Id}.first_air_heavy");
             Require(ids.Contains(set.FirstHeavy), $"{set.Id}.first_heavy");
-            Require(ids.Contains(set.FirstSprintHeavy), $"{set.Id}.first_sprint_heavy");
             Require(ids.Contains(set.FirstSprint), $"{set.Id}.first_sprint");
             foreach (var attack in set.Attacks)
             {

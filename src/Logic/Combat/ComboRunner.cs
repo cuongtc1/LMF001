@@ -7,7 +7,6 @@ public enum ComboEntry
 {
     Ground,
     Air,
-    SprintAir,
     Sprint,
 }
 
@@ -43,9 +42,6 @@ public sealed class ComboRunner(AttackSetDef set, int bufferTicks)
 
     public bool CanCancel => Current is { } attack && Tick >= attack.CancelFromTick;
 
-    /// <summary>A press is waiting that continues this string.</summary>
-    public bool HasBufferedFollow => _buffer > 0 && Current is { } attack && FollowOf(attack) is not null;
-
     public AttackPhase Phase
     {
         get
@@ -79,11 +75,11 @@ public sealed class ComboRunner(AttackSetDef set, int bufferTicks)
         Tick = 0;
     }
 
-    /// <summary>Only one air string per jump: if it ends or breaks, the next one waits for the ground.</summary>
+    /// <summary>One air attack per jump; the next one waits for the ground.</summary>
     public void Advance(ComboEntry entry = ComboEntry.Ground)
     {
         JustStarted = false;
-        var inAir = entry is ComboEntry.Air or ComboEntry.SprintAir;
+        var inAir = entry == ComboEntry.Air;
         if (!inAir)
         {
             _airStringSpent = false;
@@ -104,24 +100,21 @@ public sealed class ComboRunner(AttackSetDef set, int bufferTicks)
             }
         }
 
-        if (Current is null && _buffer > 0 && !(inAir && _airStringSpent) && FirstAttack(entry) is { } first)
+        if (Current is null && _buffer > 0 && !(inAir && _airStringSpent))
         {
             _airStringSpent = inAir;
-            Start(first);
+            Start(FirstAttack(entry));
         }
 
         _buffer = Math.Max(0, _buffer - 1);
     }
 
-    /// <summary>X has no air version yet, so it does nothing in the air.</summary>
-    private string? FirstAttack(ComboEntry entry) => (entry, _heavyBuffered) switch
+    private string FirstAttack(ComboEntry entry) => (entry, _heavyBuffered) switch
     {
         (ComboEntry.Air, false) => set.FirstAir,
-        (ComboEntry.SprintAir, false) => set.FirstSprintAir,
-        (ComboEntry.Air or ComboEntry.SprintAir, true) => null,
-        (ComboEntry.Sprint, false) => set.FirstSprint,
-        (ComboEntry.Sprint, true) => set.FirstSprintHeavy,
+        (ComboEntry.Air, true) => set.FirstAirHeavy,
         (_, true) => set.FirstHeavy,
+        (ComboEntry.Sprint, false) => set.FirstSprint,
         _ => set.First,
     };
 

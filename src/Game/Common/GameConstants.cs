@@ -29,7 +29,6 @@ public static class InputActions
     public const string AttackLight = "attack_light";
     public const string AttackHeavy = "attack_heavy";
     public const string Dash = "dash";
-    public const string Sprint = "sprint";
     public const string DebugPanel = "debug_panel";
     public const string DebugReload = "debug_reload";
 }

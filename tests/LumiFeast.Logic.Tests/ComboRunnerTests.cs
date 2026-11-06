@@ -7,10 +7,10 @@ namespace LumiFeast.Logic.Tests;
 public class ComboRunnerTests
 {
     private static readonly RectDef Box = new(0, 0, 1, 1);
-    private static readonly AttackSetDef Set = new("test", "a", "b", "a", "b", "h", "h", [Attack("a", "b", "h"), Attack("b", null), Attack("h", null)]);
+    private static readonly AttackSetDef Set = new("test", "a", "b", "h", "b", "h", [Attack("a", "b", "h"), Attack("b", null), Attack("h", null)]);
 
     private static AttackDef Attack(string id, string? next, string? heavy = null) =>
-        new(id, 1, 2, 2, 4, 4, next, 0, Box, 0, 0, 0, "v", "v", 0, 0, 0, 0, 0, false, false, heavy, 4, 0, false);
+        new(id, 1, 2, 2, 4, 4, next, 0, Box, 0, 0, 0, "v", "v", 0, 0, 0, 0, 0, false, heavy, 4, 0, false, 0, 0);
 
     private static void RunOut(ComboRunner combo, ComboEntry entry)
     {
@@ -30,19 +30,6 @@ public class ComboRunnerTests
         RunOut(combo, ComboEntry.Air);
         combo.PressAttack();
         combo.Advance(ComboEntry.Air);
-        Assert.False(combo.IsAttacking);
-    }
-
-    [Fact]
-    public void SprintJumpStartsItsOwnString()
-    {
-        var combo = new ComboRunner(Set, 8);
-        combo.PressAttack();
-        combo.Advance(ComboEntry.SprintAir);
-        Assert.Equal("a", combo.Current?.Id);
-        RunOut(combo, ComboEntry.SprintAir);
-        combo.PressAttack();
-        combo.Advance(ComboEntry.SprintAir);
         Assert.False(combo.IsAttacking);
     }
 
@@ -69,7 +56,7 @@ public class ComboRunnerTests
     public void CancelCanComeBeforeTheChain()
     {
         var late = Attack("a", "b") with { CancelFromTick = 1, ChainFromTick = 6 };
-        var combo = new ComboRunner(new AttackSetDef("t", "a", "a", "a", "a", "a", "a", [late, Attack("b", null)]), 8);
+        var combo = new ComboRunner(new AttackSetDef("t", "a", "a", "a", "a", "a", [late, Attack("b", null)]), 8);
         combo.PressAttack();
         combo.Advance();
         combo.PressAttack();
@@ -80,10 +67,14 @@ public class ComboRunnerTests
     }
 
     [Fact]
-    public void HeavyDoesNothingInTheAir()
+    public void HeavyInTheAirUsesItsOwnAttackAndSpendsTheJump()
     {
         var combo = new ComboRunner(Set, 8);
         combo.PressAttack(heavy: true);
+        combo.Advance(ComboEntry.Air);
+        Assert.Equal("h", combo.Current?.Id);
+        RunOut(combo, ComboEntry.Air);
+        combo.PressAttack();
         combo.Advance(ComboEntry.Air);
         Assert.False(combo.IsAttacking);
     }

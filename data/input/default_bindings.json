@@ -79,16 +79,6 @@
       "pad_axes": []
     },
     {
-      "action": "sprint",
-      "keys": [
-        "C"
-      ],
-      "pad_buttons": [
-        9
-      ],
-      "pad_axes": []
-    },
-    {
       "action": "debug_panel",
       "keys": [
         "F1"

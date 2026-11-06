@@ -13,8 +13,7 @@ public readonly record struct MotorInput(
     float GravityScale,
     float LungeVelocityX,
     bool FastFall = false,
-    bool AirHold = false,
-    bool SprintHeld = false);
+    float PlungeSpeed = 0);
 
 /// <summary>Run, jump and dash rules. One Step call is one 1/60 s tick; velocities are pixels per second.</summary>
 public sealed class PlayerMotor(MovementDef move)
@@ -29,12 +28,8 @@ public sealed class PlayerMotor(MovementDef move)
     private int _dashInvulnerable;
     private int _airDashesLeft = move.AirDashes;
     private int _airJumpsLeft = move.AirJumps;
-    private int _tapDirection;
-    private int _tapTimer;
-    private int _lastMoveDirection;
-    private bool _sprintQueued;
+    private int _runDirection;
     private bool _jumpRising;
-    private bool _sprintButtonHeld;
 
     public float VelocityX { get; private set; }
 
@@ -44,10 +39,8 @@ public sealed class PlayerMotor(MovementDef move)
 
     public bool IsDashing => _dashTicks > 0;
 
+    /// <summary>The fast run after a dash; it lasts while the same direction is held.</summary>
     public bool IsSprinting { get; private set; }
-
-    /// <summary>This jump left the ground at a sprint; it stays true until landing.</summary>
-    public bool IsSprintJump { get; private set; }
 
     public bool IsInvulnerable => _dashInvulnerable > 0;
 
@@ -58,7 +51,7 @@ public sealed class PlayerMotor(MovementDef move)
     public float Tempo { get; set; } = 1;
 
     /// <summary>A jump or dash is waiting for the current lock (attack, stun) to end.</summary>
-    public bool HasQueuedAction => _jumpBuffer > 0 || _dashQueued || _sprintQueued;
+    public bool HasQueuedAction => _jumpBuffer > 0 || _dashQueued;
 
     public void Face(int direction) => Facing = direction;
 
@@ -69,9 +62,22 @@ public sealed class PlayerMotor(MovementDef move)
         _dashTicks = 0;
     }
 
+    /// <summary>An attack during a dash ends it early and keeps the run.</summary>
+    public void StopDash()
+    {
+        _dashTicks = 0;
+        StartRun();
+    }
+
     public void Step(in MotorInput input)
     {
+        var wasDashing = IsDashing;
         Tickdown();
+        if (wasDashing && !IsDashing)
+        {
+            StartRun();
+        }
+
         if (input.JumpPressed)
         {
             _jumpBuffer = move.JumpBufferTicks;
@@ -82,8 +88,11 @@ public sealed class PlayerMotor(MovementDef move)
             _dashQueued = true;
         }
 
-        TrackDoubleTap(input);
-        TrackSprintButton(input);
+        if (Math.Sign(input.MoveX) != _runDirection)
+        {
+            IsSprinting = false;
+        }
+
         if (input.OnFloor)
         {
             _coyote = move.CoyoteTicks;
@@ -91,7 +100,6 @@ public sealed class PlayerMotor(MovementDef move)
             _airJumpsLeft = move.AirJumps;
             VelocityY = Math.Min(VelocityY, 0);
             _jumpRising = false;
-            IsSprintJump = false;
         }
 
         if (!input.Locked)
@@ -103,15 +111,6 @@ public sealed class PlayerMotor(MovementDef move)
 
             TryStartDash(input);
             TryJump(input);
-            if (_sprintQueued)
-            {
-                _sprintQueued = false;
-                IsSprinting = true;
-            }
-        }
-        else
-        {
-            IsSprinting = false;
         }
 
         if (IsDashing)
@@ -125,40 +124,10 @@ public sealed class PlayerMotor(MovementDef move)
         StepVertical(input);
     }
 
-    /// <summary>Two quick presses of one direction start a sprint; it lasts while the direction is held.</summary>
-    private void TrackDoubleTap(in MotorInput input)
+    private void StartRun()
     {
-        var direction = Math.Sign(input.MoveX);
-        _tapTimer = Math.Max(0, _tapTimer - 1);
-        if (direction != 0 && _lastMoveDirection == 0)
-        {
-            _sprintQueued = direction == _tapDirection && _tapTimer > 0;
-            _tapDirection = direction;
-            _tapTimer = move.SprintTapTicks;
-        }
-
-        if (direction != _tapDirection || direction == 0)
-        {
-            IsSprinting = false;
-            _sprintQueued = false;
-        }
-
-        _lastMoveDirection = direction;
-    }
-
-    /// <summary>The sprint button needs no double tap: hold it with a direction. Made for gamepads.</summary>
-    private void TrackSprintButton(in MotorInput input)
-    {
-        if (input.SprintHeld && input.MoveX != 0 && !input.Locked)
-        {
-            IsSprinting = true;
-        }
-        else if (_sprintButtonHeld && !input.SprintHeld)
-        {
-            IsSprinting = false;
-        }
-
-        _sprintButtonHeld = input.SprintHeld;
+        IsSprinting = true;
+        _runDirection = Facing;
     }
 
     private void Tickdown()
@@ -203,7 +172,6 @@ public sealed class PlayerMotor(MovementDef move)
         if (_coyote > 0)
         {
             StartJump(move.JumpVelocity);
-            IsSprintJump = IsSprinting;
             _coyote = 0;
         }
         else if (!input.OnFloor && AirJumpUnlocked && _airJumpsLeft > 0)
@@ -242,14 +210,16 @@ public sealed class PlayerMotor(MovementDef move)
             _jumpRising = false;
         }
 
-        var fastFall = input.FastFall && !input.OnFloor && !input.AirHold;
+        if (input.PlungeSpeed > 0)
+        {
+            VelocityY = input.PlungeSpeed;
+            return;
+        }
+
+        var fastFall = input.FastFall && !input.OnFloor;
         var falling = VelocityY > 0;
         var scale = fastFall ? move.FastFallGravityScale : falling ? move.FallGravityScale * input.GravityScale : 1;
         VelocityY += move.Gravity * Tempo * Tempo * scale * TickSeconds;
         VelocityY = Math.Min(VelocityY, (fastFall ? move.FastFallMaxSpeed : move.MaxFallSpeed) * Tempo);
-        if (input.AirHold)
-        {
-            VelocityY = Math.Min(VelocityY, 0);
-        }
     }
 }

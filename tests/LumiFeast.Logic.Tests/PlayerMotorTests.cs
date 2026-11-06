@@ -174,62 +174,67 @@ public class PlayerMotorTests
         Assert.Equal(plain.VelocityY, attacking.VelocityY);
     }
 
-    [Fact]
-    public void AirHoldStopsTheFallButNotTheRise()
+    private static PlayerMotor Dashed(float move = 1)
     {
         var motor = NewMotor();
-        motor.Step(Ground(jump: true));
-        motor.Step(Air(true) with { AirHold = true });
-        Assert.True(motor.VelocityY < 0);
-        for (var i = 0; i < 40; i++)
+        motor.Step(Ground(move));
+        motor.Step(Ground(move, dash: true));
+        while (motor.IsDashing)
         {
-            motor.Step(Air(true) with { AirHold = true });
+            motor.Step(Ground(move));
         }
 
-        Assert.Equal(0, motor.VelocityY);
-        motor.Step(Air(true));
-        Assert.True(motor.VelocityY > 0);
+        return motor;
     }
 
     [Fact]
-    public void SprintJumpIsRememberedUntilLanding()
+    public void DashLeadsIntoARunWhileTheDirectionIsHeld()
     {
-        var motor = NewMotor();
-        motor.Step(Ground(1));
-        motor.Step(Ground(0));
-        motor.Step(Ground(1));
-        motor.Step(Ground(1, jump: true));
-        Assert.True(motor.IsSprintJump);
-        motor.Step(Air(true));
-        Assert.True(motor.IsSprintJump);
-        motor.Step(Ground());
-        Assert.False(motor.IsSprintJump);
-    }
-
-    [Fact]
-    public void StandingJumpIsNotASprintJump()
-    {
-        var motor = NewMotor();
-        motor.Step(Ground(jump: true));
-        Assert.False(motor.IsSprintJump);
-    }
-
-    [Fact]
-    public void SprintButtonNeedsNoDoubleTap()
-    {
-        var motor = NewMotor();
-        motor.Step(Ground(1) with { SprintHeld = true });
+        var motor = Dashed();
         Assert.True(motor.IsSprinting);
-        motor.Step(Ground(1));
+        for (var i = 0; i < 60; i++)
+        {
+            motor.Step(Ground(1));
+        }
+
+        Assert.Equal(TestData.Game.Character("lumi").Movement.SprintSpeed, motor.VelocityX);
+        motor.Step(Ground(0));
         Assert.False(motor.IsSprinting);
     }
 
     [Fact]
-    public void SprintButtonDoesNothingWithoutADirection()
+    public void DashWithoutADirectionEndsWithoutARun()
+    {
+        var motor = Dashed(0);
+        motor.Step(Ground(0));
+        Assert.False(motor.IsSprinting);
+    }
+
+    [Fact]
+    public void TurningAroundEndsTheRun()
+    {
+        var motor = Dashed();
+        motor.Step(Ground(-1));
+        Assert.False(motor.IsSprinting);
+    }
+
+    [Fact]
+    public void AttackDuringADashKeepsTheRun()
     {
         var motor = NewMotor();
-        motor.Step(Ground(0) with { SprintHeld = true });
-        Assert.False(motor.IsSprinting);
+        motor.Step(Ground(1));
+        motor.Step(Ground(1, dash: true));
+        motor.StopDash();
+        Assert.False(motor.IsDashing);
+        Assert.True(motor.IsSprinting);
+    }
+
+    [Fact]
+    public void PlungeDrivesLumiDown()
+    {
+        var motor = NewMotor();
+        motor.Step(Air() with { PlungeSpeed = 1800 });
+        Assert.Equal(1800, motor.VelocityY);
     }
 
     [Fact]
@@ -244,59 +249,6 @@ public class PlayerMotorTests
         }
 
         Assert.True(fast.VelocityY > plain.VelocityY);
-    }
-
-    [Fact]
-    public void DoubleTapSprintsUntilReleased()
-    {
-        var motor = NewMotor();
-        motor.Step(Ground(1));
-        motor.Step(Ground(0));
-        motor.Step(Ground(1));
-        Assert.True(motor.IsSprinting);
-        motor.Step(Ground(0));
-        Assert.False(motor.IsSprinting);
-    }
-
-    [Fact]
-    public void SlowTapsDoNotSprint()
-    {
-        var motor = NewMotor();
-        motor.Step(Ground(1));
-        for (var i = 0; i < 40; i++)
-        {
-            motor.Step(Ground(0));
-        }
-
-        motor.Step(Ground(1));
-        Assert.False(motor.IsSprinting);
-    }
-
-    [Fact]
-    public void SprintIsFasterThanRun()
-    {
-        var motor = NewMotor();
-        motor.Step(Ground(1));
-        motor.Step(Ground(0));
-        for (var i = 0; i < 60; i++)
-        {
-            motor.Step(Ground(1));
-        }
-
-        Assert.Equal(TestData.Game.Character("lumi").Movement.SprintSpeed, motor.VelocityX);
-    }
-
-    [Fact]
-    public void DoubleTapDuringAttackQueuesForCancel()
-    {
-        var motor = NewMotor();
-        var locked = Ground(1) with { Locked = true };
-        motor.Step(locked);
-        motor.Step(Ground(0) with { Locked = true });
-        motor.Step(locked);
-        Assert.True(motor.HasQueuedAction);
-        motor.Step(Ground(1));
-        Assert.True(motor.IsSprinting);
     }
 
     private readonly struct PlayerMotorProbe(PlayerMotor motor)

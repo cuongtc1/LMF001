@@ -140,8 +140,12 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             _motor.Face(Mathf.Sign(input.MoveX));
         }
 
-        var sprintButton = input.SprintHeld && input.MoveX != 0;
-        if (_combo.CanCancel && (_motor.HasQueuedAction || sprintButton))
+        if (_combo.JustStarted && _motor.IsDashing)
+        {
+            _motor.StopDash();
+        }
+
+        if (_combo.CanCancel && _motor.HasQueuedAction)
         {
             _combo.Cancel();
             _hitbox.Close();
@@ -166,8 +170,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             attacking is not null && !onFloor && _combo.Phase != AttackPhase.Recovery ? _def.Movement.AirAttackGravityScale : 1,
             LungeVelocity(),
             input.DownHeld,
-            HoldsInAir(attacking, onFloor),
-            input.SprintHeld));
+            attacking is not null && _combo.Phase == AttackPhase.Active ? attacking.PlungeSpeed : 0));
 
         Velocity = new Vector2(_motor.VelocityX, _motor.VelocityY);
         MoveAndSlide();
@@ -183,10 +186,6 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         StepAttack();
         ShowView(attacking);
     }
-
-    /// <summary>Lumi hangs only while a swing is out or the next one is pressed; one Z lets her fall at once.</summary>
-    private bool HoldsInAir(AttackDef? attack, bool onFloor) =>
-        attack is { HoldInAir: true } && !onFloor && (_combo.Phase != AttackPhase.Recovery || _combo.HasBufferedFollow);
 
     private bool StandsOnPlatform()
     {
@@ -206,10 +205,10 @@ public partial class PlayerController : CharacterBody2D, IDamageable
     {
         if (!IsOnFloor())
         {
-            return _motor.IsSprintJump ? ComboEntry.SprintAir : ComboEntry.Air;
+            return ComboEntry.Air;
         }
 
-        return _motor.IsSprinting ? ComboEntry.Sprint : ComboEntry.Ground;
+        return _motor.IsSprinting || _motor.IsDashing ? ComboEntry.Sprint : ComboEntry.Ground;
     }
 
     /// <summary>Monsters stop Lumi, except while she dashes through them.</summary>
@@ -269,7 +268,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
                 _gameFeel.PlayEffect(attack.HitVfx, node.GlobalPosition + new Vector2(0, -70), _motor.Facing);
             }
 
-            Mp = Mathf.Min(MaxMp, Mp + _def.Combat.MpPerHit);
+            Mp = Mathf.Min(MaxMp, Mp + attack.Mana);
             ComboHits++;
             TotalHits++;
             _comboResetTicks = _feel.ComboResetTicks;
