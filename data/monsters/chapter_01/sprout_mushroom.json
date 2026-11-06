@@ -25,7 +25,7 @@
     "stoic_reset_ticks": 0,
     "stoic_hp_marks": [],
     "down_ticks": 70,
-    "getup_armor_ticks": 0,
+    "getup_armor_ticks": 45,
     "stagger_max": 0,
     "stagger_break_ticks": 0,
     "stagger_damage_scale": 1
