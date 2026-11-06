@@ -45,13 +45,17 @@ public sealed record SpineViewDef(
     string Land,
     string Dash,
     string Guard,
+    string GuardHit,
+    string Hurt,
+    string Knockdown,
+    string Getup,
     string DefaultAttack,
     float SprintFromSpeed);
 
 /// <param name="DamageScale">Share of damage taken through a guard.</param>
 /// <param name="PerfectTicks">A hit this soon after raising the guard is a perfect guard.</param>
 /// <param name="CounterTicks">Time to press Z after a perfect guard.</param>
-public sealed record GuardDef(float DamageScale, int PerfectTicks, int CounterTicks, float PushSpeed, int PerfectHitstopTicks);
+public sealed record GuardDef(float DamageScale, int PerfectTicks, int CounterTicks, float PushSpeed, int PerfectHitstopTicks, int HitTicks);
 
 public sealed record BodyDef(float Width, float Height);
 
@@ -134,7 +138,7 @@ public sealed record MonsterAiDef(
     int StaggerBreakTicks,
     float StaggerDamageScale);
 
-public sealed record MonsterAttackDef(float DamageMultiplier, RectDef Hitbox, float KnockbackSpeed, int HitstopTicks, string HitVfx);
+public sealed record MonsterAttackDef(float DamageMultiplier, RectDef Hitbox, float KnockbackSpeed, int HitstopTicks, string HitVfx, bool Knockdown);
 
 public sealed record MonsterArtDef(string Folder, float Height, bool FacesLeft, string Idle, string Windup, string Hit, string Healed);
 
@@ -172,7 +176,9 @@ public sealed record GameFeelDef(
     float DamageNumberRise,
     int DamageNumberTicks,
     float JuggleGravityScale,
-    string GuardVfx);
+    string GuardVfx,
+    int PlayerDownTicks,
+    int PlayerGetupTicks);
 
 public sealed record VfxDef(string Id, int Frames, int TicksPerFrame, float Scale);
 

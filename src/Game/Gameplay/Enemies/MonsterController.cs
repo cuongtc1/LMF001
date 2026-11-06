@@ -208,7 +208,7 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
             return;
         }
 
-        var hit = new HitInfo(_stats.Attack, _def.Attack.DamageMultiplier, _brain.Facing, _def.Attack.KnockbackSpeed, 0, _def.Id);
+        var hit = new HitInfo(_stats.Attack, _def.Attack.DamageMultiplier, _brain.Facing, _def.Attack.KnockbackSpeed, 0, _def.Id, 0, _def.Attack.Knockdown);
         var landed = _hitbox.Sweep(_brain.SwingId, _def.Attack.Hitbox, _brain.Facing, hit);
         if (landed.Count > 0)
         {

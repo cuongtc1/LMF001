@@ -44,7 +44,8 @@
     "perfect_ticks": 10,
     "counter_ticks": 36,
     "push_speed": 260,
-    "perfect_hitstop_ticks": 8
+    "perfect_hitstop_ticks": 8,
+    "hit_ticks": 14
   },
   "spine_view": {
     "skeleton": "assets/characters/lumi/spine/lumi_rig_v3.skel",
@@ -61,6 +62,10 @@
     "fall": "fall",
     "land": "land",
     "dash": "dash",
-    "guard": "guard"
+    "guard": "guard",
+    "guard_hit": "guard_hit",
+    "hurt": "hurt",
+    "knockdown": "knockdown",
+    "getup": "getup"
   }
 }

@@ -40,7 +40,8 @@
     },
     "knockback_speed": 0,
     "hitstop_ticks": 0,
-    "hit_vfx": "hit_light"
+    "hit_vfx": "hit_light",
+    "knockdown": false
   },
   "body": {
     "width": 70,

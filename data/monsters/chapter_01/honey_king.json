@@ -43,7 +43,8 @@
     },
     "knockback_speed": 620,
     "hitstop_ticks": 7,
-    "hit_vfx": "hit_heavy"
+    "hit_vfx": "hit_heavy",
+    "knockdown": true
   },
   "body": {
     "width": 210,

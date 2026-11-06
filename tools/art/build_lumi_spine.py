@@ -153,6 +153,74 @@ def ax():
                  left_arm=[(10, -120), (14, -130), (18, -30), (46, -30)])
 
 
+def guard_hit():
+    return clip({
+        'torso': [(0, 8), (4, 12), (14, -5)],
+        'head': [(0, 4), (14, 4)],
+        'upperarm_R': [(0, 62), (4, 56), (14, 70)],
+        'forearm_R': [(0, 70), (14, 70)],
+        'weapon': [(0, -112), (4, -104), (14, -125)],
+        'upperarm_L': [(0, 50), (14, 50)],
+        'forearm_L': [(0, 40), (14, 40)],
+        'leg_R': [(0, 14), (14, 14)],
+        'leg_L': [(0, -22), (4, -26), (14, -16)],
+        'boot_L': [(0, -14), (14, -10)],
+        'tail_L': [(0, 14), (14, 4)],
+        'tail_R': [(0, 8), (14, -4)],
+    }, hip_y=[(0, -24), (4, -30), (14, -16)])
+
+
+def counter():
+    return swing(26, arm=[(3, 130), (6, 65), (10, 15), (16, 15)], fore=[(3, 30), (6, 5), (10, -8), (16, -8)],
+                 sword=[(3, -110), (6, -160), (10, -130), (16, -130)], torso=[(3, 10), (6, -18), (10, -24), (16, -20)],
+                 front_leg=[(3, -6), (6, 30), (10, 36), (16, 36)], back_leg=[(3, 8), (6, -28), (10, -32), (16, -32)],
+                 left_arm=[(3, 30), (6, -60), (10, -75), (16, -70)], hip_y=[(0, 0), (6, -26), (16, -26), (26, 0)])
+
+
+def hurt():
+    return clip({
+        'torso': [(0, 6), (5, 20), (20, 14)],
+        'head': [(0, 6), (5, 16), (20, 12)],
+        'upperarm_R': [(0, -30), (5, -45), (20, -30)],
+        'forearm_R': [(0, 10), (20, 10)],
+        'weapon': [(0, -40), (5, -60), (20, -60)],
+        'upperarm_L': [(0, 40), (5, 55), (20, 45)],
+        'forearm_L': [(0, 10), (20, 10)],
+        'leg_R': [(0, 8), (5, 14), (20, 10)],
+        'leg_L': [(0, -10), (5, -16), (20, -12)],
+        'boot_L': [(0, -8), (20, -8)],
+        'tail_L': [(0, 14), (5, 24), (20, 16)],
+        'tail_R': [(0, 10), (5, 20), (20, 12)],
+        'skirt': [(0, 4), (5, 8), (20, 6)],
+    })
+
+
+LYING = {
+    'torso': -6, 'head': 10, 'upperarm_R': -60, 'forearm_R': 10, 'weapon': -30, 'upperarm_L': 70, 'forearm_L': 10,
+    'leg_R': 14, 'boot_R': -12, 'leg_L': 4, 'boot_L': -30, 'tail_L': 40, 'tail_R': 30, 'skirt': 6,
+}
+LYING_HIP = -470
+
+
+def knockdown():
+    body = clip({bone: [(0, value * 0.3), (14, value), (50, value)] for bone, value in LYING.items()})
+    body['bones']['hip'] = {
+        'rotate': [{'time': 0, 'value': 20}, {'time': round(14 * TICK, 4), 'value': 84}, {'time': round(50 * TICK, 4), 'value': 84}],
+        'translate': [{'time': 0, 'y': -60}, {'time': round(14 * TICK, 4), 'y': LYING_HIP}, {'time': round(50 * TICK, 4), 'y': LYING_HIP}],
+    }
+    return body
+
+
+def getup():
+    rest = lambda bone: REST.get(bone, 0)
+    body = clip({bone: [(0, value), (14, value * 0.5), (26, rest(bone))] for bone, value in LYING.items()})
+    body['bones']['hip'] = {
+        'rotate': [{'time': 0, 'value': 84}, {'time': round(14 * TICK, 4), 'value': 26}, {'time': round(26 * TICK, 4), 'value': 0}],
+        'translate': [{'time': 0, 'y': LYING_HIP}, {'time': round(14 * TICK, 4), 'y': -170}, {'time': round(26 * TICK, 4), 'y': 0}],
+    }
+    return body
+
+
 def z_dash():
     return swing(29,
                  arm=[(6, -10), (9, 75), (13, 85)], fore=[(6, 30), (9, 10), (13, 5)],
@@ -282,6 +350,7 @@ def main():
         'idle': idle(), 'run': run(), 'sprint': sprint(), 'jump': jump(), 'fall': fall(), 'land': land(), 'dash': dash(),
         'guard': guard(), 'z1': z1(), 'z2': z2(), 'z3': z3(), 's1': z_dash(),
         'x1': x1(), 'xx': xx(), 'zx': zx(), 'a1': a1(), 'au': au(), 'ax': ax(),
+        'guard_hit': guard_hit(), 'counter': counter(), 'hurt': hurt(), 'knockdown': knockdown(), 'getup': getup(),
     }
     json.dump(rig, open(RIG, 'w', encoding='utf-8', newline='\n'), indent=1)
     if os.path.exists(PROJECT):

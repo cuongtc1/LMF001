@@ -13,7 +13,6 @@ public partial class SpineLumiView : Node2D, ICharacterView
     private const float DashStretch = 0.1f;
     private const float LandSquash = 0.14f;
     private const float SquashRecovery = 0.18f;
-    private const float HurtTilt = -0.3f;
     private const float RunSpeedThreshold = 40;
     private const int BlinkTicks = 4;
     private const int Track = 0;
@@ -61,13 +60,36 @@ public partial class SpineLumiView : Node2D, ICharacterView
         var clip = PickClip(state);
         if (clip != _clip)
         {
-            Play(clip, clip != _view.Jump && clip != _view.Land, 1);
+            Play(clip, IsLoop(clip), 1);
         }
     }
+
+    private bool IsLoop(string clip) =>
+        clip == _view.Idle || clip == _view.Run || clip == _view.Sprint || clip == _view.Fall || clip == _view.Guard;
 
     private string PickClip(in ViewState state)
     {
         var speed = Mathf.Abs(state.VelocityX);
+        if (state.KnockedDown)
+        {
+            return _view.Knockdown;
+        }
+
+        if (state.GettingUp)
+        {
+            return _view.Getup;
+        }
+
+        if (state.Hurt)
+        {
+            return _view.Hurt;
+        }
+
+        if (state.GuardHit)
+        {
+            return _view.GuardHit;
+        }
+
         if (state.Guarding)
         {
             return _view.Guard;
@@ -125,7 +147,7 @@ public partial class SpineLumiView : Node2D, ICharacterView
         var scaleX = state.Dashing ? 1 + stretch : 1 + _squash - stretch;
         var scaleY = state.Dashing ? 1 - stretch : 1 - _squash + stretch;
         Scale = new Vector2(scaleX * state.Facing, scaleY);
-        Rotation = state.Hurt ? HurtTilt : state.Attacking ? 0 : Mathf.Abs(state.VelocityX) * LeanPerSpeed;
+        Rotation = state.Hurt || state.Attacking ? 0 : Mathf.Abs(state.VelocityX) * LeanPerSpeed;
         Modulate = state.CounterReady ? CounterGlow : Colors.White;
         _blink = state.Blinking ? _blink + 1 : 0;
         Visible = !state.Blinking || _blink / BlinkTicks % 2 == 0;

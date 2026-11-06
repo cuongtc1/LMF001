@@ -28,6 +28,9 @@ public partial class PlayerController : CharacterBody2D, IDamageable
     private int _comboResetTicks;
     private int _dropTicks;
     private int _landingLagTicks;
+    private int _downTicks;
+    private int _getupTicks;
+    private int _guardHitTicks;
     private int _vfxSwingId;
     private bool _onPlatform;
 
@@ -117,6 +120,14 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         _hitbox.Close();
         _stunTicks = _feel.HurtStunTicks;
         _invulnerableTicks = _feel.HurtInvulnerableTicks;
+        if (hit.Knockdown)
+        {
+            _downTicks = _feel.PlayerDownTicks;
+            _getupTicks = _feel.PlayerGetupTicks;
+            _stunTicks = _downTicks + _getupTicks;
+            _invulnerableTicks += _stunTicks;
+        }
+
         _motor.Knockback(hit.Direction * _feel.HurtKnockbackSpeed, -_feel.HurtKnockbackUp);
         _gameFeel.Hitstop(_feel.HurtHitstopTicks);
         if (Health.IsDead)
@@ -130,6 +141,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
     private void ApplyGuard(GuardResult result, in HitInfo hit)
     {
         var guard = _def.Guard;
+        _guardHitTicks = guard.HitTicks;
         _motor.Knockback(hit.Direction * guard.PushSpeed, 0);
         if (result == GuardResult.Perfect)
         {
@@ -323,6 +335,16 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         _stunTicks = Mathf.Max(0, _stunTicks - 1);
         _dropTicks = Mathf.Max(0, _dropTicks - 1);
         _landingLagTicks = Mathf.Max(0, _landingLagTicks - 1);
+        _guardHitTicks = Mathf.Max(0, _guardHitTicks - 1);
+        if (_downTicks > 0)
+        {
+            _downTicks--;
+        }
+        else
+        {
+            _getupTicks = Mathf.Max(0, _getupTicks - 1);
+        }
+
         if (_dropTicks == 0)
         {
             CollisionMask = PhysicsLayers.World | PhysicsLayers.Platform;
@@ -365,6 +387,9 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             _combo.SwingId,
             _combo.Progress,
             _guard.IsGuarding,
-            _guard.CounterReady));
+            _guard.CounterReady,
+            _guardHitTicks > 0,
+            _downTicks > 0 || Health.IsDead,
+            _getupTicks > 0));
     }
 }

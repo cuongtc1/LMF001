@@ -6,7 +6,7 @@ namespace LumiFeast.Logic.Tests;
 
 public class GuardStateTests
 {
-    private static readonly GuardDef Def = new(0.25f, 3, 5, 100, 4);
+    private static readonly GuardDef Def = new(0.25f, 3, 5, 100, 4, 10);
 
     private static GuardState Held(int ticks)
     {

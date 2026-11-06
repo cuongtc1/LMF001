@@ -13,7 +13,10 @@ public readonly record struct ViewState(
     int SwingId,
     float AttackProgress,
     bool Guarding,
-    bool CounterReady);
+    bool CounterReady,
+    bool GuardHit,
+    bool KnockedDown,
+    bool GettingUp);
 
 /// <summary>What the controller tells the visuals. The Spine view will implement this too.</summary>
 public interface ICharacterView

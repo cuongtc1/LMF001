@@ -1,85 +1,15 @@
 {
-  "start_x": 640,
-  "end_tick": 380,
+  "start_x": 1600,
+  "end_tick": 330,
   "steps": [
     {
-      "tick": 40,
-      "action": "attack_heavy",
-      "pressed": true
-    },
-    {
-      "tick": 42,
-      "action": "attack_heavy",
-      "pressed": false
-    },
-    {
-      "tick": 66,
-      "action": "attack_heavy",
-      "pressed": true
-    },
-    {
-      "tick": 68,
-      "action": "attack_heavy",
-      "pressed": false
-    },
-    {
-      "tick": 130,
-      "action": "attack_light",
-      "pressed": true
-    },
-    {
-      "tick": 132,
-      "action": "attack_light",
-      "pressed": false
-    },
-    {
       "tick": 150,
-      "action": "attack_heavy",
+      "action": "guard",
       "pressed": true
     },
     {
-      "tick": 152,
-      "action": "attack_heavy",
-      "pressed": false
-    },
-    {
-      "tick": 200,
-      "action": "jump",
-      "pressed": true
-    },
-    {
-      "tick": 206,
-      "action": "attack_light",
-      "pressed": true
-    },
-    {
-      "tick": 208,
-      "action": "attack_light",
-      "pressed": false
-    },
-    {
-      "tick": 225,
-      "action": "jump",
-      "pressed": false
-    },
-    {
-      "tick": 270,
-      "action": "jump",
-      "pressed": true
-    },
-    {
-      "tick": 280,
-      "action": "jump",
-      "pressed": false
-    },
-    {
-      "tick": 296,
-      "action": "attack_heavy",
-      "pressed": true
-    },
-    {
-      "tick": 298,
-      "action": "attack_heavy",
+      "tick": 300,
+      "action": "guard",
       "pressed": false
     }
   ]

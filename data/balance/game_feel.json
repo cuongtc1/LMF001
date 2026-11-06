@@ -13,5 +13,7 @@
   "damage_number_rise": 70,
   "damage_number_ticks": 36,
   "juggle_gravity_scale": 0.55,
-  "guard_vfx": "hit_heavy"
+  "guard_vfx": "hit_heavy",
+  "player_down_ticks": 50,
+  "player_getup_ticks": 26
 }
