@@ -39,9 +39,14 @@ public sealed record SpineViewDef(
     float MixSeconds,
     string Idle,
     string Run,
+    string Sprint,
+    string Jump,
+    string Fall,
+    string Land,
+    string Dash,
+    string Guard,
     string DefaultAttack,
-    float SprintFromSpeed,
-    float SprintTimeScale);
+    float SprintFromSpeed);
 
 /// <param name="DamageScale">Share of damage taken through a guard.</param>
 /// <param name="PerfectTicks">A hit this soon after raising the guard is a perfect guard.</param>

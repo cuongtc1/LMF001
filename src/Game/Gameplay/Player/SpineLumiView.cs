@@ -10,13 +10,14 @@ public partial class SpineLumiView : Node2D, ICharacterView
     private const float LeanPerSpeed = 0.00012f;
     private const float StretchPerFallSpeed = 0.00008f;
     private const float MaxStretch = 0.1f;
-    private const float DashStretch = 0.2f;
+    private const float DashStretch = 0.1f;
     private const float LandSquash = 0.14f;
     private const float SquashRecovery = 0.18f;
     private const float HurtTilt = -0.3f;
     private const float RunSpeedThreshold = 40;
     private const int BlinkTicks = 4;
     private const int Track = 0;
+    private const float MillisecondsPerSecond = 1000;
 
     private static readonly Color CounterGlow = new(1.5f, 1.3f, 0.6f);
 
@@ -28,6 +29,7 @@ public partial class SpineLumiView : Node2D, ICharacterView
     private int _swingId = -1;
     private float _clipSeconds;
     private bool _wasOnFloor = true;
+    private double _landingEndMs;
     private float _squash;
     private int _blink;
 
@@ -56,15 +58,37 @@ public partial class SpineLumiView : Node2D, ICharacterView
         }
 
         _swingId = -1;
-        var moving = Mathf.Abs(state.VelocityX) > RunSpeedThreshold && state.OnFloor;
-        var clip = moving || state.Dashing ? _view.Run : _view.Idle;
-        var speed = moving && Mathf.Abs(state.VelocityX) > _view.SprintFromSpeed ? _view.SprintTimeScale : 1;
+        var clip = PickClip(state);
         if (clip != _clip)
         {
-            Play(clip, true, 1);
+            Play(clip, clip != _view.Jump && clip != _view.Land, 1);
+        }
+    }
+
+    private string PickClip(in ViewState state)
+    {
+        var speed = Mathf.Abs(state.VelocityX);
+        if (state.Guarding)
+        {
+            return _view.Guard;
         }
 
-        _entry?.SetTimeScale(speed);
+        if (state.Dashing)
+        {
+            return _view.Dash;
+        }
+
+        if (!state.OnFloor)
+        {
+            return state.VelocityY < 0 ? _view.Jump : _view.Fall;
+        }
+
+        if (speed > RunSpeedThreshold)
+        {
+            return speed > _view.SprintFromSpeed ? _view.Sprint : _view.Run;
+        }
+
+        return Time.GetTicksMsec() < _landingEndMs ? _view.Land : _view.Idle;
     }
 
     private void ShowAttack(in ViewState state)
@@ -92,6 +116,7 @@ public partial class SpineLumiView : Node2D, ICharacterView
         if (state.OnFloor && !_wasOnFloor)
         {
             _squash = LandSquash;
+            _landingEndMs = Time.GetTicksMsec() + _data.FindAnimation(_view.Land).GetDuration() * MillisecondsPerSecond;
         }
 
         _wasOnFloor = state.OnFloor;

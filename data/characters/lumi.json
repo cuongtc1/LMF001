@@ -56,6 +56,11 @@
     "run": "run",
     "default_attack": "z1",
     "sprint_from_speed": 520,
-    "sprint_time_scale": 1.5
+    "sprint": "sprint",
+    "jump": "jump",
+    "fall": "fall",
+    "land": "land",
+    "dash": "dash",
+    "guard": "guard"
   }
 }
