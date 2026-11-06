@@ -16,6 +16,7 @@ public class GameDataTests
         Assert.NotNull(Get(set.FirstHeavy).NextHeavy);
         Assert.Null(Get(set.FirstAir).Next);
         Assert.True(Get(set.FirstAirHeavy).PlungeSpeed > 0);
+        Assert.True(Get(set.FirstAirHeavy).LandingLagTicks > 0);
         Assert.Equal((3f, 5f, 4f), (Get(set.First).Mana, Get(set.FirstHeavy).Mana, Get(set.FirstSprint).Mana));
     }
 

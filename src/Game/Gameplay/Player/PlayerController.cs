@@ -27,6 +27,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
     private int _respawnTicks;
     private int _comboResetTicks;
     private int _dropTicks;
+    private int _landingLagTicks;
     private int _vfxSwingId;
     private bool _onPlatform;
 
@@ -156,7 +157,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         }
 
         var input = InputSource.Read();
-        if ((input.AttackPressed || input.HeavyPressed) && _stunTicks == 0)
+        if ((input.AttackPressed || input.HeavyPressed) && _stunTicks == 0 && _landingLagTicks == 0)
         {
             _combo.PressAttack(input.HeavyPressed);
         }
@@ -181,7 +182,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
 
         var attacking = _combo.Current;
         var onFloor = IsOnFloor();
-        _guard.Step(input.GuardHeld && onFloor && attacking is null && _stunTicks == 0 && !_motor.IsDashing && !Health.IsDead);
+        _guard.Step(input.GuardHeld && onFloor && attacking is null && _stunTicks == 0 && _landingLagTicks == 0 && !_motor.IsDashing && !Health.IsDead);
         if (input.DownPressed && _onPlatform && attacking is null && _stunTicks == 0)
         {
             _dropTicks = _def.Movement.DropThroughTicks;
@@ -195,7 +196,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             input.JumpHeld,
             input.DashPressed,
             onFloor,
-            attacking is not null || _stunTicks > 0 || Health.IsDead || _guard.IsGuarding,
+            attacking is not null || _stunTicks > 0 || _landingLagTicks > 0 || Health.IsDead || _guard.IsGuarding,
             attacking is not null && !onFloor && _combo.Phase != AttackPhase.Recovery ? _def.Movement.AirAttackGravityScale : 1,
             LungeVelocity(),
             input.DownHeld,
@@ -205,8 +206,9 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         MoveAndSlide();
         _onPlatform = StandsOnPlatform();
         PushOutOfBodies();
-        if (_combo.Current is { EndsOnLanding: true } && IsOnFloor())
+        if (_combo.Current is { EndsOnLanding: true } landed && IsOnFloor())
         {
+            _landingLagTicks = landed.LandingLagTicks;
             _combo.Cancel();
             _hitbox.Close();
         }
@@ -319,6 +321,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
     {
         _stunTicks = Mathf.Max(0, _stunTicks - 1);
         _dropTicks = Mathf.Max(0, _dropTicks - 1);
+        _landingLagTicks = Mathf.Max(0, _landingLagTicks - 1);
         if (_dropTicks == 0)
         {
             CollisionMask = PhysicsLayers.World | PhysicsLayers.Platform;

@@ -10,7 +10,7 @@ public class ComboRunnerTests
     private static readonly AttackSetDef Set = new("test", "a", "b", "h", "b", "h", "h", [Attack("a", "b", "h"), Attack("b", null), Attack("h", null)]);
 
     private static AttackDef Attack(string id, string? next, string? heavy = null) =>
-        new(id, 1, 2, 2, 4, 4, next, 0, Box, 0, 0, 0, "v", "v", 0, 0, 0, 0, 0, false, heavy, 4, 0, false, 0, 0, 0);
+        new(id, 1, 2, 2, 4, 4, next, 0, Box, 0, 0, 0, "v", "v", 0, 0, 0, 0, 0, false, heavy, 4, 0, false, 0, 0, 0, 0);
 
     private static void RunOut(ComboRunner combo, ComboEntry entry)
     {

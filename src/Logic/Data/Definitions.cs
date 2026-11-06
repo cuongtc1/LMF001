@@ -83,7 +83,8 @@ public sealed record AttackDef(
     bool Knockdown,
     float Mana,
     float PlungeSpeed,
-    float Stagger)
+    float Stagger,
+    int LandingLagTicks)
 {
     public int TotalTicks => StartupTicks + ActiveTicks + RecoveryTicks;
 }

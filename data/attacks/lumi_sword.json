@@ -38,7 +38,8 @@
       "knockdown": false,
       "plunge_speed": 0,
       "mana": 3,
-      "stagger": 2
+      "stagger": 2,
+      "landing_lag_ticks": 0
     },
     {
       "id": "z2",
@@ -72,7 +73,8 @@
       "knockdown": false,
       "plunge_speed": 0,
       "mana": 3,
-      "stagger": 2
+      "stagger": 2,
+      "landing_lag_ticks": 0
     },
     {
       "id": "z3",
@@ -106,7 +108,8 @@
       "knockdown": false,
       "plunge_speed": 0,
       "mana": 3,
-      "stagger": 3
+      "stagger": 3,
+      "landing_lag_ticks": 0
     },
     {
       "id": "zx",
@@ -140,7 +143,8 @@
       "knockdown": false,
       "plunge_speed": 0,
       "mana": 5,
-      "stagger": 4
+      "stagger": 4,
+      "landing_lag_ticks": 0
     },
     {
       "id": "x1",
@@ -174,7 +178,8 @@
       "knockdown": false,
       "plunge_speed": 0,
       "mana": 5,
-      "stagger": 5
+      "stagger": 5,
+      "landing_lag_ticks": 0
     },
     {
       "id": "xx",
@@ -208,7 +213,8 @@
       "knockdown": true,
       "plunge_speed": 0,
       "mana": 5,
-      "stagger": 6
+      "stagger": 6,
+      "landing_lag_ticks": 0
     },
     {
       "id": "s1",
@@ -242,7 +248,8 @@
       "knockdown": false,
       "plunge_speed": 0,
       "mana": 4,
-      "stagger": 3
+      "stagger": 3,
+      "landing_lag_ticks": 0
     },
     {
       "id": "a1",
@@ -276,11 +283,12 @@
       "knockdown": false,
       "plunge_speed": 0,
       "mana": 3,
-      "stagger": 2
+      "stagger": 2,
+      "landing_lag_ticks": 0
     },
     {
       "id": "ax",
-      "damage_multiplier": 1.8,
+      "damage_multiplier": 1.4,
       "startup_ticks": 6,
       "active_ticks": 26,
       "recovery_ticks": 6,
@@ -310,7 +318,8 @@
       "knockdown": true,
       "plunge_speed": 1800,
       "mana": 5,
-      "stagger": 5
+      "stagger": 5,
+      "landing_lag_ticks": 28
     },
     {
       "id": "counter",
@@ -344,7 +353,8 @@
       "knockdown": false,
       "plunge_speed": 0,
       "mana": 6,
-      "stagger": 8
+      "stagger": 8,
+      "landing_lag_ticks": 0
     }
   ],
   "first_counter": "counter"
