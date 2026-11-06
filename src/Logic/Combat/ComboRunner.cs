@@ -8,6 +8,7 @@ public enum ComboEntry
     Ground,
     Air,
     Sprint,
+    Counter,
 }
 
 public enum AttackPhase
@@ -111,6 +112,7 @@ public sealed class ComboRunner(AttackSetDef set, int bufferTicks)
 
     private string FirstAttack(ComboEntry entry) => (entry, _heavyBuffered) switch
     {
+        (ComboEntry.Counter, _) => set.FirstCounter,
         (ComboEntry.Air, false) => set.FirstAir,
         (ComboEntry.Air, true) => set.FirstAirHeavy,
         (_, true) => set.FirstHeavy,

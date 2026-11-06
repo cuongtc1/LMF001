@@ -28,7 +28,10 @@
       0.33
     ],
     "down_ticks": 70,
-    "getup_armor_ticks": 90
+    "getup_armor_ticks": 90,
+    "stagger_max": 40,
+    "stagger_break_ticks": 150,
+    "stagger_damage_scale": 1.5
   },
   "attack": {
     "damage_multiplier": 1.0,

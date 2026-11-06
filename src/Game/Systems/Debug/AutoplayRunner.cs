@@ -82,7 +82,8 @@ public partial class AutoplayRunner : Node, IPlayerInput
         _pressedNow.Contains(InputActions.AttackLight),
         _held.Contains(InputActions.MoveDown),
         _pressedNow.Contains(InputActions.AttackHeavy),
-        _pressedNow.Contains(InputActions.MoveDown));
+        _pressedNow.Contains(InputActions.MoveDown),
+        _held.Contains(InputActions.Guard));
 
     private readonly record struct Step(int Tick, string Action, bool Pressed);
 }

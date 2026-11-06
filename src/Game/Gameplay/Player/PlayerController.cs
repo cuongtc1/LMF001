@@ -18,6 +18,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
     private GameFeel _gameFeel = null!;
     private PlayerMotor _motor = null!;
     private ComboRunner _combo = null!;
+    private GuardState _guard = null!;
     private ICharacterView _view = null!;
     private AttackHitbox _hitbox = null!;
     private Vector2 _spawn;
@@ -54,6 +55,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         var speed = StatScaler.ForSpeed(def.Stats.Speed, GameServices.Data.Scaling.Speed);
         _motor = new PlayerMotor(def.Movement) { Tempo = speed.Move };
         _combo = new ComboRunner(attacks, def.Combat.AttackBufferTicks) { AttackSpeed = speed.Attack };
+        _guard = new GuardState(def.Guard);
         Health = new Health(def.Stats.MaxHp);
         GlobalPosition = spawn;
         CollisionLayer = 0;
@@ -93,9 +95,16 @@ public partial class PlayerController : CharacterBody2D, IDamageable
 
     public bool TakeHit(in HitInfo hit)
     {
-        if (GameServices.GodMode || _motor.IsInvulnerable || _invulnerableTicks > 0 || Health.IsDead)
+        if (GameServices.GodMode || _invulnerableTicks > 0 || Health.IsDead)
         {
             return false;
+        }
+
+        var guarded = _guard.Resolve(hit.Direction, _motor.Facing);
+        if (guarded != GuardResult.None)
+        {
+            ApplyGuard(guarded, hit);
+            return true;
         }
 
         var damage = DamageCalculator.Compute(hit.Attack, hit.Multiplier, _def.Stats.Defense);
@@ -114,6 +123,24 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         }
 
         return true;
+    }
+
+    private void ApplyGuard(GuardResult result, in HitInfo hit)
+    {
+        var guard = _def.Guard;
+        _motor.Knockback(hit.Direction * guard.PushSpeed, 0);
+        if (result == GuardResult.Perfect)
+        {
+            GameLog.Info(MessageKeys.CombatGuardPerfect);
+            _gameFeel.PlayEffect(_feel.GuardVfx, GlobalPosition + new Vector2(_motor.Facing * _def.Body.Width, -_def.Body.Height / 2), _motor.Facing);
+            _gameFeel.Hitstop(guard.PerfectHitstopTicks);
+            return;
+        }
+
+        var damage = Mathf.Max(1, Mathf.RoundToInt(DamageCalculator.Compute(hit.Attack, hit.Multiplier, _def.Stats.Defense) * guard.DamageScale));
+        Health.Damage(damage);
+        GameLog.Info(MessageKeys.CombatGuardBlock, damage);
+        _gameFeel.ShowDamage(GlobalPosition + new Vector2(0, -_def.Body.Height), damage, Colors.LightGray);
     }
 
     public override void _PhysicsProcess(double delta)
@@ -140,12 +167,13 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             _motor.Face(Mathf.Sign(input.MoveX));
         }
 
-        if (_combo.JustStarted && _motor.IsDashing)
+        if (_combo.JustStarted)
         {
-            _motor.StopDash();
+            _motor.EndRun();
+            _guard.ClearCounter();
         }
 
-        if (_combo.CanCancel && _motor.HasQueuedAction)
+        if (_combo.CanCancel && (_motor.HasQueuedAction || input.GuardHeld))
         {
             _combo.Cancel();
             _hitbox.Close();
@@ -153,6 +181,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
 
         var attacking = _combo.Current;
         var onFloor = IsOnFloor();
+        _guard.Step(input.GuardHeld && onFloor && attacking is null && _stunTicks == 0 && !_motor.IsDashing && !Health.IsDead);
         if (input.DownPressed && _onPlatform && attacking is null && _stunTicks == 0)
         {
             _dropTicks = _def.Movement.DropThroughTicks;
@@ -166,7 +195,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             input.JumpHeld,
             input.DashPressed,
             onFloor,
-            attacking is not null || _stunTicks > 0 || Health.IsDead,
+            attacking is not null || _stunTicks > 0 || Health.IsDead || _guard.IsGuarding,
             attacking is not null && !onFloor && _combo.Phase != AttackPhase.Recovery ? _def.Movement.AirAttackGravityScale : 1,
             LungeVelocity(),
             input.DownHeld,
@@ -206,6 +235,11 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         if (!IsOnFloor())
         {
             return ComboEntry.Air;
+        }
+
+        if (_guard.CounterReady)
+        {
+            return ComboEntry.Counter;
         }
 
         return _motor.IsSprinting || _motor.IsDashing ? ComboEntry.Sprint : ComboEntry.Ground;
@@ -259,7 +293,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             return;
         }
 
-        var hit = new HitInfo(_def.Stats.Attack, attack.DamageMultiplier, _motor.Facing, attack.KnockbackSpeed, attack.LaunchSpeed, _def.Id, attack.StunTicks, attack.Knockdown);
+        var hit = new HitInfo(_def.Stats.Attack, attack.DamageMultiplier, _motor.Facing, attack.KnockbackSpeed, attack.LaunchSpeed, _def.Id, attack.StunTicks, attack.Knockdown, attack.Stagger);
         var landed = _hitbox.Sweep(_combo.SwingId, attack.Hitbox, _motor.Facing, hit);
         foreach (var target in landed)
         {
@@ -321,10 +355,12 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             _motor.VelocityY,
             IsOnFloor(),
             _motor.IsDashing,
-            _invulnerableTicks > 0 || _motor.IsInvulnerable,
+            _invulnerableTicks > 0,
             _stunTicks > 0 || Health.IsDead,
             attack is not null,
-            swing));
+            swing,
+            _guard.IsGuarding,
+            _guard.CounterReady));
     }
 
     /// <summary>The sword crosses its arc during the active ticks and holds there in recovery.</summary>

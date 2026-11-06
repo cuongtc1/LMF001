@@ -1,0 +1,26 @@
+{
+  "start_x": 1600,
+  "end_tick": 120,
+  "steps": [
+    {
+      "tick": 31,
+      "action": "guard",
+      "pressed": true
+    },
+    {
+      "tick": 42,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 44,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 46,
+      "action": "guard",
+      "pressed": false
+    }
+  ]
+}

@@ -12,6 +12,7 @@ public enum MonsterState
     Recover,
     Stunned,
     Down,
+    Dizzy,
 }
 
 public static class MonsterBehaviors
@@ -33,6 +34,7 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats)
     private int _hitsTaken;
     private int _hitResetTimer;
     private int _nextHpMark;
+    private float _stagger;
 
     public MonsterState State { get; private set; } = MonsterState.Idle;
 
@@ -53,7 +55,31 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats)
     public bool IsArmored => _stoicTimer > 0 || (ai.SuperArmor && State is MonsterState.Windup or MonsterState.Attack);
 
     /// <summary>Hits can push, launch or stun it right now.</summary>
-    public bool CanBeMoved => !IsArmored && State != MonsterState.Down;
+    public bool CanBeMoved => !IsArmored && State is not (MonsterState.Down or MonsterState.Dizzy);
+
+    public float StaggerRatio => ai.StaggerMax > 0 ? _stagger / ai.StaggerMax : 0;
+
+    public float DamageTakenScale => State == MonsterState.Dizzy ? ai.StaggerDamageScale : 1;
+
+    /// <summary>Fills the stagger bar, even through armor. A full bar breaks armor and makes it dizzy.</summary>
+    public bool AddStagger(float amount)
+    {
+        if (ai.StaggerMax <= 0 || State == MonsterState.Dizzy)
+        {
+            return false;
+        }
+
+        _stagger += amount;
+        if (_stagger < ai.StaggerMax)
+        {
+            return false;
+        }
+
+        _stagger = 0;
+        _stoicTimer = 0;
+        Set(MonsterState.Dizzy, ai.StaggerBreakTicks);
+        return true;
+    }
 
     /// <summary>Armor from the hit count, an HP mark, or standing up. Counts only hits outside armor.</summary>
     public bool RegisterHit(float hpFraction)
@@ -142,6 +168,9 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats)
                 State = MonsterState.Idle;
                 break;
             case MonsterState.Stunned when _timer == 0:
+                State = MonsterState.Idle;
+                break;
+            case MonsterState.Dizzy when _timer == 0:
                 State = MonsterState.Idle;
                 break;
             case MonsterState.Down when _timer == 0:

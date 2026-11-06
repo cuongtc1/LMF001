@@ -17,6 +17,8 @@ public partial class PlaceholderLumiView : Node2D, ICharacterView
     private const int BlinkTicks = 4;
     private const float GripToCenter = 0.36f;
 
+    private static readonly Color CounterGlow = new(1.5f, 1.3f, 0.6f);
+
     private Sprite2D _body = null!;
     private Node2D _swordPivot = null!;
     private PlaceholderViewDef _view = null!;
@@ -68,10 +70,11 @@ public partial class PlaceholderLumiView : Node2D, ICharacterView
         Scale = new Vector2(scaleX * state.Facing, scaleY);
         Rotation = state.Hurt ? HurtTilt : state.VelocityX * state.Facing * LeanPerSpeed * state.Facing;
 
-        var target = state.Attacking ? state.SwingDegrees : _view.SwordRestDegrees;
+        var target = state.Attacking ? state.SwingDegrees : state.Guarding ? _view.SwordGuardDegrees : _view.SwordRestDegrees;
         _swordAngle = state.Attacking ? target : Mathf.Lerp(_swordAngle, target, 0.25f);
         _swordPivot.RotationDegrees = _swordAngle;
 
+        Modulate = state.CounterReady ? CounterGlow : Colors.White;
         _blink = state.Blinking ? _blink + 1 : 0;
         Visible = !state.Blinking || _blink / BlinkTicks % 2 == 0;
     }

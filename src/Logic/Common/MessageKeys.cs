@@ -17,6 +17,9 @@ public static class MessageKeys
     public const string CombatMonsterHit = "combat.monster_hit";
     public const string CombatMonsterHealed = "combat.monster_healed";
     public const string CombatStoic = "combat.stoic";
+    public const string CombatDizzy = "combat.dizzy";
+    public const string CombatGuardBlock = "combat.guard_block";
+    public const string CombatGuardPerfect = "combat.guard_perfect";
     public const string AutoplayStarted = "debug.autoplay_started";
     public const string AutoplayFinished = "debug.autoplay_finished";
     public const string DebugTitle = "debug.title";
@@ -39,7 +42,7 @@ public static class MessageKeys
     [
         DataFileMissing, DataFileInvalid, DataUnknownId, DataDuplicateId, DataBadValue, DataLoaded, DataReloaded,
         GameBooted, StageLoaded, AssetMissing, CombatPlayerHit, CombatMonsterHit, CombatMonsterHealed,
-        AutoplayStarted, AutoplayFinished, DebugTitle, DebugDifficulty, DebugTier, DebugGodMode, DebugAirJump, DebugHeal, DebugArena, CombatStoic, HudWave, HudClear, ArenaWave, ArenaCleared,
+        AutoplayStarted, AutoplayFinished, DebugTitle, DebugDifficulty, DebugTier, DebugGodMode, DebugAirJump, DebugHeal, DebugArena, CombatStoic, CombatDizzy, CombatGuardBlock, CombatGuardPerfect, HudWave, HudClear, ArenaWave, ArenaCleared,
         DebugRespawn, DebugReload, DebugHelp, HudCombo,
     ];
 }

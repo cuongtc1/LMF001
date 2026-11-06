@@ -83,12 +83,11 @@ public class PlayerMotorTests
     }
 
     [Fact]
-    public void DashIsInvulnerableAndHasCooldown()
+    public void DashHasACooldown()
     {
         var motor = NewMotor();
         motor.Step(Ground(dash: true));
         Assert.True(motor.IsDashing);
-        Assert.True(motor.IsInvulnerable);
         Assert.False(new PlayerMotorProbe(motor).CanDashAgain());
     }
 
@@ -219,14 +218,13 @@ public class PlayerMotorTests
     }
 
     [Fact]
-    public void AttackDuringADashKeepsTheRun()
+    public void AttackEndsTheDashAndTheRun()
     {
-        var motor = NewMotor();
+        var motor = Dashed();
+        motor.EndRun();
+        Assert.False(motor.IsSprinting);
         motor.Step(Ground(1));
-        motor.Step(Ground(1, dash: true));
-        motor.StopDash();
-        Assert.False(motor.IsDashing);
-        Assert.True(motor.IsSprinting);
+        Assert.False(motor.IsSprinting);
     }
 
     [Fact]

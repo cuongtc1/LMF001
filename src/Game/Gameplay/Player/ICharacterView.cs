@@ -9,7 +9,9 @@ public readonly record struct ViewState(
     bool Blinking,
     bool Hurt,
     bool Attacking,
-    float SwingDegrees);
+    float SwingDegrees,
+    bool Guarding,
+    bool CounterReady);
 
 /// <summary>What the controller tells the visuals. The Spine view will implement this too.</summary>
 public interface ICharacterView

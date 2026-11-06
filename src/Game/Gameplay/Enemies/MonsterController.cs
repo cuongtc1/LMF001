@@ -21,9 +21,13 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
     private const float BobPerTick = 0.09f;
     private const float AuraScale = 1.12f;
     private const float DownSinkShare = 0.25f;
+    private const float StaggerBarWidth = 200;
+    private const float StaggerBarHeight = 10;
+    private const float DizzyWobble = 0.12f;
     private const string AuraShaderCode = "shader_type canvas_item; void fragment() { COLOR.rgb = vec3(1.0, 0.12, 0.1); }";
 
     private static readonly Color TelegraphColor = new(1.6f, 0.55f, 0.45f);
+    private static readonly Color DizzyColor = new(1.4f, 1.3f, 0.5f);
 
     private MonsterDef _def = null!;
     private MonsterStats _stats = null!;
@@ -35,6 +39,7 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
     private AttackHitbox _hitbox = null!;
     private Sprite2D _sprite = null!;
     private Sprite2D _aura = null!;
+    private ColorRect? _staggerBar;
     private Hurtbox _hurtbox = null!;
     private Texture2D _idle = null!;
     private Texture2D _windup = null!;
@@ -93,6 +98,17 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         };
         _sprite.AddChild(_aura);
 
+        if (def.Ai.StaggerMax > 0)
+        {
+            _staggerBar = new ColorRect
+            {
+                Color = Colors.Gold,
+                Position = new Vector2(-StaggerBarWidth / 2, -def.Art.Height - 24),
+                Size = new Vector2(0, StaggerBarHeight),
+            };
+            AddChild(_staggerBar);
+        }
+
         _hurtbox = new Hurtbox();
         AddChild(_hurtbox);
         _hurtbox.Setup(this, size, PhysicsLayers.EnemyHurtbox);
@@ -109,7 +125,7 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
             return false;
         }
 
-        var damage = DamageCalculator.Compute(hit.Attack, hit.Multiplier, _stats.Defense);
+        var damage = Mathf.RoundToInt(DamageCalculator.Compute(hit.Attack, hit.Multiplier, _stats.Defense) * _brain.DamageTakenScale);
         if (!_def.Immortal)
         {
             _health.Damage(damage);
@@ -122,6 +138,11 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         }
 
         _gameFeel.ShowDamage(GlobalPosition + new Vector2(0, -_def.Art.Height), damage, Colors.White);
+        if (_brain.AddStagger(hit.Stagger))
+        {
+            GameLog.Info(MessageKeys.CombatDizzy, _def.Id);
+        }
+
         _flashTicks = 6;
         if (_brain.CanBeMoved)
         {
@@ -200,16 +221,23 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
     {
         _flashTicks = Mathf.Max(0, _flashTicks - 1);
         var telegraph = _brain.State == MonsterState.Windup;
-        _sprite.Modulate = _flashTicks > 0 ? Colors.White * FlashStrength : telegraph ? TelegraphColor : Colors.White;
+        var dizzy = _brain.State == MonsterState.Dizzy;
+        _sprite.Modulate = _flashTicks > 0 ? Colors.White * FlashStrength : dizzy ? DizzyColor : telegraph ? TelegraphColor : Colors.White;
+        _age++;
+        if (_staggerBar is not null)
+        {
+            _staggerBar.Size = new Vector2(StaggerBarWidth * _brain.StaggerRatio, StaggerBarHeight);
+        }
+
         if (_flying)
         {
-            _sprite.Position = new Vector2(0, -_def.Art.Height / 2 + Mathf.Sin(++_age * BobPerTick) * BobPixels);
+            _sprite.Position = new Vector2(0, -_def.Art.Height / 2 + Mathf.Sin(_age * BobPerTick) * BobPixels);
         }
 
         _sprite.Texture = _brain.State switch
         {
             MonsterState.Windup => _windup,
-            MonsterState.Stunned or MonsterState.Down => _hit,
+            MonsterState.Stunned or MonsterState.Down or MonsterState.Dizzy => _hit,
             _ => _idle,
         };
 
@@ -219,7 +247,7 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         var textureScale = _def.Art.Height / _sprite.Texture.GetHeight();
         _sprite.Scale = new Vector2(textureScale * flip * (1 + squash), textureScale * (1 - squash));
         var down = _brain.State == MonsterState.Down;
-        _sprite.Rotation = down ? Mathf.Pi / 2 * flip : 0;
+        _sprite.Rotation = down ? Mathf.Pi / 2 * flip : dizzy ? Mathf.Sin(_age * BobPerTick * 2) * DizzyWobble : 0;
         if (!_flying)
         {
             _sprite.Position = new Vector2(0, -_def.Art.Height * (down ? DownSinkShare : 0.5f));

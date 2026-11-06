@@ -23,6 +23,7 @@ public static class GameDataValidator
         {
             Require(character.Stats.MaxHp > 0 && character.Stats.Attack > 0 && character.Stats.Speed > 0, character.Id);
             Require(character.Movement.RunSpeed > 0 && character.Movement.Gravity > 0, character.Id);
+            Require(character.Guard.DamageScale is >= 0 and <= 1, character.Id);
             data.AttackSet(character.Combat.AttackSet);
         }
 
@@ -33,6 +34,7 @@ public static class GameDataValidator
             Require(ids.Contains(set.FirstAir), $"{set.Id}.first_air");
             Require(ids.Contains(set.FirstAirHeavy), $"{set.Id}.first_air_heavy");
             Require(ids.Contains(set.FirstHeavy), $"{set.Id}.first_heavy");
+            Require(ids.Contains(set.FirstCounter), $"{set.Id}.first_counter");
             Require(ids.Contains(set.FirstSprint), $"{set.Id}.first_sprint");
             foreach (var attack in set.Attacks)
             {

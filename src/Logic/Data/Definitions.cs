@@ -19,7 +19,6 @@ public sealed record MovementDef(
     float DashSpeed,
     int DashTicks,
     int DashCooldownTicks,
-    int DashInvulnerableTicks,
     int AirDashes,
     float AirAttackGravityScale,
     float SprintSpeed,
@@ -38,7 +37,13 @@ public sealed record PlaceholderViewDef(
     float SwordLength,
     float HandX,
     float HandY,
-    float SwordRestDegrees);
+    float SwordRestDegrees,
+    float SwordGuardDegrees);
+
+/// <param name="DamageScale">Share of damage taken through a guard.</param>
+/// <param name="PerfectTicks">A hit this soon after raising the guard is a perfect guard.</param>
+/// <param name="CounterTicks">Time to press Z after a perfect guard.</param>
+public sealed record GuardDef(float DamageScale, int PerfectTicks, int CounterTicks, float PushSpeed, int PerfectHitstopTicks);
 
 public sealed record BodyDef(float Width, float Height);
 
@@ -47,6 +52,7 @@ public sealed record CharacterDef(
     CharacterStatsDef Stats,
     MovementDef Movement,
     CharacterCombatDef Combat,
+    GuardDef Guard,
     BodyDef Body,
     PlaceholderViewDef PlaceholderView);
 
@@ -76,7 +82,8 @@ public sealed record AttackDef(
     int StunTicks,
     bool Knockdown,
     float Mana,
-    float PlungeSpeed)
+    float PlungeSpeed,
+    float Stagger)
 {
     public int TotalTicks => StartupTicks + ActiveTicks + RecoveryTicks;
 }
@@ -86,12 +93,14 @@ public sealed record AttackDef(
 /// <param name="FirstAirHeavy">X in the air.</param>
 /// <param name="FirstSprint">Z during a dash or the run after it.</param>
 /// <param name="FirstHeavy">X on the ground.</param>
-public sealed record AttackSetDef(string Id, string First, string FirstAir, string FirstAirHeavy, string FirstSprint, string FirstHeavy, IReadOnlyList<AttackDef> Attacks);
+/// <param name="FirstCounter">Z right after a perfect guard.</param>
+public sealed record AttackSetDef(string Id, string First, string FirstAir, string FirstAirHeavy, string FirstSprint, string FirstHeavy, string FirstCounter, IReadOnlyList<AttackDef> Attacks);
 
 public sealed record MonsterStatsDef(int MaxHp, int Attack, float Defense, float Speed);
 
 /// <param name="SuperArmor">Armored during its own windup and strike.</param>
 /// <param name="StoicThreshold">Hits before it armors up and fights back; 0 means never.</param>
+/// <param name="StaggerMax">Stagger that makes it dizzy; 0 means it has no stagger bar.</param>
 /// <param name="StoicHpMarks">HP fractions, high to low, that also trigger armor once each.</param>
 public sealed record MonsterAiDef(
     string Behavior,
@@ -112,7 +121,10 @@ public sealed record MonsterAiDef(
     int StoicResetTicks,
     IReadOnlyList<float> StoicHpMarks,
     int DownTicks,
-    int GetupArmorTicks);
+    int GetupArmorTicks,
+    float StaggerMax,
+    int StaggerBreakTicks,
+    float StaggerDamageScale);
 
 public sealed record MonsterAttackDef(float DamageMultiplier, RectDef Hitbox, float KnockbackSpeed, int HitstopTicks, string HitVfx);
 
@@ -151,7 +163,8 @@ public sealed record GameFeelDef(
     int ComboResetTicks,
     float DamageNumberRise,
     int DamageNumberTicks,
-    float JuggleGravityScale);
+    float JuggleGravityScale,
+    string GuardVfx);
 
 public sealed record VfxDef(string Id, int Frames, int TicksPerFrame, float Scale);
 

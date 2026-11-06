@@ -37,7 +37,8 @@
       "stun_ticks": 40,
       "knockdown": false,
       "plunge_speed": 0,
-      "mana": 3
+      "mana": 3,
+      "stagger": 2
     },
     {
       "id": "z2",
@@ -70,7 +71,8 @@
       "stun_ticks": 40,
       "knockdown": false,
       "plunge_speed": 0,
-      "mana": 3
+      "mana": 3,
+      "stagger": 2
     },
     {
       "id": "z3",
@@ -103,7 +105,8 @@
       "stun_ticks": 50,
       "knockdown": false,
       "plunge_speed": 0,
-      "mana": 3
+      "mana": 3,
+      "stagger": 3
     },
     {
       "id": "zx",
@@ -136,7 +139,8 @@
       "stun_ticks": 70,
       "knockdown": false,
       "plunge_speed": 0,
-      "mana": 5
+      "mana": 5,
+      "stagger": 4
     },
     {
       "id": "x1",
@@ -169,7 +173,8 @@
       "stun_ticks": 48,
       "knockdown": false,
       "plunge_speed": 0,
-      "mana": 5
+      "mana": 5,
+      "stagger": 5
     },
     {
       "id": "xx",
@@ -202,7 +207,8 @@
       "stun_ticks": 40,
       "knockdown": true,
       "plunge_speed": 0,
-      "mana": 5
+      "mana": 5,
+      "stagger": 6
     },
     {
       "id": "s1",
@@ -211,7 +217,7 @@
       "active_ticks": 6,
       "recovery_ticks": 16,
       "cancel_from_tick": 13,
-      "next": null,
+      "next": "z1",
       "lunge_pixels": 150,
       "hitbox": {
         "x": 10,
@@ -235,7 +241,8 @@
       "stun_ticks": 40,
       "knockdown": false,
       "plunge_speed": 0,
-      "mana": 4
+      "mana": 4,
+      "stagger": 3
     },
     {
       "id": "a1",
@@ -268,7 +275,8 @@
       "stun_ticks": 40,
       "knockdown": false,
       "plunge_speed": 0,
-      "mana": 3
+      "mana": 3,
+      "stagger": 2
     },
     {
       "id": "ax",
@@ -301,7 +309,43 @@
       "stun_ticks": 50,
       "knockdown": true,
       "plunge_speed": 1800,
-      "mana": 5
+      "mana": 5,
+      "stagger": 5
+    },
+    {
+      "id": "counter",
+      "damage_multiplier": 2.0,
+      "startup_ticks": 4,
+      "active_ticks": 6,
+      "recovery_ticks": 16,
+      "cancel_from_tick": 10,
+      "next": "z1",
+      "lunge_pixels": 80,
+      "hitbox": {
+        "x": -40,
+        "y": -210,
+        "width": 380,
+        "height": 220
+      },
+      "hitstop_ticks": 7,
+      "shake_pixels": 6,
+      "knockback_speed": 300,
+      "vfx": "slash_horizontal",
+      "hit_vfx": "hit_heavy",
+      "vfx_x": 140,
+      "vfx_y": -105,
+      "swing_from_degrees": -60,
+      "swing_to_degrees": 95,
+      "launch_speed": 0,
+      "ends_on_landing": false,
+      "next_heavy": null,
+      "chain_from_tick": 10,
+      "stun_ticks": 60,
+      "knockdown": false,
+      "plunge_speed": 0,
+      "mana": 6,
+      "stagger": 8
     }
-  ]
+  ],
+  "first_counter": "counter"
 }

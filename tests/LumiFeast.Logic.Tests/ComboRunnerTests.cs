@@ -7,10 +7,10 @@ namespace LumiFeast.Logic.Tests;
 public class ComboRunnerTests
 {
     private static readonly RectDef Box = new(0, 0, 1, 1);
-    private static readonly AttackSetDef Set = new("test", "a", "b", "h", "b", "h", [Attack("a", "b", "h"), Attack("b", null), Attack("h", null)]);
+    private static readonly AttackSetDef Set = new("test", "a", "b", "h", "b", "h", "h", [Attack("a", "b", "h"), Attack("b", null), Attack("h", null)]);
 
     private static AttackDef Attack(string id, string? next, string? heavy = null) =>
-        new(id, 1, 2, 2, 4, 4, next, 0, Box, 0, 0, 0, "v", "v", 0, 0, 0, 0, 0, false, heavy, 4, 0, false, 0, 0);
+        new(id, 1, 2, 2, 4, 4, next, 0, Box, 0, 0, 0, "v", "v", 0, 0, 0, 0, 0, false, heavy, 4, 0, false, 0, 0, 0);
 
     private static void RunOut(ComboRunner combo, ComboEntry entry)
     {
@@ -56,7 +56,7 @@ public class ComboRunnerTests
     public void CancelCanComeBeforeTheChain()
     {
         var late = Attack("a", "b") with { CancelFromTick = 1, ChainFromTick = 6 };
-        var combo = new ComboRunner(new AttackSetDef("t", "a", "a", "a", "a", "a", [late, Attack("b", null)]), 8);
+        var combo = new ComboRunner(new AttackSetDef("t", "a", "a", "a", "a", "a", "a", [late, Attack("b", null)]), 8);
         combo.PressAttack();
         combo.Advance();
         combo.PressAttack();
@@ -77,6 +77,22 @@ public class ComboRunnerTests
         combo.PressAttack();
         combo.Advance(ComboEntry.Air);
         Assert.False(combo.IsAttacking);
+    }
+
+    [Fact]
+    public void CounterEntryStartsTheCounter()
+    {
+        var combo = new ComboRunner(Set, 8);
+        combo.PressAttack();
+        combo.Advance(ComboEntry.Counter);
+        Assert.Equal("h", combo.Current?.Id);
+    }
+
+    [Fact]
+    public void ZAfterDashZKeepsTheZComboGoing()
+    {
+        var set = TestData.Game.AttackSet("lumi_sword");
+        Assert.Equal(set.First, set.Attacks.First(attack => attack.Id == set.FirstSprint).Next);
     }
 
     [Fact]

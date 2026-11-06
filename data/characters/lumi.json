@@ -21,7 +21,6 @@
     "dash_speed": 1150,
     "dash_ticks": 12,
     "dash_cooldown_ticks": 30,
-    "dash_invulnerable_ticks": 14,
     "air_dashes": 1,
     "air_attack_gravity_scale": 0.3,
     "sprint_speed": 720,
@@ -47,6 +46,14 @@
     "sword_length": 250,
     "hand_x": 62,
     "hand_y": -96,
-    "sword_rest_degrees": 150
+    "sword_rest_degrees": 150,
+    "sword_guard_degrees": 35
+  },
+  "guard": {
+    "damage_scale": 0.25,
+    "perfect_ticks": 10,
+    "counter_ticks": 36,
+    "push_speed": 260,
+    "perfect_hitstop_ticks": 8
   }
 }

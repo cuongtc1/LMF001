@@ -1,0 +1,11 @@
+{
+  "start_x": 1600,
+  "end_tick": 420,
+  "steps": [
+    {
+      "tick": 100,
+      "action": "guard",
+      "pressed": true
+    }
+  ]
+}

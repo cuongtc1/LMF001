@@ -25,7 +25,6 @@ public sealed class PlayerMotor(MovementDef move)
     private bool _dashQueued;
     private int _dashTicks;
     private int _dashCooldown;
-    private int _dashInvulnerable;
     private int _airDashesLeft = move.AirDashes;
     private int _airJumpsLeft = move.AirJumps;
     private int _runDirection;
@@ -41,8 +40,6 @@ public sealed class PlayerMotor(MovementDef move)
 
     /// <summary>The fast run after a dash; it lasts while the same direction is held.</summary>
     public bool IsSprinting { get; private set; }
-
-    public bool IsInvulnerable => _dashInvulnerable > 0;
 
     /// <summary>The double jump is a story reward, so it starts locked.</summary>
     public bool AirJumpUnlocked { get; set; }
@@ -62,11 +59,11 @@ public sealed class PlayerMotor(MovementDef move)
         _dashTicks = 0;
     }
 
-    /// <summary>An attack during a dash ends it early and keeps the run.</summary>
-    public void StopDash()
+    /// <summary>An attack ends the dash and the run; Lumi walks again afterwards.</summary>
+    public void EndRun()
     {
         _dashTicks = 0;
-        StartRun();
+        IsSprinting = false;
     }
 
     public void Step(in MotorInput input)
@@ -136,7 +133,6 @@ public sealed class PlayerMotor(MovementDef move)
         _jumpBuffer = Math.Max(0, _jumpBuffer - 1);
         _dashTicks = Math.Max(0, _dashTicks - 1);
         _dashCooldown = Math.Max(0, _dashCooldown - 1);
-        _dashInvulnerable = Math.Max(0, _dashInvulnerable - 1);
     }
 
     private void TryStartDash(in MotorInput input)
@@ -159,7 +155,6 @@ public sealed class PlayerMotor(MovementDef move)
 
         _dashTicks = move.DashTicks;
         _dashCooldown = move.DashCooldownTicks;
-        _dashInvulnerable = move.DashInvulnerableTicks;
     }
 
     private void TryJump(in MotorInput input)

@@ -7,8 +7,8 @@ namespace LumiFeast.Logic.Tests;
 
 public class MonsterBrainTests
 {
-    private static MonsterAiDef Ai(string behavior = MonsterBehaviors.Chaser, float hop = 0, bool armor = false, int threshold = 0, float[]? marks = null) =>
-        new(behavior, 500, 100, 10, 5, 10, 20, 1, 300, hop, 30, 200, armor, threshold, 100, 50, marks ?? [], 40, 30);
+    private static MonsterAiDef Ai(string behavior = MonsterBehaviors.Chaser, float hop = 0, bool armor = false, int threshold = 0, float[]? marks = null, float stagger = 0) =>
+        new(behavior, 500, 100, 10, 5, 10, 20, 1, 300, hop, 30, 200, armor, threshold, 100, 50, marks ?? [], 40, 30, stagger, 60, 1.5f);
 
     private static readonly MonsterStats Stats = new(100, 10, 0, 200, 1);
 
@@ -193,6 +193,40 @@ public class MonsterBrainTests
         Assert.Equal(MonsterState.Stunned, brain.State);
         brain.Step(900, true);
         Assert.Equal(MonsterState.Idle, brain.State);
+    }
+
+    [Fact]
+    public void FullStaggerBarBreaksArmorAndMakesItDizzy()
+    {
+        var brain = new MonsterBrain(Ai(threshold: 1, stagger: 10), Stats);
+        brain.RegisterHit(0.9f);
+        Assert.False(brain.AddStagger(6));
+        Assert.True(brain.AddStagger(6));
+        Assert.Equal(MonsterState.Dizzy, brain.State);
+        Assert.False(brain.IsArmored);
+        Assert.Equal(1.5f, brain.DamageTakenScale);
+    }
+
+    [Fact]
+    public void DizzyEndsAndTheBarStartsEmpty()
+    {
+        var brain = new MonsterBrain(Ai(stagger: 10), Stats);
+        brain.AddStagger(10);
+        brain.Stun(100);
+        Assert.Equal(MonsterState.Dizzy, brain.State);
+        for (var i = 0; i < 61; i++)
+        {
+            brain.Step(900, true);
+        }
+
+        Assert.Equal(MonsterState.Idle, brain.State);
+        Assert.Equal(0, brain.StaggerRatio);
+    }
+
+    [Fact]
+    public void MonstersWithoutABarNeverGetDizzy()
+    {
+        Assert.False(new MonsterBrain(Ai(), Stats).AddStagger(1000));
     }
 
     [Fact]
