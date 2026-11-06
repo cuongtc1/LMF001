@@ -39,21 +39,23 @@
     "width": 70,
     "height": 200
   },
-  "placeholder_view": {
-    "sprite": "assets/characters/lumi/placeholder/lumi.png",
-    "height": 240,
-    "sword_sprite": "assets/characters/lumi/placeholder/sword.png",
-    "sword_length": 250,
-    "hand_x": 62,
-    "hand_y": -96,
-    "sword_rest_degrees": 150,
-    "sword_guard_degrees": 35
-  },
   "guard": {
     "damage_scale": 0.25,
     "perfect_ticks": 10,
     "counter_ticks": 36,
     "push_speed": 260,
     "perfect_hitstop_ticks": 8
+  },
+  "spine_view": {
+    "skeleton": "assets/characters/lumi/spine/lumi_rig_v3.skel",
+    "atlas": "assets/characters/lumi/spine/lumi_prototype.atlas",
+    "skin": "little_knight",
+    "scale": 0.192,
+    "mix_seconds": 0.06,
+    "idle": "idle",
+    "run": "run",
+    "default_attack": "z1",
+    "sprint_from_speed": 520,
+    "sprint_time_scale": 1.5
   }
 }

@@ -9,6 +9,7 @@ public static class GameConstants
     public const string PlayerCharacterId = "lumi";
     public const string AutoplayArgument = "--autoplay=";
     public const float TicksPerSecond = 60f;
+    public const int PlayerZIndex = 2;
 }
 
 /// <summary>Collision layer bits.</summary>

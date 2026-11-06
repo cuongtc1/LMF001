@@ -65,9 +65,10 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         var size = new Vector2(def.Body.Width, def.Body.Height);
         AddChild(new CollisionShape2D { Shape = new RectangleShape2D { Size = size }, Position = new Vector2(0, -size.Y / 2) });
 
-        var view = new PlaceholderLumiView();
+        ZIndex = GameConstants.PlayerZIndex; // Lumi stays visible in front of monsters
+        var view = new SpineLumiView();
         AddChild(view);
-        view.Setup(def.PlaceholderView);
+        view.Setup(def.SpineView);
         _view = view;
 
         var hurtbox = new Hurtbox();
@@ -351,7 +352,6 @@ public partial class PlayerController : CharacterBody2D, IDamageable
 
     private void ShowView(AttackDef? attack)
     {
-        var swing = attack is null ? 0 : Mathf.Lerp(attack.SwingFromDegrees, attack.SwingToDegrees, SwingProgress(attack));
         _view.Show(new ViewState(
             _motor.Facing,
             _motor.VelocityX,
@@ -361,12 +361,10 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             _invulnerableTicks > 0,
             _stunTicks > 0 || Health.IsDead,
             attack is not null,
-            swing,
+            attack?.Id ?? string.Empty,
+            _combo.SwingId,
+            _combo.Progress,
             _guard.IsGuarding,
             _guard.CounterReady));
     }
-
-    /// <summary>The sword crosses its arc during the active ticks and holds there in recovery.</summary>
-    private float SwingProgress(AttackDef attack) =>
-        Mathf.Clamp((_combo.Tick - attack.StartupTicks + 1f) / attack.ActiveTicks, 0, 1);
 }

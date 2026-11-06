@@ -1,7 +1,6 @@
 """Turn the picked ver12 images into game-ready PNGs under assets/. Run from the repo root:
 python tools/art/prepare_prototype_art.py
 Needs the local .documents/ folder. Picks: .documents/sample_pictures/ver12/README.md"""
-import json
 import os
 
 import cv2
@@ -10,7 +9,6 @@ from PIL import Image
 
 PICS = '.documents/sample_pictures/'
 V = PICS + 'ver12/'
-PARTS = PICS + 'rig_master/parts_v2/'
 GAME_W, GAME_H = 1920, 1080
 FOREST = 'assets/backgrounds/chapter_01/honey_forest/'
 WHITE_CUTOFF = 244
@@ -148,21 +146,8 @@ def effects():
     effect(V + 'C/ver12_C_Hit_2.png', 1, 2, 'hit_heavy')
 
 
-def lumi():
-    info = json.load(open(PARTS + '_parts_info.json'))
-    canvas = Image.new('RGBA', (1280, 1280))
-    for name in info['order_back_to_front']:
-        box = info['boxes'][name]
-        canvas.alpha_composite(Image.open(PARTS + name + '.png').convert('RGBA'), (box['x0'], box['y0']))
-    folder = 'assets/characters/lumi/placeholder/'
-    save(crop_alpha(np.asarray(canvas)), folder + 'lumi.png')
-    sword = np.asarray(Image.open(PICS + 'rig_master/sword_front_v1.png').convert('RGBA'))
-    save(crop_alpha(sword), folder + 'sword.png')
-
-
 if __name__ == '__main__':
     background()
     platforms()
     monsters()
     effects()
-    lumi()

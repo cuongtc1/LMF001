@@ -1,0 +1,108 @@
+using Godot;
+using LumiFeast.Game.Common;
+using LumiFeast.Logic.Data;
+
+namespace LumiFeast.Game.Gameplay.Player;
+
+/// <summary>Lumi drawn by Spine. Attack clips follow the combo's own clock, so art never drifts from the hitbox.</summary>
+public partial class SpineLumiView : Node2D, ICharacterView
+{
+    private const float LeanPerSpeed = 0.00012f;
+    private const float StretchPerFallSpeed = 0.00008f;
+    private const float MaxStretch = 0.1f;
+    private const float DashStretch = 0.2f;
+    private const float LandSquash = 0.14f;
+    private const float SquashRecovery = 0.18f;
+    private const float HurtTilt = -0.3f;
+    private const float RunSpeedThreshold = 40;
+    private const int BlinkTicks = 4;
+    private const int Track = 0;
+
+    private static readonly Color CounterGlow = new(1.5f, 1.3f, 0.6f);
+
+    private SpineViewDef _view = null!;
+    private SpineSprite _sprite = null!;
+    private SpineSkeletonDataResource _data = null!;
+    private SpineTrackEntry? _entry;
+    private string _clip = string.Empty;
+    private int _swingId = -1;
+    private float _clipSeconds;
+    private bool _wasOnFloor = true;
+    private float _squash;
+    private int _blink;
+
+    public void Setup(SpineViewDef view)
+    {
+        _view = view;
+        _data = new SpineSkeletonDataResource();
+        _data.Set("skeleton_file_res", GD.Load<Resource>(GameConstants.ResourceRoot + view.Skeleton));
+        _data.Set("atlas_res", GD.Load<Resource>(GameConstants.ResourceRoot + view.Atlas));
+        _data.Set("default_mix", view.MixSeconds);
+        _sprite = new SpineSprite { Scale = Vector2.One * view.Scale };
+        _sprite.Set("skeleton_data_res", _data);
+        AddChild(_sprite);
+        _sprite.GetSkeleton().SetSkinByName(view.Skin);
+        _sprite.GetSkeleton().SetSlotsToSetupPose();
+        Play(view.Idle, true, 1);
+    }
+
+    public void Show(in ViewState state)
+    {
+        ShowBody(state);
+        if (state.Attacking)
+        {
+            ShowAttack(state);
+            return;
+        }
+
+        _swingId = -1;
+        var moving = Mathf.Abs(state.VelocityX) > RunSpeedThreshold && state.OnFloor;
+        var clip = moving || state.Dashing ? _view.Run : _view.Idle;
+        var speed = moving && Mathf.Abs(state.VelocityX) > _view.SprintFromSpeed ? _view.SprintTimeScale : 1;
+        if (clip != _clip)
+        {
+            Play(clip, true, 1);
+        }
+
+        _entry?.SetTimeScale(speed);
+    }
+
+    private void ShowAttack(in ViewState state)
+    {
+        if (state.SwingId != _swingId)
+        {
+            _swingId = state.SwingId;
+            var clip = _data.FindAnimation(state.AttackId) is null ? _view.DefaultAttack : state.AttackId;
+            Play(clip, false, 0);
+        }
+
+        _entry?.SetTrackTime(state.AttackProgress * _clipSeconds);
+    }
+
+    private void Play(string clip, bool loop, float timeScale)
+    {
+        _clip = clip;
+        _clipSeconds = _data.FindAnimation(clip).GetDuration();
+        _entry = _sprite.GetAnimationState().SetAnimation(clip, loop, Track);
+        _entry.SetTimeScale(timeScale);
+    }
+
+    private void ShowBody(in ViewState state)
+    {
+        if (state.OnFloor && !_wasOnFloor)
+        {
+            _squash = LandSquash;
+        }
+
+        _wasOnFloor = state.OnFloor;
+        _squash = Mathf.Lerp(_squash, 0, SquashRecovery);
+        var stretch = state.Dashing ? DashStretch : Mathf.Min(MaxStretch, Mathf.Abs(state.VelocityY) * StretchPerFallSpeed);
+        var scaleX = state.Dashing ? 1 + stretch : 1 + _squash - stretch;
+        var scaleY = state.Dashing ? 1 - stretch : 1 - _squash + stretch;
+        Scale = new Vector2(scaleX * state.Facing, scaleY);
+        Rotation = state.Hurt ? HurtTilt : state.Attacking ? 0 : Mathf.Abs(state.VelocityX) * LeanPerSpeed;
+        Modulate = state.CounterReady ? CounterGlow : Colors.White;
+        _blink = state.Blinking ? _blink + 1 : 0;
+        Visible = !state.Blinking || _blink / BlinkTicks % 2 == 0;
+    }
+}

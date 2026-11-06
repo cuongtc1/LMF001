@@ -30,15 +30,18 @@ public sealed record MovementDef(
 
 public sealed record CharacterCombatDef(string AttackSet, float MpPerSecond, int AttackBufferTicks);
 
-public sealed record PlaceholderViewDef(
-    string Sprite,
-    float Height,
-    string SwordSprite,
-    float SwordLength,
-    float HandX,
-    float HandY,
-    float SwordRestDegrees,
-    float SwordGuardDegrees);
+/// <param name="DefaultAttack">Clip for attacks that have no animation of their own yet.</param>
+public sealed record SpineViewDef(
+    string Skeleton,
+    string Atlas,
+    string Skin,
+    float Scale,
+    float MixSeconds,
+    string Idle,
+    string Run,
+    string DefaultAttack,
+    float SprintFromSpeed,
+    float SprintTimeScale);
 
 /// <param name="DamageScale">Share of damage taken through a guard.</param>
 /// <param name="PerfectTicks">A hit this soon after raising the guard is a perfect guard.</param>
@@ -54,7 +57,7 @@ public sealed record CharacterDef(
     CharacterCombatDef Combat,
     GuardDef Guard,
     BodyDef Body,
-    PlaceholderViewDef PlaceholderView);
+    SpineViewDef SpineView);
 
 public sealed record AttackDef(
     string Id,
@@ -73,8 +76,6 @@ public sealed record AttackDef(
     string HitVfx,
     float VfxX,
     float VfxY,
-    float SwingFromDegrees,
-    float SwingToDegrees,
     float LaunchSpeed,
     bool EndsOnLanding,
     string? NextHeavy,

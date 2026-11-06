@@ -9,7 +9,9 @@ public readonly record struct ViewState(
     bool Blinking,
     bool Hurt,
     bool Attacking,
-    float SwingDegrees,
+    string AttackId,
+    int SwingId,
+    float AttackProgress,
     bool Guarding,
     bool CounterReady);
 
