@@ -586,7 +586,84 @@
    }
   }
  ],
- "animations": {},
+ "animations": {
+  "idle": {
+   "bones": {
+    "hip": {
+     "translate": [
+      {
+       "time": 0
+      },
+      {
+       "time": 0.6,
+       "y": -8
+      },
+      {
+       "time": 1.2
+      }
+     ]
+    },
+    "torso": {
+     "rotate": [
+      {
+       "time": 0
+      },
+      {
+       "time": 0.6,
+       "value": -2
+      },
+      {
+       "time": 1.2
+      }
+     ]
+    },
+    "upperarm_R": {
+     "rotate": [
+      {
+       "time": 0,
+       "value": -15
+      },
+      {
+       "time": 0.6,
+       "value": -11
+      },
+      {
+       "time": 1.2,
+       "value": -15
+      }
+     ]
+    },
+    "tail_L": {
+     "rotate": [
+      {
+       "time": 0
+      },
+      {
+       "time": 0.6,
+       "value": 3
+      },
+      {
+       "time": 1.2
+      }
+     ]
+    },
+    "tail_R": {
+     "rotate": [
+      {
+       "time": 0
+      },
+      {
+       "time": 0.6,
+       "value": -3
+      },
+      {
+       "time": 1.2
+      }
+     ]
+    }
+   }
+  }
+ },
  "events": {
   "move": {},
   "hitbox_on": {},

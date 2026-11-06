@@ -1,0 +1,14 @@
+[remap]
+
+importer="spine.skel"
+type="SpineSkeletonFileResource"
+uid="uid://b58xs6k0whx1c"
+path="res://.godot/imported/lumi_rig_v3.skel-712eaa855c5745f61f980775dda1f9cf.spskel"
+
+[deps]
+
+source_file="res://assets/characters/lumi/spine/lumi_rig_v3.skel"
+dest_files=["res://.godot/imported/lumi_rig_v3.skel-712eaa855c5745f61f980775dda1f9cf.spskel"]
+
+[params]
+

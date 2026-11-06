@@ -1,0 +1,16 @@
+[remap]
+
+importer="spine.atlas"
+type="SpineAtlasResource"
+uid="uid://3g2j6d8cxaj7"
+path="res://.godot/imported/lumi_prototype.atlas-2dd1899c8b1688fbbc554fc31c8ad5a2.spatlas"
+
+[deps]
+
+source_file="res://assets/characters/lumi/spine/lumi_prototype.atlas"
+dest_files=["res://.godot/imported/lumi_prototype.atlas-2dd1899c8b1688fbbc554fc31c8ad5a2.spatlas"]
+
+[params]
+
+normal_map_prefix="n"
+specular_map_prefix="s"
