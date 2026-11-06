@@ -30,7 +30,7 @@ def clip(rotations, hip_y=None, hip_x=None):
     return {'bones': bones}
 
 
-def swing(total, arm, fore, sword, torso, front_leg, back_leg, left_arm):
+def swing(total, arm, fore, sword, torso, front_leg, back_leg, left_arm, hip_y=None):
     """Each list holds (tick, degrees). Every swing starts and ends on the rest pose."""
     rest = lambda bone, keys: [(0, REST.get(bone, 0))] + keys + [(total, REST.get(bone, 0))]
     return clip({
@@ -46,7 +46,7 @@ def swing(total, arm, fore, sword, torso, front_leg, back_leg, left_arm):
         'skirt': rest('skirt', [(t, v * 0.5) for t, v in torso]),
         'tail_L': rest('tail_L', [(t, -v) for t, v in torso]),
         'tail_R': rest('tail_R', [(t, -v * 0.7) for t, v in torso]),
-    })
+    }, hip_y=hip_y)
 
 
 def idle():
@@ -105,6 +105,52 @@ def z3():
                  sword=[(9, -120), (13, -160), (17, -135)], torso=[(9, 12), (13, -18), (17, -22)],
                  front_leg=[(9, -10), (13, 28), (17, 32)], back_leg=[(9, 10), (13, -24), (17, -26)],
                  left_arm=[(9, 30), (13, -55), (17, -65)])
+
+
+def x1():
+    return swing(46,
+                 arm=[(12, 165), (16, 95), (20, 35), (30, 35)], fore=[(12, 20), (16, 5), (20, -10), (30, -10)],
+                 sword=[(12, -130), (16, -150), (20, -140), (30, -140)], torso=[(12, 12), (16, -12), (20, -20), (30, -18)],
+                 front_leg=[(12, -10), (16, 24), (20, 30), (30, 30)], back_leg=[(12, 10), (16, -22), (20, -28), (30, -28)],
+                 left_arm=[(12, -150), (16, -40), (20, -30), (30, -30)], hip_y=[(0, 0), (12, 8), (20, -30), (30, -30), (46, 0)])
+
+
+def xx():
+    return swing(49,
+                 arm=[(12, 20), (16, 60), (20, 120), (30, 120)], fore=[(12, -20), (16, 0), (20, 30), (30, 30)],
+                 sword=[(12, 80), (16, -150), (20, -175), (30, -175)], torso=[(12, 14), (16, -16), (20, -24), (30, -22)],
+                 front_leg=[(12, -12), (16, 30), (20, 36), (30, 36)], back_leg=[(12, 12), (16, -28), (20, -34), (30, -34)],
+                 left_arm=[(12, 30), (16, -50), (20, -70), (30, -70)], hip_y=[(0, 0), (12, -14), (20, -34), (30, -34), (49, 0)])
+
+
+def zx():
+    return swing(46,
+                 arm=[(12, 0), (16, 90), (20, 150), (30, 150)], fore=[(12, -10), (16, 10), (20, 25), (30, 25)],
+                 sword=[(12, -160), (16, -125), (20, -120), (30, -120)], torso=[(12, -12), (16, 6), (20, 14), (30, 12)],
+                 front_leg=[(12, 20), (16, 12), (20, 2), (30, 2)], back_leg=[(12, -18), (16, -8), (20, 4), (30, 4)],
+                 left_arm=[(12, -35), (16, 15), (20, 30), (30, 30)], hip_y=[(0, 0), (12, -26), (20, 12), (30, 8), (46, 0)])
+
+
+AIR_LEGS = {'front_leg': [(5, 34), (11, 30), (17, 26)], 'back_leg': [(5, -12), (11, -14), (17, -12)]}
+
+
+def a1():
+    return swing(23, arm=[(5, 120), (8, 65), (11, 30)], fore=[(5, 30), (8, 5), (11, -5)],
+                 sword=[(5, -95), (8, -160), (11, -140)], torso=[(5, 8), (8, -10), (11, -14)],
+                 left_arm=[(5, 15), (8, -40), (11, -55)], **AIR_LEGS)
+
+
+def au():
+    return swing(23, arm=[(5, 40), (8, 130), (11, 165)], fore=[(5, 10), (8, 20), (11, 25)],
+                 sword=[(5, -130), (8, -120), (11, -120)], torso=[(5, -8), (8, 8), (11, 14)],
+                 left_arm=[(5, -30), (8, 20), (11, 30)], **AIR_LEGS)
+
+
+def ax():
+    return swing(50, arm=[(10, 165), (14, 165), (18, 60), (46, 60)], fore=[(10, 25), (14, 25), (18, 0), (46, 0)],
+                 sword=[(10, -120), (14, -120), (18, -165), (46, -165)], torso=[(10, 12), (14, 14), (18, -16), (46, -16)],
+                 front_leg=[(10, 36), (14, 40), (18, 14), (46, 14)], back_leg=[(10, -16), (14, -18), (18, -20), (46, -20)],
+                 left_arm=[(10, -120), (14, -130), (18, -30), (46, -30)])
 
 
 def z_dash():
@@ -235,6 +281,7 @@ def main():
     rig['animations'] = {
         'idle': idle(), 'run': run(), 'sprint': sprint(), 'jump': jump(), 'fall': fall(), 'land': land(), 'dash': dash(),
         'guard': guard(), 'z1': z1(), 'z2': z2(), 'z3': z3(), 's1': z_dash(),
+        'x1': x1(), 'xx': xx(), 'zx': zx(), 'a1': a1(), 'au': au(), 'ax': ax(),
     }
     json.dump(rig, open(RIG, 'w', encoding='utf-8', newline='\n'), indent=1)
     if os.path.exists(PROJECT):

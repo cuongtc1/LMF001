@@ -163,7 +163,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             _combo.PressAttack(input.HeavyPressed);
         }
 
-        _combo.Advance(CurrentEntry());
+        _combo.Advance(CurrentEntry(input));
         if (_combo.JustStarted && input.MoveX != 0)
         {
             _motor.Face(Mathf.Sign(input.MoveX));
@@ -233,11 +233,11 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         return false;
     }
 
-    private ComboEntry CurrentEntry()
+    private ComboEntry CurrentEntry(in PlayerFrameInput input)
     {
         if (!IsOnFloor())
         {
-            return ComboEntry.Air;
+            return input.JumpHeld && _motor.VelocityY < 0 ? ComboEntry.AirUp : ComboEntry.Air;
         }
 
         if (_guard.CounterReady)

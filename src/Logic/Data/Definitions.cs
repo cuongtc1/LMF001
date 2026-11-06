@@ -97,11 +97,12 @@ public sealed record AttackDef(
 
 /// <param name="First">Starts the combo on the ground.</param>
 /// <param name="FirstAir">Z in the air.</param>
+/// <param name="FirstAirUp">Z while rising with Up held.</param>
 /// <param name="FirstAirHeavy">X in the air.</param>
 /// <param name="FirstSprint">Z during a dash or the run after it.</param>
 /// <param name="FirstHeavy">X on the ground.</param>
 /// <param name="FirstCounter">Z right after a perfect guard.</param>
-public sealed record AttackSetDef(string Id, string First, string FirstAir, string FirstAirHeavy, string FirstSprint, string FirstHeavy, string FirstCounter, IReadOnlyList<AttackDef> Attacks);
+public sealed record AttackSetDef(string Id, string First, string FirstAir, string FirstAirUp, string FirstAirHeavy, string FirstSprint, string FirstHeavy, string FirstCounter, IReadOnlyList<AttackDef> Attacks);
 
 public sealed record MonsterStatsDef(int MaxHp, int Attack, float Defense, float Speed);
 

@@ -335,7 +335,41 @@
       "mana": 6,
       "stagger": 8,
       "landing_lag_ticks": 0
+    },
+    {
+      "id": "au",
+      "damage_multiplier": 0.8,
+      "startup_ticks": 6,
+      "active_ticks": 5,
+      "recovery_ticks": 12,
+      "cancel_from_tick": 11,
+      "next": null,
+      "lunge_pixels": 30,
+      "hitbox": {
+        "x": -70,
+        "y": -360,
+        "width": 260,
+        "height": 320
+      },
+      "hitstop_ticks": 3,
+      "shake_pixels": 0,
+      "knockback_speed": 60,
+      "vfx": "slash_diagonal",
+      "hit_vfx": "hit_light",
+      "vfx_x": 60,
+      "vfx_y": -250,
+      "launch_speed": 0,
+      "ends_on_landing": true,
+      "next_heavy": null,
+      "chain_from_tick": 15,
+      "stun_ticks": 40,
+      "knockdown": false,
+      "plunge_speed": 0,
+      "mana": 3,
+      "stagger": 2,
+      "landing_lag_ticks": 0
     }
   ],
-  "first_counter": "counter"
+  "first_counter": "counter",
+  "first_air_up": "au"
 }

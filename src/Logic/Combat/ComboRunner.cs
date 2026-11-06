@@ -7,6 +7,7 @@ public enum ComboEntry
 {
     Ground,
     Air,
+    AirUp,
     Sprint,
     Counter,
 }
@@ -80,7 +81,7 @@ public sealed class ComboRunner(AttackSetDef set, int bufferTicks)
     public void Advance(ComboEntry entry = ComboEntry.Ground)
     {
         JustStarted = false;
-        var inAir = entry == ComboEntry.Air;
+        var inAir = entry is ComboEntry.Air or ComboEntry.AirUp;
         if (!inAir)
         {
             _airStringSpent = false;
@@ -114,7 +115,8 @@ public sealed class ComboRunner(AttackSetDef set, int bufferTicks)
     {
         (ComboEntry.Counter, _) => set.FirstCounter,
         (ComboEntry.Air, false) => set.FirstAir,
-        (ComboEntry.Air, true) => set.FirstAirHeavy,
+        (ComboEntry.AirUp, false) => set.FirstAirUp,
+        (ComboEntry.Air or ComboEntry.AirUp, true) => set.FirstAirHeavy,
         (_, true) => set.FirstHeavy,
         (ComboEntry.Sprint, false) => set.FirstSprint,
         _ => set.First,

@@ -1,75 +1,85 @@
 {
-  "start_x": 300,
-  "end_tick": 330,
+  "start_x": 640,
+  "end_tick": 380,
   "steps": [
     {
-      "tick": 30,
-      "action": "move_right",
-      "pressed": true
-    },
-    {
       "tick": 40,
-      "action": "dash",
+      "action": "attack_heavy",
       "pressed": true
     },
     {
       "tick": 42,
-      "action": "dash",
+      "action": "attack_heavy",
       "pressed": false
     },
     {
-      "tick": 80,
-      "action": "jump",
+      "tick": 66,
+      "action": "attack_heavy",
       "pressed": true
     },
     {
-      "tick": 104,
-      "action": "jump",
+      "tick": 68,
+      "action": "attack_heavy",
       "pressed": false
     },
     {
       "tick": 130,
-      "action": "move_right",
-      "pressed": false
-    },
-    {
-      "tick": 170,
-      "action": "guard",
-      "pressed": true
-    },
-    {
-      "tick": 215,
-      "action": "guard",
-      "pressed": false
-    },
-    {
-      "tick": 240,
-      "action": "move_right",
-      "pressed": true
-    },
-    {
-      "tick": 244,
-      "action": "dash",
-      "pressed": true
-    },
-    {
-      "tick": 246,
-      "action": "dash",
-      "pressed": false
-    },
-    {
-      "tick": 250,
       "action": "attack_light",
       "pressed": true
     },
     {
-      "tick": 252,
+      "tick": 132,
       "action": "attack_light",
       "pressed": false
     },
     {
-      "tick": 285,
-      "action": "move_right",
+      "tick": 150,
+      "action": "attack_heavy",
+      "pressed": true
+    },
+    {
+      "tick": 152,
+      "action": "attack_heavy",
+      "pressed": false
+    },
+    {
+      "tick": 200,
+      "action": "jump",
+      "pressed": true
+    },
+    {
+      "tick": 206,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 208,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 225,
+      "action": "jump",
+      "pressed": false
+    },
+    {
+      "tick": 270,
+      "action": "jump",
+      "pressed": true
+    },
+    {
+      "tick": 280,
+      "action": "jump",
+      "pressed": false
+    },
+    {
+      "tick": 296,
+      "action": "attack_heavy",
+      "pressed": true
+    },
+    {
+      "tick": 298,
+      "action": "attack_heavy",
       "pressed": false
     }
   ]
