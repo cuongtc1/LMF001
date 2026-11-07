@@ -79,6 +79,14 @@ public static class GameDataValidator
             Require(rooms.Contains(run.FirstRoom) && rooms.Contains(run.BossRoom), run.Id);
             data.AmuletSet(run.AmuletSet);
             Require(run.RoomsPerRun >= 1 && run.RoomsPerRun <= run.Rooms.Count - 1, $"{run.Id}.rooms_per_run");
+            foreach (var room in run.Rooms.Where(room => room.Challenge is not null))
+            {
+                var challenge = room.Challenge!;
+                Require(Run.ChallengeKinds.All.Contains(challenge.Kind), $"{room.Id}.challenge.kind");
+                Require(challenge.Kind != Run.ChallengeKinds.TimeLimit || challenge.Seconds > 0, $"{room.Id}.challenge.seconds");
+                Require(room.Waves.Count > 0 && challenge.RewardChoices > 0, $"{room.Id}.challenge");
+            }
+
             foreach (var spawn in run.Rooms.SelectMany(room => room.Waves).SelectMany(wave => wave.Spawns))
             {
                 data.Monster(spawn.Monster);

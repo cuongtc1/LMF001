@@ -52,6 +52,9 @@ public partial class PlayerController : CharacterBody2D, IDamageable
     /// <summary>Raised once the death pause ends while <see cref="AutoRespawn"/> is off.</summary>
     public event System.Action? Fell;
 
+    /// <summary>A hit that got through: not guarded, not dodged.</summary>
+    public event System.Action? Hurt;
+
     /// <summary>The test stage brings Lumi back by herself; a run shows its result screen instead.</summary>
     public bool AutoRespawn { get; set; } = true;
 
@@ -165,6 +168,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
 
         var damage = Mathf.Max(1, Mathf.RoundToInt(DamageCalculator.Compute(hit.Attack, hit.Multiplier, _def.Stats.Defense) * Modifiers.Scale(AmuletEffects.DamageTaken)));
         Health.Damage(damage);
+        Hurt?.Invoke();
         GameLog.Info(MessageKeys.CombatPlayerHit, damage, Health.Current, Health.Max);
         _gameFeel.ShowDamage(GlobalPosition + new Vector2(0, -_def.Body.Height), damage, Colors.OrangeRed);
         _combo.Cancel();

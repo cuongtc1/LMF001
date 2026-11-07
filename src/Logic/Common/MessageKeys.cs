@@ -66,6 +66,12 @@ public static class MessageKeys
     public const string ResultRetry = "result.retry";
     public const string ResultAgain = "result.again";
     public const string RunDefeated = "run.defeated";
+    public const string TrialOffer = "trial.offer";
+    public const string TrialStarted = "trial.started";
+    public const string TrialClock = "trial.clock";
+    public const string TrialNoHit = "trial.no_hit";
+    public const string TrialWon = "trial.won";
+    public const string TrialFailed = "trial.failed";
 
     public static readonly string[] All =
     [
@@ -74,5 +80,6 @@ public static class MessageKeys
         AutoplayStarted, AutoplayFinished, DebugTitle, DebugDifficulty, DebugTier, DebugGodMode, DebugAirJump, DebugHeal, DebugArena, CombatStoic, CombatDizzy, CombatPhaseTwo, CombatGuardBlock, CombatGuardPerfect, HudRoom, HudBoss, RunDoorPrompt, RunStarted, RunCleared, RewardPicked, DebugPrototype, RewardSkill, RewardAmulet, HudSkillSlot, HudSkillReady, HudSkillCooldown, HudSkillEmpty, HudWave, HudClear, ArenaWave, ArenaCleared,
         DebugRespawn, DebugReload, DebugHelp, HudCombo,
         ResultDefeatTitle, ResultDefeatLine, ResultClearTitle, ResultClearLine, ResultTime, ResultRooms, ResultHealed, ResultCombo, ResultLoadout, ResultRetry, ResultAgain, RunDefeated,
+        TrialOffer, TrialStarted, TrialClock, TrialNoHit, TrialWon, TrialFailed,
     ];
 }

@@ -261,7 +261,14 @@ public sealed record RoomDef(
     IReadOnlyList<WaveDef> Waves,
     IReadOnlyList<float>? Crates = null,
     float? ChestX = null,
-    bool RewardOnClear = true);
+    bool RewardOnClear = true,
+    ChallengeDef? Challenge = null);
+
+/// <summary>An optional trial: the waves wait until Lumi hits the lever, and the door is open from the start.</summary>
+/// <param name="Kind">One of <c>ChallengeKinds</c>.</param>
+/// <param name="Seconds">Clock of a time_limit trial; unused by no_hit.</param>
+/// <param name="RewardChoices">Amulet cards offered on a win.</param>
+public sealed record ChallengeDef(string Kind, float LeverX, int Seconds, int RewardChoices);
 
 /// <param name="HpChance">Share of crates that drop an HP token; the rest drop MP.</param>
 /// <param name="CrateBrokenSprite">Drawn at the same scale as the crate, so both come from one sheet.</param>
@@ -277,7 +284,10 @@ public sealed record PickupDef(
     string MpTokenSprite,
     string ChestSprite,
     string ChestOpenSprite,
-    float ChestHeight);
+    float ChestHeight,
+    string LeverSprite,
+    string LeverOnSprite,
+    float LeverHeight);
 
 /// <param name="RoomsPerRun">Rooms before the boss.</param>
 /// <param name="DoorPromptTicks">Time on the ground at a door before its prompt shows.</param>

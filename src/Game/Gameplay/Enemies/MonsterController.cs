@@ -40,6 +40,8 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
     private GameFeel _gameFeel = null!;
     private PlayerController _player = null!;
     private MonsterBrain _brain = null!;
+    private const float RunOffSeconds = 0.6f;
+
     private AttackHitbox _hitbox = null!;
     private Sprite2D _sprite = null!;
     private Sprite2D _aura = null!;
@@ -346,6 +348,17 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         tween.TweenProperty(_sprite, "position:y", _sprite.Position.Y - HealRisePixels, seconds).SetEase(Tween.EaseType.Out).SetTrans(Tween.TransitionType.Back);
         tween.TweenProperty(_sprite, "modulate:a", 0f, seconds).SetDelay(seconds * 0.5f);
         tween.Chain().TweenCallback(Callable.From(FinishHeal));
+    }
+
+    /// <summary>Leaves the fight without being healed: a lost trial sends the rest away.</summary>
+    public void RunOff()
+    {
+        _healing = true;
+        _hurtbox.SetDeferred(Area2D.PropertyName.Monitorable, false);
+        _hitbox.Close();
+        var tween = CreateTween();
+        tween.TweenProperty(this, "modulate:a", 0f, RunOffSeconds);
+        tween.TweenCallback(Callable.From(QueueFree));
     }
 
     private void FinishHeal()

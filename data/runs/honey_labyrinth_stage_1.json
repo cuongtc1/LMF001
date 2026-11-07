@@ -324,6 +324,112 @@
       "reward_on_clear": false
     },
     {
+      "id": "trial_clock",
+      "width": 1920,
+      "ground_y": 885,
+      "layers": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/back.png",
+          "scroll_scale": 0.3,
+          "z_index": -30
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/wall_a.png",
+          "scroll_scale": 1.0,
+          "z_index": -10
+        }
+      ],
+      "platforms": [],
+      "waves": [
+        {
+          "spawns": [
+            {
+              "monster": "honey_slime",
+              "x": 1100
+            },
+            {
+              "monster": "corrupted_seedling",
+              "x": 1500
+            },
+            {
+              "monster": "honey_slime",
+              "x": 1700
+            }
+          ]
+        },
+        {
+          "spawns": [
+            {
+              "monster": "sprout_mushroom",
+              "x": 1200
+            },
+            {
+              "monster": "fire_beetle",
+              "x": 1750
+            }
+          ]
+        }
+      ],
+      "crates": [],
+      "challenge": {
+        "kind": "time_limit",
+        "lever_x": 520,
+        "seconds": 30,
+        "reward_choices": 3
+      }
+    },
+    {
+      "id": "trial_untouched",
+      "width": 1920,
+      "ground_y": 885,
+      "layers": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/back.png",
+          "scroll_scale": 0.3,
+          "z_index": -30
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/wall_a.png",
+          "scroll_scale": 1.0,
+          "z_index": -10
+        }
+      ],
+      "platforms": [],
+      "waves": [
+        {
+          "spawns": [
+            {
+              "monster": "little_treant",
+              "x": 1300
+            },
+            {
+              "monster": "honey_slime",
+              "x": 1600
+            }
+          ]
+        },
+        {
+          "spawns": [
+            {
+              "monster": "corrupted_seedling",
+              "x": 1500
+            },
+            {
+              "monster": "sprout_mushroom",
+              "x": 1100
+            }
+          ]
+        }
+      ],
+      "crates": [],
+      "challenge": {
+        "kind": "no_hit",
+        "lever_x": 520,
+        "seconds": 0,
+        "reward_choices": 3
+      }
+    },
+    {
       "id": "den",
       "width": 1920,
       "ground_y": 885,
@@ -375,6 +481,9 @@
     "mp_token_sprite": "assets/props/common/mp_token.png",
     "chest_sprite": "assets/props/common/chest.png",
     "chest_open_sprite": "assets/props/common/chest_open.png",
-    "chest_height": 120
+    "chest_height": 120,
+    "lever_sprite": "assets/props/common/lever.png",
+    "lever_on_sprite": "assets/props/common/lever_on.png",
+    "lever_height": 130
   }
 }

@@ -59,6 +59,8 @@ public partial class RunStage : Node2D
     private readonly RunStats _stats = new();
     private bool _runOver;
     private int _clearScreenTicks;
+    private ChallengeRun? _challenge;
+    private bool _challengeSettled;
 
     public override void _Ready()
     {
@@ -81,6 +83,7 @@ public partial class RunStage : Node2D
         _player.Blockers = _monsters;
         _player.AutoRespawn = false;
         _player.Fell += () => ShowResult(false);
+        _player.Hurt += () => _challenge?.PlayerHit();
         _player.AddChild(_camera);
         _camera.Position = new Vector2(0, -CameraHeight);
         _camera.MakeCurrent();
@@ -105,9 +108,17 @@ public partial class RunStage : Node2D
             var autoplay = new AutoplayRunner();
             AddChild(autoplay);
             autoplay.Setup(script, _player);
-            if (autoplay.StartRoom is { } room && _plan.Contains(room))
+            if (autoplay.StartRoom is { } room)
             {
-                _roomIndex = _plan.ToList().IndexOf(room);
+                // a room the seeded plan left out takes the second slot
+                var plan = _plan.ToList();
+                if (!plan.Contains(room))
+                {
+                    plan[1] = room;
+                }
+
+                _plan = plan;
+                _roomIndex = plan.IndexOf(room);
                 BuildRoom();
             }
         }
@@ -133,11 +144,12 @@ public partial class RunStage : Node2D
             case WaveEvent.SpawnWave:
                 SpawnWave();
                 break;
-            case WaveEvent.Cleared:
+            case WaveEvent.Cleared when _challenge is null:
                 OpenDoor();
                 break;
         }
 
+        StepChallenge();
         StepDoor();
     }
 
@@ -198,9 +210,21 @@ public partial class RunStage : Node2D
         _roomCleared = false;
         _groundedTicks = 0;
         _waves = new WaveRunner(_room.Waves.Count, _run.WaveDelayTicks);
-        _waves.Start();
+        _challengeSettled = false;
+        _challenge = _room.Challenge is { } trial ? new ChallengeRun(trial, (int)GameConstants.TicksPerSecond) : null;
         _hud.ShowStatus(GameServices.Messages.Get(
             _plan[_roomIndex] == _run.BossRoom ? MessageKeys.HudBoss : MessageKeys.HudRoom, _roomIndex + 1, _plan.Count));
+        if (_challenge is null)
+        {
+            _waves.Start();
+        }
+        else
+        {
+            // a trial is optional, so its door is open from the start
+            _roomCleared = true;
+            _door.Modulate = Colors.White;
+            _hud.ShowStatus(GameServices.Messages.Get(MessageKeys.TrialOffer));
+        }
     }
 
     private void BuildDoor()
@@ -233,6 +257,14 @@ public partial class RunStage : Node2D
             crate.Broken += BreakCrate;
         }
 
+        if (_room.Challenge is { } trial)
+        {
+            var lever = new HittableProp();
+            _roomNode.AddChild(lever);
+            lever.Setup(pickups.LeverSprite, pickups.LeverHeight, new Vector2(trial.LeverX, _room.GroundY), 1);
+            lever.Broken += StartChallenge;
+        }
+
         if (_room.ChestX is { } chestX)
         {
             var chest = new HittableProp();
@@ -255,6 +287,56 @@ public partial class RunStage : Node2D
     {
         chest.ChangeSprite(_run.Pickups.ChestOpenSprite);
         OfferReward(RewardKind.Amulets);
+    }
+
+    private void StartChallenge(HittableProp lever)
+    {
+        lever.ChangeSprite(_run.Pickups.LeverOnSprite);
+        if (_challenge?.Start() != true)
+        {
+            return;
+        }
+
+        GameLog.Info(MessageKeys.TrialStarted, _challenge.Def.Kind);
+        _waves.Start();
+    }
+
+    /// <summary>Shows the trial on the status line and settles it: a win offers amulets, a loss sends the monsters away.</summary>
+    private void StepChallenge()
+    {
+        // a hit can fail the trial between steps, so settle any state past Waiting once
+        if (_challenge is not { } trial || trial.State == ChallengeState.Waiting || _challengeSettled)
+        {
+            return;
+        }
+
+        var messages = GameServices.Messages;
+        switch (trial.Step(_waves.IsCleared))
+        {
+            case ChallengeState.Running:
+                _hud.ShowStatus(trial.HasClock ? messages.Get(MessageKeys.TrialClock, trial.SecondsLeft) : messages.Get(MessageKeys.TrialNoHit));
+                break;
+            case ChallengeState.Won:
+                _challengeSettled = true;
+                GameLog.Info(MessageKeys.TrialWon);
+                _stats.RoomCleared();
+                _hud.ShowStatus(messages.Get(MessageKeys.TrialWon));
+                OfferReward(RewardKind.Amulets, trial.Def.RewardChoices);
+                break;
+            case ChallengeState.Failed:
+                _challengeSettled = true;
+                GameLog.Info(MessageKeys.TrialFailed);
+                _stats.RoomCleared();
+                _hud.ShowStatus(messages.Get(MessageKeys.TrialFailed));
+                foreach (var monster in _monsters)
+                {
+                    monster.RunOff();
+                }
+
+                _monsters.Clear();
+                _waves.Reset();
+                break;
+        }
     }
 
     private void SpawnWave()
@@ -335,7 +417,7 @@ public partial class RunStage : Node2D
     }
 
     /// <summary>One of three: skills while a slot is free, and amulets not taken yet.</summary>
-    private void OfferReward(RewardKind kind)
+    private void OfferReward(RewardKind kind, int? choices = null)
     {
         var data = GameServices.Data;
         var skills = data.SkillSet(data.Character(GameConstants.PlayerCharacterId).Combat.SkillSet).Skills;
@@ -350,7 +432,7 @@ public partial class RunStage : Node2D
         {
             pool.AddRange(amulets.Where(amulet => !_player.Modifiers.Has(amulet.Id)).Select(amulet => MessageKeys.AmuletPrefix + amulet.Id));
         }
-        var picks = RewardDraw.Pick(pool, _run.RewardChoices, _random);
+        var picks = RewardDraw.Pick(pool, choices ?? _run.RewardChoices, _random);
         if (picks.Count == 0)
         {
             return;
