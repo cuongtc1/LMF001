@@ -11,6 +11,7 @@ using LumiFeast.Game.UI;
 using LumiFeast.Logic.Combat;
 using LumiFeast.Logic.Common;
 using LumiFeast.Logic.Data;
+using LumiFeast.Logic.Run;
 using LumiFeast.Logic.Stages;
 
 namespace LumiFeast.Game.Gameplay.Run;
@@ -40,6 +41,9 @@ public partial class RunStage : Node2D
     private Label _prompt = null!;
     private int _groundedTicks;
     private bool _roomCleared;
+    private bool _rewardPending;
+    private RewardPicker _picker = null!;
+    private SeededRandom _random = new(1);
 
     public override void _Ready()
     {
@@ -68,6 +72,9 @@ public partial class RunStage : Node2D
         _hud = new PrototypeHud();
         AddChild(_hud);
         _hud.Setup(_player);
+
+        _picker = new RewardPicker();
+        AddChild(_picker);
 
         var debug = new DebugPanel();
         AddChild(debug);
@@ -107,6 +114,10 @@ public partial class RunStage : Node2D
     {
         var seed = AutoplayRunner.RequestedScript() is null ? Time.GetTicksUsec() : GameConstants.ScriptedRunSeed;
         _plan = RunPlan.Build(_run, seed);
+        _random = new SeededRandom(seed);
+        _player.Loadout.Clear();
+        _player.Modifiers.Clear();
+        _player.ApplyModifiers();
         _roomIndex = 0;
         GameLog.Info(MessageKeys.RunStarted, string.Join(' ', _plan));
         BuildRoom();
@@ -201,9 +212,14 @@ public partial class RunStage : Node2D
     {
         _roomCleared = true;
         _hud.TrackBoss(null);
-        _player.Health.Heal(Mathf.RoundToInt(_player.Health.Max * _run.RoomClearHeal));
+        _player.Health.Heal(Mathf.RoundToInt(_player.Health.Max * (_run.RoomClearHeal + _player.Modifiers.Total(AmuletEffects.RoomHeal))));
         _door.Modulate = Colors.White;
         var last = _roomIndex + 1 >= _plan.Count;
+        if (!last)
+        {
+            OfferReward();
+        }
+
         if (last)
         {
             GameLog.Info(MessageKeys.RunCleared);
@@ -211,10 +227,58 @@ public partial class RunStage : Node2D
         }
     }
 
+    /// <summary>One of three: skills while a slot is free, and amulets not taken yet.</summary>
+    private void OfferReward()
+    {
+        var data = GameServices.Data;
+        var skills = data.SkillSet(data.Character(GameConstants.PlayerCharacterId).Combat.SkillSet).Skills;
+        var amulets = data.AmuletSet(_run.AmuletSet).Amulets;
+        var pool = new List<string>();
+        if (!_player.Loadout.IsFull)
+        {
+            pool.AddRange(skills.Where(skill => !_player.Loadout.Has(skill.Id)).Select(skill => MessageKeys.SkillPrefix + skill.Id));
+        }
+
+        pool.AddRange(amulets.Where(amulet => !_player.Modifiers.Has(amulet.Id)).Select(amulet => MessageKeys.AmuletPrefix + amulet.Id));
+        var picks = RewardDraw.Pick(pool, _run.RewardChoices, _random);
+        if (picks.Count == 0)
+        {
+            return;
+        }
+
+        var messages = GameServices.Messages;
+        var cards = picks.Select(key => (messages.Get(key), messages.Get(key + MessageKeys.DescriptionSuffix) + "\n" + (key.StartsWith(MessageKeys.SkillPrefix, System.StringComparison.Ordinal)
+            ? messages.Get(MessageKeys.RewardSkill, skills.First(skill => MessageKeys.SkillPrefix + skill.Id == key).MpCost)
+            : messages.Get(MessageKeys.RewardAmulet)))).ToList();
+        _rewardPending = true;
+        _player.InputPaused = true;
+        _picker.Open(cards, index =>
+        {
+            var key = picks[index];
+            if (key.StartsWith(MessageKeys.SkillPrefix, System.StringComparison.Ordinal))
+            {
+                _player.Loadout.Add(skills.First(skill => MessageKeys.SkillPrefix + skill.Id == key));
+            }
+            else
+            {
+                _player.Modifiers.Add(amulets.First(amulet => MessageKeys.AmuletPrefix + amulet.Id == key));
+                _player.ApplyModifiers();
+            }
+
+            GameLog.Info(MessageKeys.RewardPicked, key);
+            _rewardPending = false;
+            _player.InputPaused = false;
+        });
+        if (AutoplayRunner.RequestedScript() is not null)
+        {
+            _picker.Choose(0);
+        }
+    }
+
     /// <summary>The prompt waits until Lumi has stood still on the ground, so nobody presses it from the air.</summary>
     private void StepDoor()
     {
-        var atDoor = _roomCleared && Mathf.Abs(_player.GlobalPosition.X - _door.Position.X) < DoorZoneWidth && _player.OnGround;
+        var atDoor = _roomCleared && !_rewardPending && Mathf.Abs(_player.GlobalPosition.X - _door.Position.X) < DoorZoneWidth && _player.OnGround;
         _groundedTicks = atDoor ? _groundedTicks + 1 : 0;
         var ready = _groundedTicks >= _run.DoorPromptTicks;
         _prompt.Visible = ready;

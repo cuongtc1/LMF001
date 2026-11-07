@@ -253,7 +253,7 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         var pot = new Projectile();
         GetParent().AddChild(pot);
         pot.Launch(move.ProjectileSprite!, move.ProjectileHeight, from, velocity, move.ProjectileGravity, GlobalPosition.Y,
-            new HitInfo(_stats.Attack, move.DamageMultiplier, _brain.Facing, _def.Attack.KnockbackSpeed, 0, _def.Id));
+            new HitInfo(_stats.Attack, move.DamageMultiplier, _brain.Facing, _def.Attack.KnockbackSpeed, 0, _def.Id), PhysicsLayers.PlayerHurtbox);
     }
 
     private void StepStrike()

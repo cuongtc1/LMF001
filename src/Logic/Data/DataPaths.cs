@@ -14,6 +14,8 @@ public static class DataPaths
     public const string Monsters = "data/monsters";
     public const string Stages = "data/stages";
     public const string Runs = "data/runs";
+    public const string Skills = "data/skills";
+    public const string Amulets = "data/amulets";
     public const string JsonExtension = ".json";
 
     /// <summary>Files in the characters folder that are not character definitions.</summary>

@@ -16,6 +16,8 @@ public partial class PrototypeHud : CanvasLayer
     private Label _status = null!;
     private ProgressBar _bossBar = null!;
     private Health? _boss;
+    private readonly System.Collections.Generic.List<Label> _skills = [];
+    private Label _amulets = null!;
 
     public void Setup(PlayerController player)
     {
@@ -26,6 +28,18 @@ public partial class PrototypeHud : CanvasLayer
         _hp = AddBar(column, new Color("e2506a"), player.Health.Max);
         _mp = AddBar(column, new Color("6c8cf5"), player.MaxMp);
         column.AddChild(new Label { Text = GameServices.Messages.Get(MessageKeys.DebugHelp) });
+        var row = new HBoxContainer();
+        column.AddChild(row);
+        for (var i = 0; i < player.Loadout.Slots.Count; i++)
+        {
+            var label = new Label { CustomMinimumSize = new Vector2(250, 0) };
+            label.AddThemeFontSizeOverride("font_size", 22);
+            row.AddChild(label);
+            _skills.Add(label);
+        }
+
+        _amulets = new Label();
+        column.AddChild(_amulets);
 
         _combo = new Label { Position = new Vector2(1600, 300), Visible = false };
         _combo.AddThemeFontSizeOverride("font_size", 48);
@@ -66,8 +80,30 @@ public partial class PrototypeHud : CanvasLayer
         _hp.Value = _player.Health.Current;
         _mp.Value = _player.Mp;
         _bossBar.Value = _boss?.Current ?? 0;
+        ShowSkills();
         _combo.Visible = _player.ComboHits > 1;
         _combo.Text = GameServices.Messages.Get(MessageKeys.HudCombo, _player.ComboHits);
+    }
+
+    private void ShowSkills()
+    {
+        var messages = GameServices.Messages;
+        for (var i = 0; i < _skills.Count; i++)
+        {
+            var key = InputSetup.FirstKey(InputActions.Skills[i]);
+            if (_player.Loadout.Slots[i] is not { } skill)
+            {
+                _skills[i].Text = messages.Get(MessageKeys.HudSkillEmpty, key);
+                continue;
+            }
+
+            var cooldown = _player.Loadout.CooldownLeft(i);
+            var state = cooldown > 0 ? messages.Get(MessageKeys.HudSkillCooldown, Mathf.CeilToInt(cooldown / GameConstants.TicksPerSecond)) : messages.Get(MessageKeys.HudSkillReady);
+            _skills[i].Text = messages.Get(MessageKeys.HudSkillSlot, key, messages.Get(MessageKeys.SkillPrefix + skill.Id), state);
+            _skills[i].Modulate = cooldown > 0 || _player.Mp < skill.MpCost ? Colors.Gray : Colors.White;
+        }
+
+        _amulets.Text = string.Join("  ", System.Linq.Enumerable.Select(_player.Modifiers.Amulets, amulet => messages.Get(MessageKeys.AmuletPrefix + amulet.Id)));
     }
 
     private static ProgressBar AddBar(Container parent, Color color, double max)

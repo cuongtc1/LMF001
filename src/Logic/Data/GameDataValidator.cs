@@ -24,7 +24,24 @@ public static class GameDataValidator
             Require(character.Stats.MaxHp > 0 && character.Stats.Attack > 0 && character.Stats.Speed > 0, character.Id);
             Require(character.Movement.RunSpeed > 0 && character.Movement.Gravity > 0, character.Id);
             Require(character.Guard.DamageScale is >= 0 and <= 1, character.Id);
-            data.AttackSet(character.Combat.AttackSet);
+            var attacks = data.AttackSet(character.Combat.AttackSet).Attacks.Select(attack => attack.Id).ToHashSet();
+            var skills = data.SkillSet(character.Combat.SkillSet);
+            var projectiles = skills.Projectiles.Select(projectile => projectile.Id).ToHashSet();
+            foreach (var skill in skills.Skills)
+            {
+                Require(attacks.Contains(skill.Attack), $"{skills.Id}.{skill.Id}");
+            }
+
+            foreach (var attack in data.AttackSet(character.Combat.AttackSet).Attacks.Where(attack => attack.Projectile is not null))
+            {
+                Require(projectiles.Contains(attack.Projectile!), attack.Id);
+            }
+
+            foreach (var effect in data.AmuletSets.Values.SelectMany(set => set.Amulets).SelectMany(amulet => amulet.Effects))
+            {
+                Require(Run.AmuletEffects.All.Contains(effect.Kind), effect.Kind);
+                Require(effect.Projectile is null || projectiles.Contains(effect.Projectile), effect.Kind);
+            }
         }
 
         foreach (var set in data.AttackSets.Values)
@@ -60,6 +77,7 @@ public static class GameDataValidator
         {
             var rooms = run.Rooms.Select(room => room.Id).ToHashSet();
             Require(rooms.Contains(run.FirstRoom) && rooms.Contains(run.BossRoom), run.Id);
+            data.AmuletSet(run.AmuletSet);
             Require(run.RoomsPerRun >= 1 && run.RoomsPerRun <= run.Rooms.Count - 1, $"{run.Id}.rooms_per_run");
             foreach (var spawn in run.Rooms.SelectMany(room => room.Waves).SelectMany(wave => wave.Spawns))
             {

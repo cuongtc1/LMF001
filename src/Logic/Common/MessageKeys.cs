@@ -35,11 +35,21 @@ public static class MessageKeys
     public const string DebugHelp = "debug.help";
     public const string HudCombo = "hud.combo";
     public const string HudWave = "hud.wave";
+    public const string RewardSkill = "reward.skill";
+    public const string RewardAmulet = "reward.amulet";
+    public const string HudSkillSlot = "hud.skill_slot";
+    public const string HudSkillReady = "hud.skill_ready";
+    public const string HudSkillCooldown = "hud.skill_cooldown";
+    public const string HudSkillEmpty = "hud.skill_empty";
+    public const string SkillPrefix = "skill.";
+    public const string AmuletPrefix = "amulet.";
+    public const string DescriptionSuffix = ".desc";
     public const string HudRoom = "hud.room";
     public const string HudBoss = "hud.boss";
     public const string RunDoorPrompt = "run.door_prompt";
     public const string RunStarted = "run.started";
     public const string RunCleared = "run.cleared";
+    public const string RewardPicked = "run.reward_picked";
     public const string DebugPrototype = "debug.prototype";
     public const string HudClear = "hud.clear";
     public const string ArenaWave = "stage.arena_wave";
@@ -49,7 +59,7 @@ public static class MessageKeys
     [
         DataFileMissing, DataFileInvalid, DataUnknownId, DataDuplicateId, DataBadValue, DataLoaded, DataReloaded,
         GameBooted, StageLoaded, AssetMissing, CombatPlayerHit, CombatMonsterHit, CombatMonsterHealed,
-        AutoplayStarted, AutoplayFinished, DebugTitle, DebugDifficulty, DebugTier, DebugGodMode, DebugAirJump, DebugHeal, DebugArena, CombatStoic, CombatDizzy, CombatPhaseTwo, CombatGuardBlock, CombatGuardPerfect, HudRoom, HudBoss, RunDoorPrompt, RunStarted, RunCleared, DebugPrototype, HudWave, HudClear, ArenaWave, ArenaCleared,
+        AutoplayStarted, AutoplayFinished, DebugTitle, DebugDifficulty, DebugTier, DebugGodMode, DebugAirJump, DebugHeal, DebugArena, CombatStoic, CombatDizzy, CombatPhaseTwo, CombatGuardBlock, CombatGuardPerfect, HudRoom, HudBoss, RunDoorPrompt, RunStarted, RunCleared, RewardPicked, DebugPrototype, RewardSkill, RewardAmulet, HudSkillSlot, HudSkillReady, HudSkillCooldown, HudSkillEmpty, HudWave, HudClear, ArenaWave, ArenaCleared,
         DebugRespawn, DebugReload, DebugHelp, HudCombo,
     ];
 }

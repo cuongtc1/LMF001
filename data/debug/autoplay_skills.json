@@ -1,0 +1,93 @@
+{
+  "start_x": 560,
+  "god_mode": true,
+  "skills": [
+    "skewer",
+    "tenderizer",
+    "jam_spread",
+    "dough_roll"
+  ],
+  "end_tick": 760,
+  "steps": [
+    {
+      "tick": 60,
+      "action": "skill_1",
+      "pressed": true
+    },
+    {
+      "tick": 62,
+      "action": "skill_1",
+      "pressed": false
+    },
+    {
+      "tick": 200,
+      "action": "skill_2",
+      "pressed": true
+    },
+    {
+      "tick": 202,
+      "action": "skill_2",
+      "pressed": false
+    },
+    {
+      "tick": 340,
+      "action": "skill_3",
+      "pressed": true
+    },
+    {
+      "tick": 342,
+      "action": "skill_3",
+      "pressed": false
+    },
+    {
+      "tick": 480,
+      "action": "skill_4",
+      "pressed": true
+    },
+    {
+      "tick": 482,
+      "action": "skill_4",
+      "pressed": false
+    },
+    {
+      "tick": 560,
+      "action": "move_right",
+      "pressed": true
+    },
+    {
+      "tick": 570,
+      "action": "move_right",
+      "pressed": false
+    },
+    {
+      "tick": 600,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 602,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 618,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 620,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 640,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 642,
+      "action": "attack_light",
+      "pressed": false
+    }
+  ]
+}

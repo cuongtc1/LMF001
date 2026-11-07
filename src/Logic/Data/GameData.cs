@@ -25,6 +25,10 @@ public sealed class GameData
 
     public required IReadOnlyDictionary<string, RunDef> Runs { get; init; }
 
+    public required IReadOnlyDictionary<string, SkillSetDef> SkillSets { get; init; }
+
+    public required IReadOnlyDictionary<string, AmuletSetDef> AmuletSets { get; init; }
+
     public CharacterDef Character(string id) => Find(Characters, id);
 
     public AttackSetDef AttackSet(string id) => Find(AttackSets, id);
@@ -34,6 +38,10 @@ public sealed class GameData
     public StageDef Stage(string id) => Find(Stages, id);
 
     public RunDef Run(string id) => Find(Runs, id);
+
+    public SkillSetDef SkillSet(string id) => Find(SkillSets, id);
+
+    public AmuletSetDef AmuletSet(string id) => Find(AmuletSets, id);
 
     public DifficultyDef Difficulty(string id) =>
         Difficulties.Modes.FirstOrDefault(mode => mode.Id == id) ?? throw new GameDataException(MessageKeys.DataUnknownId, id);

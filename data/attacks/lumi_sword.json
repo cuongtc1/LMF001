@@ -38,7 +38,10 @@
       "mana": 3,
       "stagger": 2,
       "landing_lag_ticks": 0,
-      "guard_break": false
+      "guard_break": false,
+      "view_clip": null,
+      "rehit_ticks": 0,
+      "projectile": null
     },
     {
       "id": "z2",
@@ -72,7 +75,10 @@
       "mana": 3,
       "stagger": 2,
       "landing_lag_ticks": 0,
-      "guard_break": false
+      "guard_break": false,
+      "view_clip": null,
+      "rehit_ticks": 0,
+      "projectile": null
     },
     {
       "id": "z3",
@@ -106,7 +112,10 @@
       "mana": 3,
       "stagger": 3,
       "landing_lag_ticks": 0,
-      "guard_break": false
+      "guard_break": false,
+      "view_clip": null,
+      "rehit_ticks": 0,
+      "projectile": null
     },
     {
       "id": "zx",
@@ -140,7 +149,10 @@
       "mana": 5,
       "stagger": 4,
       "landing_lag_ticks": 0,
-      "guard_break": true
+      "guard_break": true,
+      "view_clip": null,
+      "rehit_ticks": 0,
+      "projectile": null
     },
     {
       "id": "x1",
@@ -174,7 +186,10 @@
       "mana": 5,
       "stagger": 5,
       "landing_lag_ticks": 0,
-      "guard_break": true
+      "guard_break": true,
+      "view_clip": null,
+      "rehit_ticks": 0,
+      "projectile": null
     },
     {
       "id": "xx",
@@ -208,7 +223,10 @@
       "mana": 5,
       "stagger": 6,
       "landing_lag_ticks": 0,
-      "guard_break": true
+      "guard_break": true,
+      "view_clip": null,
+      "rehit_ticks": 0,
+      "projectile": null
     },
     {
       "id": "s1",
@@ -242,7 +260,10 @@
       "mana": 4,
       "stagger": 3,
       "landing_lag_ticks": 0,
-      "guard_break": false
+      "guard_break": false,
+      "view_clip": null,
+      "rehit_ticks": 0,
+      "projectile": null
     },
     {
       "id": "a1",
@@ -276,7 +297,10 @@
       "mana": 3,
       "stagger": 2,
       "landing_lag_ticks": 0,
-      "guard_break": false
+      "guard_break": false,
+      "view_clip": null,
+      "rehit_ticks": 0,
+      "projectile": null
     },
     {
       "id": "ax",
@@ -310,7 +334,10 @@
       "mana": 5,
       "stagger": 5,
       "landing_lag_ticks": 12,
-      "guard_break": true
+      "guard_break": true,
+      "view_clip": null,
+      "rehit_ticks": 0,
+      "projectile": null
     },
     {
       "id": "counter",
@@ -344,7 +371,10 @@
       "mana": 6,
       "stagger": 8,
       "landing_lag_ticks": 0,
-      "guard_break": true
+      "guard_break": true,
+      "view_clip": null,
+      "rehit_ticks": 0,
+      "projectile": null
     },
     {
       "id": "au",
@@ -378,7 +408,158 @@
       "mana": 3,
       "stagger": 2,
       "landing_lag_ticks": 0,
-      "guard_break": false
+      "guard_break": false,
+      "view_clip": null,
+      "rehit_ticks": 0,
+      "projectile": null
+    },
+    {
+      "id": "sk_skewer",
+      "damage_multiplier": 1.4,
+      "startup_ticks": 6,
+      "active_ticks": 20,
+      "recovery_ticks": 16,
+      "cancel_from_tick": 34,
+      "next": null,
+      "lunge_pixels": 520,
+      "hitbox": {
+        "x": -20,
+        "y": -220,
+        "width": 320,
+        "height": 220
+      },
+      "hitstop_ticks": 3,
+      "shake_pixels": 0,
+      "knockback_speed": 300,
+      "vfx": "slash_horizontal",
+      "hit_vfx": "hit_light",
+      "vfx_x": 165,
+      "vfx_y": -105,
+      "launch_speed": 0,
+      "ends_on_landing": false,
+      "next_heavy": null,
+      "chain_from_tick": 34,
+      "stun_ticks": 50,
+      "knockdown": false,
+      "plunge_speed": 0,
+      "mana": 0,
+      "stagger": 6,
+      "landing_lag_ticks": 0,
+      "guard_break": true,
+      "view_clip": "s1",
+      "rehit_ticks": 0,
+      "projectile": null
+    },
+    {
+      "id": "sk_tenderizer",
+      "damage_multiplier": 2.6,
+      "startup_ticks": 16,
+      "active_ticks": 8,
+      "recovery_ticks": 22,
+      "cancel_from_tick": 35,
+      "next": null,
+      "lunge_pixels": 0,
+      "hitbox": {
+        "x": -320,
+        "y": -230,
+        "width": 680,
+        "height": 250
+      },
+      "hitstop_ticks": 8,
+      "shake_pixels": 10,
+      "knockback_speed": 420,
+      "vfx": "slash_ring",
+      "hit_vfx": "hit_heavy",
+      "vfx_x": 140,
+      "vfx_y": -105,
+      "launch_speed": 0,
+      "ends_on_landing": false,
+      "next_heavy": null,
+      "chain_from_tick": 35,
+      "stun_ticks": 40,
+      "knockdown": true,
+      "plunge_speed": 0,
+      "mana": 0,
+      "stagger": 10,
+      "landing_lag_ticks": 0,
+      "guard_break": true,
+      "view_clip": "x1",
+      "rehit_ticks": 0,
+      "projectile": null
+    },
+    {
+      "id": "sk_jam",
+      "damage_multiplier": 0.1,
+      "startup_ticks": 10,
+      "active_ticks": 6,
+      "recovery_ticks": 20,
+      "cancel_from_tick": 26,
+      "next": null,
+      "lunge_pixels": 0,
+      "hitbox": {
+        "x": 0,
+        "y": 0,
+        "width": 1,
+        "height": 1
+      },
+      "hitstop_ticks": 3,
+      "shake_pixels": 0,
+      "knockback_speed": 260,
+      "vfx": "slash_horizontal",
+      "hit_vfx": "hit_light",
+      "vfx_x": 165,
+      "vfx_y": -105,
+      "launch_speed": 0,
+      "ends_on_landing": false,
+      "next_heavy": null,
+      "chain_from_tick": 26,
+      "stun_ticks": 40,
+      "knockdown": false,
+      "plunge_speed": 0,
+      "mana": 0,
+      "stagger": 0,
+      "landing_lag_ticks": 0,
+      "guard_break": true,
+      "view_clip": "z1",
+      "rehit_ticks": 0,
+      "projectile": "jam_wave"
+    },
+    {
+      "id": "sk_roll",
+      "damage_multiplier": 0.6,
+      "startup_ticks": 4,
+      "active_ticks": 30,
+      "recovery_ticks": 10,
+      "cancel_from_tick": 39,
+      "next": null,
+      "lunge_pixels": 640,
+      "hitbox": {
+        "x": -60,
+        "y": -160,
+        "width": 220,
+        "height": 160
+      },
+      "hitstop_ticks": 3,
+      "shake_pixels": 0,
+      "knockback_speed": 120,
+      "vfx": "slash_horizontal",
+      "hit_vfx": "hit_light",
+      "vfx_x": 165,
+      "vfx_y": -105,
+      "launch_speed": 0,
+      "ends_on_landing": false,
+      "next_heavy": null,
+      "chain_from_tick": 39,
+      "stun_ticks": 30,
+      "knockdown": false,
+      "plunge_speed": 0,
+      "mana": 0,
+      "stagger": 2,
+      "landing_lag_ticks": 0,
+      "guard_break": true,
+      "view_clip": "dash",
+      "rehit_ticks": 8,
+      "projectile": null
     }
   ],
   "first_counter": "counter",

@@ -1,0 +1,99 @@
+{
+  "id": "honey_labyrinth",
+  "amulets": [
+    {
+      "id": "honey_edge",
+      "effects": [
+        {
+          "kind": "light_damage",
+          "value": 0.2,
+          "target": null,
+          "projectile": null
+        }
+      ]
+    },
+    {
+      "id": "heavy_spoon",
+      "effects": [
+        {
+          "kind": "heavy_damage",
+          "value": 0.25,
+          "target": null,
+          "projectile": null
+        },
+        {
+          "kind": "heavy_stagger",
+          "value": 0.5,
+          "target": null,
+          "projectile": null
+        }
+      ]
+    },
+    {
+      "id": "sugar_rush",
+      "effects": [
+        {
+          "kind": "speed",
+          "value": 0.15,
+          "target": null,
+          "projectile": null
+        }
+      ]
+    },
+    {
+      "id": "full_pantry",
+      "effects": [
+        {
+          "kind": "mana_gain",
+          "value": 0.3,
+          "target": null,
+          "projectile": null
+        }
+      ]
+    },
+    {
+      "id": "thick_crust",
+      "effects": [
+        {
+          "kind": "damage_taken",
+          "value": -0.15,
+          "target": null,
+          "projectile": null
+        }
+      ]
+    },
+    {
+      "id": "second_helping",
+      "effects": [
+        {
+          "kind": "room_heal",
+          "value": 0.1,
+          "target": null,
+          "projectile": null
+        }
+      ]
+    },
+    {
+      "id": "star_sprinkle",
+      "effects": [
+        {
+          "kind": "attack_projectile",
+          "value": 0,
+          "target": "z3",
+          "projectile": "star_wave"
+        }
+      ]
+    },
+    {
+      "id": "quick_hands",
+      "effects": [
+        {
+          "kind": "skill_cooldown",
+          "value": -0.25,
+          "target": null,
+          "projectile": null
+        }
+      ]
+    }
+  ]
+}

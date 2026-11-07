@@ -28,7 +28,19 @@ public sealed record MovementDef(
     float FastFallMaxSpeed,
     int DropThroughTicks);
 
-public sealed record CharacterCombatDef(string AttackSet, float MpPerSecond, int AttackBufferTicks);
+public sealed record CharacterCombatDef(string AttackSet, float MpPerSecond, int AttackBufferTicks, string SkillSet);
+
+public sealed record SkillDef(string Id, string Attack, float MpCost, int CooldownTicks, int InvulnerableTicks);
+
+public sealed record ProjectileDef(string Id, string Sprite, float Speed, int Ticks, float Height, float DamageMultiplier, bool Pierce, float Stagger);
+
+public sealed record SkillSetDef(string Id, int Slots, IReadOnlyList<SkillDef> Skills, IReadOnlyList<ProjectileDef> Projectiles);
+
+public sealed record AmuletEffectDef(string Kind, float Value, string? Target = null, string? Projectile = null);
+
+public sealed record AmuletDef(string Id, IReadOnlyList<AmuletEffectDef> Effects);
+
+public sealed record AmuletSetDef(string Id, IReadOnlyList<AmuletDef> Amulets);
 
 /// <param name="DefaultAttack">Clip for attacks that have no animation of their own yet.</param>
 public sealed record SpineViewDef(
@@ -95,7 +107,10 @@ public sealed record AttackDef(
     float PlungeSpeed,
     float Stagger,
     int LandingLagTicks,
-    bool GuardBreak)
+    bool GuardBreak,
+    string? ViewClip = null,
+    int RehitTicks = 0,
+    string? Projectile = null)
 {
     public int TotalTicks => StartupTicks + ActiveTicks + RecoveryTicks;
 }
@@ -252,6 +267,8 @@ public sealed record RunDef(
     float DoorInset,
     int DoorPromptTicks,
     float RoomClearHeal,
+    string AmuletSet,
+    int RewardChoices,
     IReadOnlyList<RoomDef> Rooms);
 
 public sealed record InputActionDef(string Action, IReadOnlyList<string> Keys, IReadOnlyList<int> PadButtons, IReadOnlyList<int> PadAxes);

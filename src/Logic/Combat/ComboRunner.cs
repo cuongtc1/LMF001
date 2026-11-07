@@ -71,6 +71,13 @@ public sealed class ComboRunner(AttackSetDef set, int bufferTicks)
         _heavyBuffered = heavy;
     }
 
+    /// <summary>A skill replaces whatever attack is playing.</summary>
+    public void StartSkill(string attackId)
+    {
+        _buffer = 0;
+        Start(attackId);
+    }
+
     public void Cancel()
     {
         Current = null;

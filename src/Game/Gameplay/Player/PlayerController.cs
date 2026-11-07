@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 using LumiFeast.Game.Common;
 using LumiFeast.Game.Gameplay.Combat;
@@ -6,6 +7,7 @@ using LumiFeast.Logic.Combat;
 using LumiFeast.Logic.Common;
 using LumiFeast.Logic.Data;
 using LumiFeast.Logic.Player;
+using LumiFeast.Logic.Run;
 using LumiFeast.Logic.Stats;
 
 namespace LumiFeast.Game.Gameplay.Player;
@@ -33,6 +35,13 @@ public partial class PlayerController : CharacterBody2D, IDamageable
     private int _guardHitTicks;
     private int _vfxSwingId;
     private bool _onPlatform;
+    private int _skillInvulnerableTicks;
+    private SkillSetDef _skills = null!;
+
+    private const float ProjectileForward = 80;
+    private const float ProjectileHeight = 110;
+    private const float ProjectileFloor = 100000;
+    private const int RehitStride = 1000;
 
     public IPlayerInput InputSource { get; set; } = new DeviceInput();
 
@@ -49,9 +58,17 @@ public partial class PlayerController : CharacterBody2D, IDamageable
 
     public bool UpPressed { get; private set; }
 
+    /// <summary>Menus open: Lumi ignores buttons.</summary>
+    public bool InputPaused { get; set; }
+
     public float Mp { get; private set; }
 
     public int MaxMp => _def.Stats.MaxMp;
+
+    public SkillLoadout Loadout { get; private set; } = null!;
+
+    /// <summary>The amulets of the current run.</summary>
+    public RunModifiers Modifiers { get; set; } = new();
 
     public int ComboHits { get; private set; }
 
@@ -63,9 +80,11 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         _feel = feel;
         _gameFeel = gameFeel;
         _spawn = spawn;
-        var speed = StatScaler.ForSpeed(def.Stats.Speed, GameServices.Data.Scaling.Speed);
-        _motor = new PlayerMotor(def.Movement) { Tempo = speed.Move };
-        _combo = new ComboRunner(attacks, def.Combat.AttackBufferTicks) { AttackSpeed = speed.Attack };
+        _motor = new PlayerMotor(def.Movement);
+        _combo = new ComboRunner(attacks, def.Combat.AttackBufferTicks);
+        _skills = GameServices.Data.SkillSet(def.Combat.SkillSet);
+        Loadout = new SkillLoadout(_skills.Slots);
+        ApplyModifiers();
         _guard = new GuardState(def.Guard);
         Health = new Health(def.Stats.MaxHp);
         GlobalPosition = spawn;
@@ -88,6 +107,14 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         _hitbox = new AttackHitbox();
         AddChild(_hitbox);
         _hitbox.Setup(PhysicsLayers.EnemyHurtbox);
+    }
+
+    /// <summary>Recomputes what amulets change on Lumi herself.</summary>
+    public void ApplyModifiers()
+    {
+        var speed = StatScaler.ForSpeed(_def.Stats.Speed + Modifiers.Total(AmuletEffects.Speed), GameServices.Data.Scaling.Speed);
+        _motor.Tempo = speed.Move;
+        _combo.AttackSpeed = speed.Attack;
     }
 
     /// <summary>Where Lumi comes back after she falls.</summary>
@@ -115,7 +142,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
 
     public bool TakeHit(in HitInfo hit)
     {
-        if (GameServices.GodMode || _invulnerableTicks > 0 || Health.IsDead)
+        if (GameServices.GodMode || _invulnerableTicks > 0 || _skillInvulnerableTicks > 0 || Health.IsDead)
         {
             return false;
         }
@@ -127,7 +154,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             return true;
         }
 
-        var damage = DamageCalculator.Compute(hit.Attack, hit.Multiplier, _def.Stats.Defense);
+        var damage = Mathf.Max(1, Mathf.RoundToInt(DamageCalculator.Compute(hit.Attack, hit.Multiplier, _def.Stats.Defense) * Modifiers.Scale(AmuletEffects.DamageTaken)));
         Health.Damage(damage);
         GameLog.Info(MessageKeys.CombatPlayerHit, damage, Health.Current, Health.Max);
         _gameFeel.ShowDamage(GlobalPosition + new Vector2(0, -_def.Body.Height), damage, Colors.OrangeRed);
@@ -184,7 +211,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             StepDead();
         }
 
-        var input = InputSource.Read();
+        var input = InputPaused ? default : InputSource.Read();
         UpPressed = input.JumpPressed;
         if (SuppressJump)
         {
@@ -196,6 +223,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             _combo.PressAttack(input.HeavyPressed);
         }
 
+        TryStartSkill(input.SkillPressed);
         _combo.Advance(CurrentEntry(input));
         if (_combo.JustStarted && input.MoveX != 0)
         {
@@ -252,6 +280,51 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         ShowView(attacking);
     }
 
+    private void TryStartSkill(int slot)
+    {
+        if (slot < 0 || _stunTicks > 0 || _landingLagTicks > 0 || Health.IsDead || (_combo.Current is not null && !_combo.CanCancel))
+        {
+            return;
+        }
+
+        if (Loadout.TryUse(slot, Mp, Modifiers.Scale(AmuletEffects.SkillCooldown)) is not { } skill)
+        {
+            return;
+        }
+
+        Mp -= skill.MpCost;
+        _skillInvulnerableTicks = skill.InvulnerableTicks;
+        _combo.StartSkill(skill.Attack);
+        _motor.EndRun();
+        _hitbox.Close();
+    }
+
+    private void LaunchProjectile(string id, AttackDef attack)
+    {
+        var shot = _skills.Projectiles.First(projectile => projectile.Id == id);
+        var hit = new HitInfo(_def.Stats.Attack, shot.DamageMultiplier * DamageScale(attack), _motor.Facing, attack.KnockbackSpeed, 0, _def.Id, attack.StunTicks, false, shot.Stagger, true);
+        var projectile = new Projectile();
+        GetParent().AddChild(projectile);
+        projectile.Landed = OnLanded;
+        projectile.Launch(shot.Sprite, shot.Height, GlobalPosition + new Vector2(_motor.Facing * ProjectileForward, -ProjectileHeight),
+            new Vector2(_motor.Facing * shot.Speed, 0), 0, ProjectileFloor, hit, PhysicsLayers.EnemyHurtbox, shot.Pierce, shot.Ticks);
+    }
+
+    private float DamageScale(AttackDef attack) =>
+        Modifiers.Scale(attack.GuardBreak ? AmuletEffects.HeavyDamage : AmuletEffects.LightDamage);
+
+    private void OnLanded(IDamageable target)
+    {
+        if (target is Node2D node)
+        {
+            _gameFeel.PlayEffect(_feel.GuardVfx, node.GlobalPosition + new Vector2(0, -70), _motor.Facing);
+        }
+
+        TotalHits++;
+        ComboHits++;
+        _comboResetTicks = _feel.ComboResetTicks;
+    }
+
     private bool StandsOnPlatform()
     {
         for (var i = 0; i < GetSlideCollisionCount(); i++)
@@ -281,10 +354,10 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         return _motor.IsSprinting || _motor.IsDashing ? ComboEntry.Sprint : ComboEntry.Ground;
     }
 
-    /// <summary>Monsters stop Lumi, except while she dashes through them.</summary>
+    /// <summary>Monsters stop Lumi, except while she dashes or uses a skill.</summary>
     private void PushOutOfBodies()
     {
-        if (_motor.IsDashing || Health.IsDead)
+        if (_motor.IsDashing || _skillInvulnerableTicks > 0 || Health.IsDead)
         {
             return;
         }
@@ -321,6 +394,15 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             _vfxSwingId = _combo.SwingId;
             var position = GlobalPosition + new Vector2(starting.VfxX * _motor.Facing, starting.VfxY);
             _gameFeel.PlayEffect(starting.Vfx, position, _motor.Facing);
+            if (starting.Projectile is { } shot)
+            {
+                LaunchProjectile(shot, starting);
+            }
+
+            foreach (var extra in Modifiers.ProjectilesFor(starting.Id))
+            {
+                LaunchProjectile(extra, starting);
+            }
         }
 
         if (_combo.Phase != AttackPhase.Active || _combo.Current is not { } attack)
@@ -329,8 +411,10 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             return;
         }
 
-        var hit = new HitInfo(_def.Stats.Attack, attack.DamageMultiplier, _motor.Facing, attack.KnockbackSpeed, attack.LaunchSpeed, _def.Id, attack.StunTicks, attack.Knockdown, attack.Stagger, attack.GuardBreak);
-        var landed = _hitbox.Sweep(_combo.SwingId, attack.Hitbox, _motor.Facing, hit);
+        var stagger = attack.Stagger * (attack.GuardBreak ? Modifiers.Scale(AmuletEffects.HeavyStagger) : 1);
+        var hit = new HitInfo(_def.Stats.Attack, attack.DamageMultiplier * DamageScale(attack), _motor.Facing, attack.KnockbackSpeed, attack.LaunchSpeed, _def.Id, attack.StunTicks, attack.Knockdown, stagger, attack.GuardBreak);
+        var swing = attack.RehitTicks > 0 ? _combo.SwingId * RehitStride + _combo.Tick / attack.RehitTicks : _combo.SwingId;
+        var landed = _hitbox.Sweep(swing, attack.Hitbox, _motor.Facing, hit);
         foreach (var target in landed)
         {
             if (target is Node2D node)
@@ -338,7 +422,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
                 _gameFeel.PlayEffect(attack.HitVfx, node.GlobalPosition + new Vector2(0, -70), _motor.Facing);
             }
 
-            Mp = Mathf.Min(MaxMp, Mp + attack.Mana);
+            Mp = Mathf.Min(MaxMp, Mp + attack.Mana * Modifiers.Scale(AmuletEffects.ManaGain));
             ComboHits++;
             TotalHits++;
             _comboResetTicks = _feel.ComboResetTicks;
@@ -357,6 +441,8 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         _dropTicks = Mathf.Max(0, _dropTicks - 1);
         _landingLagTicks = Mathf.Max(0, _landingLagTicks - 1);
         _guardHitTicks = Mathf.Max(0, _guardHitTicks - 1);
+        _skillInvulnerableTicks = Mathf.Max(0, _skillInvulnerableTicks - 1);
+        Loadout.Step();
         if (_downTicks > 0)
         {
             _downTicks--;
@@ -404,7 +490,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             _invulnerableTicks > 0,
             _stunTicks > 0 || Health.IsDead,
             attack is not null,
-            attack?.Id ?? string.Empty,
+            attack?.ViewClip ?? attack?.Id ?? string.Empty,
             _combo.SwingId,
             _combo.Progress,
             _guard.IsGuarding,

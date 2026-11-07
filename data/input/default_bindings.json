@@ -103,6 +103,38 @@
       ],
       "pad_buttons": [],
       "pad_axes": []
+    },
+    {
+      "action": "skill_1",
+      "keys": [
+        "A"
+      ],
+      "pad_buttons": [],
+      "pad_axes": []
+    },
+    {
+      "action": "skill_2",
+      "keys": [
+        "S"
+      ],
+      "pad_buttons": [],
+      "pad_axes": []
+    },
+    {
+      "action": "skill_3",
+      "keys": [
+        "D"
+      ],
+      "pad_buttons": [],
+      "pad_axes": []
+    },
+    {
+      "action": "skill_4",
+      "keys": [
+        "F"
+      ],
+      "pad_buttons": [],
+      "pad_axes": []
     }
   ]
 }

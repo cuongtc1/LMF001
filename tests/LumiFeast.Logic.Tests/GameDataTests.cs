@@ -26,11 +26,24 @@ public class GameDataTests
         var attacks = TestData.Game.AttackSet("lumi_sword").Attacks;
         Assert.All(attacks, attack =>
         {
-            var heavy = attack.Id.Contains('x');
+            var heavy = attack.GuardBreak;
             Assert.True(heavy || attack is { LaunchSpeed: 0, Knockdown: false }, attack.Id);
         });
         Assert.Contains(attacks, attack => attack.LaunchSpeed > 0);
         Assert.Contains(attacks, attack => attack.Knockdown);
+    }
+
+    [Fact]
+    public void EverySkillAndAmuletHasANameAndADescription()
+    {
+        var messages = MessageCatalog.Parse(new DiskDataSource().ReadText(DataPaths.Messages));
+        var keys = TestData.Game.SkillSets.Values.SelectMany(set => set.Skills).Select(skill => MessageKeys.SkillPrefix + skill.Id)
+            .Concat(TestData.Game.AmuletSets.Values.SelectMany(set => set.Amulets).Select(amulet => MessageKeys.AmuletPrefix + amulet.Id));
+        Assert.All(keys, key =>
+        {
+            Assert.True(messages.Contains(key), key);
+            Assert.True(messages.Contains(key + MessageKeys.DescriptionSuffix), key);
+        });
     }
 
     [Fact]

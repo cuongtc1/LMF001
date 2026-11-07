@@ -318,5 +318,7 @@
       ]
     }
   ],
-  "room_clear_heal": 0.15
+  "room_clear_heal": 0.15,
+  "amulet_set": "honey_labyrinth",
+  "reward_choices": 3
 }

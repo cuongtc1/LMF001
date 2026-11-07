@@ -35,6 +35,15 @@ public partial class AutoplayRunner : Node, IPlayerInput
         }
 
         GameServices.GodMode = document.RootElement.TryGetProperty("god_mode", out var god) && god.GetBoolean();
+        if (document.RootElement.TryGetProperty("skills", out var skills))
+        {
+            _player.Heal();
+            var set = GameServices.Data.SkillSet(GameServices.Data.Character(GameConstants.PlayerCharacterId).Combat.SkillSet);
+            foreach (var id in skills.EnumerateArray())
+            {
+                _player.Loadout.Add(set.Skills.First(skill => skill.Id == id.GetString()));
+            }
+        }
         foreach (var step in document.RootElement.GetProperty("steps").EnumerateArray())
         {
             _steps.Add(new Step(step.GetProperty("tick").GetInt32(), step.GetProperty("action").GetString()!, step.GetProperty("pressed").GetBoolean()));
@@ -83,7 +92,8 @@ public partial class AutoplayRunner : Node, IPlayerInput
         _held.Contains(InputActions.MoveDown),
         _pressedNow.Contains(InputActions.AttackHeavy),
         _pressedNow.Contains(InputActions.MoveDown),
-        _held.Contains(InputActions.Guard));
+        _held.Contains(InputActions.Guard),
+        System.Array.FindIndex(InputActions.Skills, _pressedNow.Contains));
 
     private readonly record struct Step(int Tick, string Action, bool Pressed);
 }

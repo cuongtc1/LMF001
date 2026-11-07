@@ -30,6 +30,8 @@ public sealed class GameDataLoader(IDataSource source)
             Monsters = ReadFolder<MonsterDef>(DataPaths.Monsters, def => def.Id),
             Stages = ReadFolder<StageDef>(DataPaths.Stages, def => def.Id),
             Runs = ReadFolder<RunDef>(DataPaths.Runs, def => def.Id),
+            SkillSets = ReadFolder<SkillSetDef>(DataPaths.Skills, def => def.Id),
+            AmuletSets = ReadFolder<AmuletSetDef>(DataPaths.Amulets, def => def.Id),
         };
         GameDataValidator.Validate(data);
         return data;

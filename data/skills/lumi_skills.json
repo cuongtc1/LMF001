@@ -1,0 +1,56 @@
+{
+  "id": "lumi_skills",
+  "slots": 4,
+  "skills": [
+    {
+      "id": "skewer",
+      "attack": "sk_skewer",
+      "mp_cost": 30,
+      "cooldown_ticks": 240,
+      "invulnerable_ticks": 30
+    },
+    {
+      "id": "tenderizer",
+      "attack": "sk_tenderizer",
+      "mp_cost": 35,
+      "cooldown_ticks": 300,
+      "invulnerable_ticks": 24
+    },
+    {
+      "id": "jam_spread",
+      "attack": "sk_jam",
+      "mp_cost": 25,
+      "cooldown_ticks": 180,
+      "invulnerable_ticks": 10
+    },
+    {
+      "id": "dough_roll",
+      "attack": "sk_roll",
+      "mp_cost": 20,
+      "cooldown_ticks": 240,
+      "invulnerable_ticks": 44
+    }
+  ],
+  "projectiles": [
+    {
+      "id": "jam_wave",
+      "sprite": "assets/vfx/common/slash_wave.png",
+      "speed": 1300,
+      "ticks": 45,
+      "height": 200,
+      "damage_multiplier": 1.8,
+      "pierce": true,
+      "stagger": 4
+    },
+    {
+      "id": "star_wave",
+      "sprite": "assets/vfx/common/slash_wave.png",
+      "speed": 1100,
+      "ticks": 30,
+      "height": 130,
+      "damage_multiplier": 0.8,
+      "pierce": true,
+      "stagger": 1
+    }
+  ]
+}

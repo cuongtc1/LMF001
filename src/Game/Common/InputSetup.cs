@@ -1,3 +1,4 @@
+using System.Linq;
 using Godot;
 using LumiFeast.Logic.Data;
 
@@ -6,6 +7,10 @@ namespace LumiFeast.Game.Common;
 /// <summary>Builds the input map from data/input, which is also where remapping will save to.</summary>
 public static class InputSetup
 {
+    /// <summary>The first keyboard key of an action, for on-screen hints.</summary>
+    public static string FirstKey(string action) =>
+        GameServices.Data.Input.Actions.FirstOrDefault(item => item.Action == action)?.Keys.FirstOrDefault() ?? string.Empty;
+
     public static void Apply(InputSetDef input)
     {
         foreach (var action in input.Actions)
