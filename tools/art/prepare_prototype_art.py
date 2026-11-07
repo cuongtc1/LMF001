@@ -11,6 +11,9 @@ PICS = '.documents/sample_pictures/'
 V = PICS + 'ver12/'
 GAME_W, GAME_H = 1920, 1080
 FOREST = 'assets/backgrounds/chapter_01/honey_forest/'
+LABYRINTH = 'assets/backgrounds/chapter_01/honey_labyrinth/'
+MONSTERS = 'assets/monsters/chapter_01/'
+SKY_KEY_DISTANCE = 40
 WHITE_CUTOFF = 244
 SKY_DISTANCE = 26
 FRONT_GRASS_DROP = 190
@@ -78,6 +81,53 @@ def panels(path, count=3):
     a = rgb(path)
     width = a.shape[1] // count
     return [crop_alpha(cut_white(a[:, i * width + 4:(i + 1) * width - 4])) for i in range(count)]
+
+
+def key_color(a):
+    """Remove the sky everywhere, windows in walls included."""
+    sky = a[:60, a.shape[1] // 2 - 60:a.shape[1] // 2 + 60].reshape(-1, 3).mean(0)
+    keep = (np.abs(a.astype(np.float32) - sky).sum(2) >= SKY_KEY_DISTANCE).astype(np.float32)
+    return np.dstack([a, (cv2.GaussianBlur(keep, (0, 0), 0.8) * 255).astype(np.uint8)])
+
+
+def pieces(path, count):
+    """The largest drawings on a white sheet, in reading order. Thin frame lines are ignored."""
+    a = rgb(path)
+    drawn = (a.astype(np.int32) < WHITE_CUTOFF).any(2).astype(np.uint8)
+    solid = cv2.morphologyEx(drawn, cv2.MORPH_OPEN, np.ones((5, 5), np.uint8))
+    solid = cv2.dilate(solid, np.ones((25, 25), np.uint8))
+    n, labels, stats, _ = cv2.connectedComponentsWithStats(solid)
+    largest = sorted(range(1, n), key=lambda i: -stats[i, cv2.CC_STAT_AREA])[:count]
+    row = a.shape[0] // 3
+    boxes = sorted(largest, key=lambda i: (stats[i, cv2.CC_STAT_TOP] // row, stats[i, cv2.CC_STAT_LEFT]))
+    out = []
+    for i in boxes:
+        x, y, w, h = stats[i, :4]
+        out.append(crop_alpha(cut_white(a[y:y + h, x:x + w])))
+    return out
+
+
+def labyrinth():
+    save(fit_height(rgb(V + 'L/L1/ver12_L1_1.png')), LABYRINTH + 'back.png')
+    for name, number in (('wall_a', 4), ('wall_b', 15), ('wall_c', 14)):
+        save(key_color(fit_height(rgb(f'{V}L/L2/ver12_L2_{number}.png'))), f'{LABYRINTH}{name}.png')
+    short, wide, root, _ = pieces(V + 'L/L3/ver12_L3_15.png', 4)
+    save(short, LABYRINTH + 'platforms/ledge_short.png')
+    save(wide, LABYRINTH + 'platforms/ledge_wide.png')
+    save(root, LABYRINTH + 'platforms/root.png')
+    save(pieces(V + 'L/L3/ver12_L3_6.png', 4)[3], LABYRINTH + 'door.png')
+
+
+def first_run_monsters():
+    for name, path in (('corrupted_seedling', 'J/ver12_J1_1.png'), ('little_treant', 'J/ver12_J2_2.png'), ('fire_beetle', 'J/ver12_J3_3.png')):
+        idle, windup, healed = pieces(V + path, 3)
+        save(idle, f'{MONSTERS}{name}/idle.png')
+        save(windup, f'{MONSTERS}{name}/windup.png')
+        save(healed, f'{MONSTERS}{name}/healed.png')
+    idle, windup, _ = pieces(V + 'K/ver12_K_22.png', 3)
+    save(idle, MONSTERS + 'raccoon_mask/idle.png')
+    save(windup, MONSTERS + 'raccoon_mask/windup.png')
+    save(pieces(V + 'K/ver12_K_17.png', 3)[2], MONSTERS + 'raccoon_mask/healed.png')
 
 
 def background():
@@ -151,3 +201,5 @@ if __name__ == '__main__':
     platforms()
     monsters()
     effects()
+    labyrinth()
+    first_run_monsters()

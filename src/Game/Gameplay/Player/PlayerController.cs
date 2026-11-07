@@ -42,6 +42,13 @@ public partial class PlayerController : CharacterBody2D, IDamageable
 
     public Health Health { get; private set; } = null!;
 
+    public bool OnGround => IsOnFloor();
+
+    /// <summary>Up opens the door Lumi stands at instead of jumping.</summary>
+    public bool SuppressJump { get; set; }
+
+    public bool UpPressed { get; private set; }
+
     public float Mp { get; private set; }
 
     public int MaxMp => _def.Stats.MaxMp;
@@ -85,6 +92,12 @@ public partial class PlayerController : CharacterBody2D, IDamageable
 
     /// <summary>Where Lumi comes back after she falls.</summary>
     public void SetRespawnPoint(Vector2 point) => _spawn = point;
+
+    public void MoveTo(Vector2 position)
+    {
+        GlobalPosition = position;
+        _motor.Knockback(0, 0);
+    }
 
     public void Teleport(float x)
     {
@@ -170,6 +183,12 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         }
 
         var input = InputSource.Read();
+        UpPressed = input.JumpPressed;
+        if (SuppressJump)
+        {
+            input = input with { JumpPressed = false };
+        }
+
         if ((input.AttackPressed || input.HeavyPressed) && _stunTicks == 0 && _landingLagTicks == 0)
         {
             _combo.PressAttack(input.HeavyPressed);
@@ -308,7 +327,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             return;
         }
 
-        var hit = new HitInfo(_def.Stats.Attack, attack.DamageMultiplier, _motor.Facing, attack.KnockbackSpeed, attack.LaunchSpeed, _def.Id, attack.StunTicks, attack.Knockdown, attack.Stagger);
+        var hit = new HitInfo(_def.Stats.Attack, attack.DamageMultiplier, _motor.Facing, attack.KnockbackSpeed, attack.LaunchSpeed, _def.Id, attack.StunTicks, attack.Knockdown, attack.Stagger, attack.GuardBreak);
         var landed = _hitbox.Sweep(_combo.SwingId, attack.Hitbox, _motor.Facing, hit);
         foreach (var target in landed)
         {

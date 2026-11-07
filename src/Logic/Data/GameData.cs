@@ -23,6 +23,8 @@ public sealed class GameData
 
     public required IReadOnlyDictionary<string, StageDef> Stages { get; init; }
 
+    public required IReadOnlyDictionary<string, RunDef> Runs { get; init; }
+
     public CharacterDef Character(string id) => Find(Characters, id);
 
     public AttackSetDef AttackSet(string id) => Find(AttackSets, id);
@@ -30,6 +32,8 @@ public sealed class GameData
     public MonsterDef Monster(string id) => Find(Monsters, id);
 
     public StageDef Stage(string id) => Find(Stages, id);
+
+    public RunDef Run(string id) => Find(Runs, id);
 
     public DifficultyDef Difficulty(string id) =>
         Difficulties.Modes.FirstOrDefault(mode => mode.Id == id) ?? throw new GameDataException(MessageKeys.DataUnknownId, id);

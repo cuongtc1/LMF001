@@ -107,6 +107,19 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats)
         return true;
     }
 
+    /// <summary>A rolling monster turns around when it hits a wall.</summary>
+    public void BounceOffWall()
+    {
+        if (ai.BouncesOffWalls && State == MonsterState.Attack)
+        {
+            Facing = -Facing;
+        }
+    }
+
+    /// <summary>A hit from the front is held back unless it breaks guards or the monster is already reeling.</summary>
+    public bool GuardsAgainst(int hitDirection, bool guardBreak) =>
+        ai.FrontGuardScale < 1 && !guardBreak && hitDirection != Facing && CanBeMoved && State != MonsterState.Stunned;
+
     public void Stun(int ticks, bool knockdown = false)
     {
         if (!CanBeMoved)

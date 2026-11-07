@@ -26,7 +26,7 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
     private const float DizzyWobble = 0.12f;
     private const string AuraShaderCode = "shader_type canvas_item; void fragment() { COLOR.rgb = vec3(1.0, 0.12, 0.1); }";
 
-    private static readonly Color TelegraphColor = new(1.6f, 0.55f, 0.45f);
+    private static readonly Color TelegraphColor = new(1.3f, 0.8f, 0.75f);
     private static readonly Color DizzyColor = new(1.4f, 1.3f, 0.5f);
 
     private MonsterDef _def = null!;
@@ -125,7 +125,9 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
             return false;
         }
 
-        var damage = Mathf.RoundToInt(DamageCalculator.Compute(hit.Attack, hit.Multiplier, _stats.Defense) * _brain.DamageTakenScale);
+        var guarded = _brain.GuardsAgainst(hit.Direction, hit.GuardBreak);
+        var scale = _brain.DamageTakenScale * (guarded ? _def.Ai.FrontGuardScale : 1);
+        var damage = Mathf.Max(1, Mathf.RoundToInt(DamageCalculator.Compute(hit.Attack, hit.Multiplier, _stats.Defense) * scale));
         if (!_def.Immortal)
         {
             _health.Damage(damage);
@@ -144,7 +146,7 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         }
 
         _flashTicks = 6;
-        if (_brain.CanBeMoved)
+        if (_brain.CanBeMoved && !guarded)
         {
             _knockback = hit.Direction * hit.KnockbackSpeed * _def.KnockbackScale;
             if (hit.LaunchSpeed > 0)
@@ -182,6 +184,10 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         _knockback = Mathf.MoveToward(_knockback, 0, _feel.KnockbackDecay * (float)delta);
         Velocity = new Vector2(_brain.MoveVelocityX + _knockback, _velocityY + _brain.MoveVelocityY);
         MoveAndSlide();
+        if (IsOnWall())
+        {
+            _brain.BounceOffWall();
+        }
 
         StepStrike();
         ShowState();

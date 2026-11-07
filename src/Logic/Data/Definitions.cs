@@ -94,7 +94,8 @@ public sealed record AttackDef(
     float Mana,
     float PlungeSpeed,
     float Stagger,
-    int LandingLagTicks)
+    int LandingLagTicks,
+    bool GuardBreak)
 {
     public int TotalTicks => StartupTicks + ActiveTicks + RecoveryTicks;
 }
@@ -112,6 +113,7 @@ public sealed record MonsterStatsDef(int MaxHp, int Attack, float Defense, float
 
 /// <param name="SuperArmor">Armored during its own windup and strike.</param>
 /// <param name="StoicThreshold">Hits before it armors up and fights back; 0 means never.</param>
+/// <param name="FrontGuardScale">Share of damage taken from the front; 1 means no guard.</param>
 /// <param name="StaggerMax">Stagger that makes it dizzy; 0 means it has no stagger bar.</param>
 /// <param name="StoicHpMarks">HP fractions, high to low, that also trigger armor once each.</param>
 public sealed record MonsterAiDef(
@@ -136,7 +138,9 @@ public sealed record MonsterAiDef(
     int GetupArmorTicks,
     float StaggerMax,
     int StaggerBreakTicks,
-    float StaggerDamageScale);
+    float StaggerDamageScale,
+    float FrontGuardScale,
+    bool BouncesOffWalls);
 
 public sealed record MonsterAttackDef(float DamageMultiplier, RectDef Hitbox, float KnockbackSpeed, int HitstopTicks, string HitVfx, bool Knockdown);
 
@@ -206,6 +210,24 @@ public sealed record StageDef(
     IReadOnlyList<PlatformDef> Platforms,
     IReadOnlyList<SpawnDef> Spawns,
     ArenaDef? Arena);
+
+public sealed record RoomDef(string Id, float Width, float GroundY, IReadOnlyList<LayerDef> Layers, IReadOnlyList<PlatformDef> Platforms, IReadOnlyList<WaveDef> Waves);
+
+/// <param name="RoomsPerRun">Rooms before the boss.</param>
+/// <param name="DoorPromptTicks">Time on the ground at a door before its prompt shows.</param>
+public sealed record RunDef(
+    string Id,
+    int Tier,
+    int RoomsPerRun,
+    int WaveDelayTicks,
+    float PlayerSpawnX,
+    string FirstRoom,
+    string BossRoom,
+    string DoorSprite,
+    float DoorHeight,
+    float DoorInset,
+    int DoorPromptTicks,
+    IReadOnlyList<RoomDef> Rooms);
 
 public sealed record InputActionDef(string Action, IReadOnlyList<string> Keys, IReadOnlyList<int> PadButtons, IReadOnlyList<int> PadAxes);
 

@@ -4,20 +4,18 @@ using LumiFeast.Game.Common;
 using LumiFeast.Game.Gameplay.Combat;
 using LumiFeast.Game.Gameplay.Enemies;
 using LumiFeast.Game.Gameplay.Player;
+using LumiFeast.Game.Gameplay.World;
 using LumiFeast.Game.Systems.Debug;
 using LumiFeast.Game.UI;
 using LumiFeast.Logic.Combat;
 using LumiFeast.Logic.Common;
 using LumiFeast.Logic.Data;
-using LumiFeast.Logic.Stats;
 
 namespace LumiFeast.Game.Chapters.Prototype;
 
 /// <summary>Builds the test stage from its data file. Later a shared StageBuilder grows out of this.</summary>
 public partial class PrototypeStage : Node2D
 {
-    private const float WallThickness = 200;
-    private const float GroundThickness = 400;
     private const float ArenaRespawnOffset = 120;
 
     private static readonly Color ArenaWallColor = new(1f, 0.82f, 0.3f, 0.45f);
@@ -46,13 +44,13 @@ public partial class PrototypeStage : Node2D
 
         foreach (var layer in _stage.Layers)
         {
-            AddLayer(layer);
+            StageBuilder.AddLayer(this, layer);
         }
 
-        AddWorldCollision();
+        StageBuilder.AddBounds(this, _stage.Width, _stage.GroundY);
         foreach (var platform in _stage.Platforms)
         {
-            AddPlatform(platform);
+            StageBuilder.AddPlatform(this, platform);
         }
 
         var camera = new Camera2D
@@ -144,15 +142,15 @@ public partial class PrototypeStage : Node2D
         _waves = new WaveRunner(arena.Waves.Count, arena.WaveDelayTicks);
         _arenaWalls = new StaticBody2D { CollisionLayer = 0, CollisionMask = 0 };
         _arenaWallView = new Node2D { Visible = false, ZIndex = 5 };
-        var size = new Vector2(WallThickness, _stage.GroundY * 2);
-        foreach (var side in new[] { arena.LeftX - WallThickness / 2, arena.RightX + WallThickness / 2 })
+        var size = new Vector2(StageBuilder.WallThickness, _stage.GroundY * 2);
+        foreach (var side in new[] { arena.LeftX - StageBuilder.WallThickness / 2, arena.RightX + StageBuilder.WallThickness / 2 })
         {
-            AddSolid(_arenaWalls, new Vector2(side, 0), size);
+            StageBuilder.AddSolid(_arenaWalls, new Vector2(side, 0), size);
             _arenaWallView.AddChild(new ColorRect
             {
                 Color = ArenaWallColor,
-                Position = new Vector2(side - WallThickness / 2, 0),
-                Size = new Vector2(WallThickness, _stage.GroundY),
+                Position = new Vector2(side - StageBuilder.WallThickness / 2, 0),
+                Size = new Vector2(StageBuilder.WallThickness, _stage.GroundY),
             });
         }
 
@@ -205,57 +203,6 @@ public partial class PrototypeStage : Node2D
         }
     }
 
-    private void AddLayer(LayerDef layer)
-    {
-        var texture = GameServices.Texture(layer.Sprite);
-        var parallax = new Parallax2D
-        {
-            ScrollScale = new Vector2(layer.ScrollScale, 1),
-            RepeatSize = new Vector2(texture.GetWidth(), 0),
-            RepeatTimes = 4,
-            ZIndex = layer.ZIndex,
-        };
-        parallax.AddChild(new Sprite2D { Texture = texture, Centered = false });
-        AddChild(parallax);
-    }
-
-    private void AddWorldCollision()
-    {
-        var body = new StaticBody2D { CollisionLayer = PhysicsLayers.World, CollisionMask = 0 };
-        var groundSize = new Vector2(_stage.Width + WallThickness * 2, GroundThickness);
-        AddSolid(body, new Vector2(_stage.Width / 2, _stage.GroundY + GroundThickness / 2), groundSize);
-        var wallSize = new Vector2(WallThickness, _stage.GroundY * 2);
-        AddSolid(body, new Vector2(-WallThickness / 2, 0), wallSize);
-        AddSolid(body, new Vector2(_stage.Width + WallThickness / 2, 0), wallSize);
-        AddChild(body);
-    }
-
-    private static void AddSolid(StaticBody2D body, Vector2 position, Vector2 size) =>
-        body.AddChild(new CollisionShape2D { Position = position, Shape = new RectangleShape2D { Size = size } });
-
-    private void AddPlatform(PlatformDef platform)
-    {
-        var texture = GameServices.Texture(platform.Sprite);
-        var scale = platform.Width / texture.GetWidth();
-        var height = texture.GetHeight() * scale;
-        AddChild(new Sprite2D
-        {
-            Texture = texture,
-            Scale = Vector2.One * scale,
-            Position = new Vector2(platform.X, platform.Y + height / 2 - platform.TopInset),
-            ZIndex = -5,
-        });
-
-        var body = new StaticBody2D { CollisionLayer = PhysicsLayers.Platform, CollisionMask = 0 };
-        body.AddChild(new CollisionShape2D
-        {
-            Position = new Vector2(platform.X, platform.Y + 8),
-            Shape = new RectangleShape2D { Size = new Vector2(platform.Width - 20, 16) },
-            OneWayCollision = true,
-        });
-        AddChild(body);
-    }
-
     private void RespawnAll()
     {
         ResetArena();
@@ -274,12 +221,7 @@ public partial class PrototypeStage : Node2D
 
     private MonsterController Spawn(SpawnDef spawn)
     {
-        var data = GameServices.Data;
-        var def = data.Monster(spawn.Monster);
-        var stats = StatScaler.ForMonster(def, CurrentTier, data.Difficulty(GameServices.DifficultyId), data.Scaling);
-        var monster = new MonsterController();
-        AddChild(monster);
-        monster.Setup(def, stats, data.Feel, _gameFeel, _player, new Vector2(spawn.X, _stage.GroundY - 4 - def.Ai.HoverHeight));
+        var monster = MonsterSpawner.Spawn(this, spawn.Monster, spawn.X, _stage.GroundY, CurrentTier, _gameFeel, _player);
         monster.Healed += OnHealed;
         _monsters.Add(monster);
         return monster;

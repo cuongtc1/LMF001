@@ -1,5 +1,6 @@
 using Godot;
 using LumiFeast.Game.Common;
+using LumiFeast.Game.Systems.Debug;
 using LumiFeast.Logic.Common;
 
 namespace LumiFeast.Game.Boot;
@@ -23,6 +24,8 @@ public partial class Boot : Node
         var data = GameServices.Data;
         GameLog.Info(MessageKeys.DataLoaded, data.Characters.Count, data.Monsters.Count, data.Stages.Count);
         GameLog.Info(MessageKeys.GameBooted);
-        GetTree().CallDeferred(SceneTree.MethodName.ChangeSceneToFile, GameConstants.PrototypeScene);
+        var script = AutoplayRunner.RequestedScript();
+        var scene = script is null || script.StartsWith(GameConstants.RunScriptPrefix, System.StringComparison.Ordinal) ? GameConstants.RunScene : GameConstants.PrototypeScene;
+        GetTree().CallDeferred(SceneTree.MethodName.ChangeSceneToFile, scene);
     }
 }

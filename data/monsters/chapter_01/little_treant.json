@@ -1,0 +1,63 @@
+{
+  "id": "little_treant",
+  "stats": {
+    "max_hp": 140,
+    "attack": 40,
+    "defense": 0,
+    "speed": 110
+  },
+  "ai": {
+    "behavior": "chaser",
+    "aggro_range": 1100,
+    "attack_range": 170,
+    "windup_ticks": 40,
+    "active_ticks": 12,
+    "recovery_ticks": 40,
+    "cooldown_ticks": 70,
+    "lunge_speed": 240,
+    "hop_velocity": 0,
+    "hop_interval_ticks": 0,
+    "hover_height": 0,
+    "super_armor": false,
+    "stun_scale": 1.0,
+    "stoic_threshold": 0,
+    "stoic_ticks": 0,
+    "stoic_reset_ticks": 0,
+    "stoic_hp_marks": [],
+    "down_ticks": 70,
+    "getup_armor_ticks": 45,
+    "stagger_max": 0,
+    "stagger_break_ticks": 0,
+    "stagger_damage_scale": 1,
+    "front_guard_scale": 0.2,
+    "bounces_off_walls": false
+  },
+  "attack": {
+    "damage_multiplier": 1.0,
+    "hitbox": {
+      "x": -40,
+      "y": -150,
+      "width": 180,
+      "height": 150
+    },
+    "knockback_speed": 420,
+    "hitstop_ticks": 5,
+    "hit_vfx": "hit_heavy",
+    "knockdown": false
+  },
+  "body": {
+    "width": 130,
+    "height": 170
+  },
+  "knockback_scale": 0.5,
+  "immortal": false,
+  "art": {
+    "folder": "assets/monsters/chapter_01/little_treant",
+    "height": 190,
+    "faces_left": true,
+    "idle": "idle.png",
+    "windup": "windup.png",
+    "hit": "windup.png",
+    "healed": "healed.png"
+  }
+}

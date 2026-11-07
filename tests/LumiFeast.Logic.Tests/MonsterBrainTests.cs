@@ -7,8 +7,8 @@ namespace LumiFeast.Logic.Tests;
 
 public class MonsterBrainTests
 {
-    private static MonsterAiDef Ai(string behavior = MonsterBehaviors.Chaser, float hop = 0, bool armor = false, int threshold = 0, float[]? marks = null, float stagger = 0) =>
-        new(behavior, 500, 100, 10, 5, 10, 20, 1, 300, hop, 30, 200, armor, threshold, 100, 50, marks ?? [], 40, 30, stagger, 60, 1.5f);
+    private static MonsterAiDef Ai(string behavior = MonsterBehaviors.Chaser, float hop = 0, bool armor = false, int threshold = 0, float[]? marks = null, float stagger = 0, float guard = 1, bool bounce = false) =>
+        new(behavior, 500, 100, 10, 5, 10, 20, 1, 300, hop, 30, 200, armor, threshold, 100, 50, marks ?? [], 40, 30, stagger, 60, 1.5f, guard, bounce);
 
     private static readonly MonsterStats Stats = new(100, 10, 0, 200, 1);
 
@@ -227,6 +227,38 @@ public class MonsterBrainTests
     public void MonstersWithoutABarNeverGetDizzy()
     {
         Assert.False(new MonsterBrain(Ai(), Stats).AddStagger(1000));
+    }
+
+    [Fact]
+    public void FrontGuardHoldsLightHitsFromTheFrontOnly()
+    {
+        var brain = new MonsterBrain(Ai(guard: 0.2f), Stats);
+        Assert.True(brain.GuardsAgainst(1, false));
+        Assert.False(brain.GuardsAgainst(-1, false));
+        Assert.False(brain.GuardsAgainst(1, true));
+    }
+
+    [Fact]
+    public void NoGuardOnceReeling()
+    {
+        var brain = new MonsterBrain(Ai(guard: 0.2f), Stats);
+        brain.Stun(30);
+        Assert.False(brain.GuardsAgainst(1, false));
+    }
+
+    [Fact]
+    public void RollerTurnsAtWalls()
+    {
+        var brain = new MonsterBrain(Ai(bounce: true), Stats);
+        brain.Step(80, true);
+        for (var i = 0; i < 11; i++)
+        {
+            brain.Step(80, true);
+        }
+
+        var facing = brain.Facing;
+        brain.BounceOffWall();
+        Assert.Equal(-facing, brain.Facing);
     }
 
     [Fact]

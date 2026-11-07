@@ -56,6 +56,17 @@ public static class GameDataValidator
             RequireVfx(data, monster.Attack.HitVfx);
         }
 
+        foreach (var run in data.Runs.Values)
+        {
+            var rooms = run.Rooms.Select(room => room.Id).ToHashSet();
+            Require(rooms.Contains(run.FirstRoom) && rooms.Contains(run.BossRoom), run.Id);
+            Require(run.RoomsPerRun >= 1 && run.RoomsPerRun <= run.Rooms.Count - 1, $"{run.Id}.rooms_per_run");
+            foreach (var spawn in run.Rooms.SelectMany(room => room.Waves).SelectMany(wave => wave.Spawns))
+            {
+                data.Monster(spawn.Monster);
+            }
+        }
+
         foreach (var stage in data.Stages.Values)
         {
             Require(stage.Tier >= data.Scaling.MinTier && stage.Tier <= data.Scaling.MaxTier, $"{stage.Id}.tier");

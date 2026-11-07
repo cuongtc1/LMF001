@@ -39,6 +39,7 @@ public partial class DebugPanel : CanvasLayer
         AddButton(column, messages.Get(MessageKeys.DebugHeal), _player.Heal);
         AddButton(column, messages.Get(MessageKeys.DebugRespawn), () => _respawn());
         AddButton(column, messages.Get(MessageKeys.DebugArena), () => _goToArena());
+        AddButton(column, messages.Get(MessageKeys.DebugPrototype), () => GetTree().ChangeSceneToFile(GameConstants.PrototypeScene));
         AddButton(column, messages.Get(MessageKeys.DebugReload), Reload);
         Refresh();
     }

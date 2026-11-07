@@ -1,0 +1,321 @@
+{
+  "id": "honey_labyrinth_stage_1",
+  "tier": 1,
+  "rooms_per_run": 4,
+  "wave_delay_ticks": 60,
+  "player_spawn_x": 200,
+  "first_room": "gate",
+  "boss_room": "den",
+  "door_sprite": "assets/backgrounds/chapter_01/honey_labyrinth/door.png",
+  "door_height": 300,
+  "door_inset": 160,
+  "door_prompt_ticks": 60,
+  "rooms": [
+    {
+      "id": "gate",
+      "width": 1920,
+      "ground_y": 885,
+      "layers": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/back.png",
+          "scroll_scale": 0.3,
+          "z_index": -30
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/wall_a.png",
+          "scroll_scale": 1.0,
+          "z_index": -10
+        }
+      ],
+      "platforms": [],
+      "waves": [
+        {
+          "spawns": [
+            {
+              "monster": "honey_slime",
+              "x": 1100
+            },
+            {
+              "monster": "honey_slime",
+              "x": 1400
+            }
+          ]
+        },
+        {
+          "spawns": [
+            {
+              "monster": "sprout_mushroom",
+              "x": 1200
+            },
+            {
+              "monster": "honey_slime",
+              "x": 1500
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hedge",
+      "width": 2400,
+      "ground_y": 885,
+      "layers": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/back.png",
+          "scroll_scale": 0.3,
+          "z_index": -30
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/wall_b.png",
+          "scroll_scale": 1.0,
+          "z_index": -10
+        }
+      ],
+      "platforms": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
+          "x": 1150,
+          "y": 635,
+          "width": 460,
+          "top_inset": 16
+        }
+      ],
+      "waves": [
+        {
+          "spawns": [
+            {
+              "monster": "corrupted_seedling",
+              "x": 1500
+            },
+            {
+              "monster": "sprout_mushroom",
+              "x": 1900
+            }
+          ]
+        },
+        {
+          "spawns": [
+            {
+              "monster": "honey_slime",
+              "x": 900
+            },
+            {
+              "monster": "corrupted_seedling",
+              "x": 2000
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "roots",
+      "width": 2400,
+      "ground_y": 885,
+      "layers": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/back.png",
+          "scroll_scale": 0.3,
+          "z_index": -30
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/wall_c.png",
+          "scroll_scale": 1.0,
+          "z_index": -10
+        }
+      ],
+      "platforms": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/root.png",
+          "x": 800,
+          "y": 645,
+          "width": 400,
+          "top_inset": 16
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
+          "x": 1500,
+          "y": 635,
+          "width": 260,
+          "top_inset": 16
+        }
+      ],
+      "waves": [
+        {
+          "spawns": [
+            {
+              "monster": "little_treant",
+              "x": 1400
+            },
+            {
+              "monster": "honey_slime",
+              "x": 1800
+            }
+          ]
+        },
+        {
+          "spawns": [
+            {
+              "monster": "little_treant",
+              "x": 900
+            },
+            {
+              "monster": "sprout_mushroom",
+              "x": 2000
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "beetle_run",
+      "width": 2880,
+      "ground_y": 885,
+      "layers": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/back.png",
+          "scroll_scale": 0.3,
+          "z_index": -30
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/wall_a.png",
+          "scroll_scale": 1.0,
+          "z_index": -10
+        }
+      ],
+      "platforms": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
+          "x": 1000,
+          "y": 635,
+          "width": 460,
+          "top_inset": 16
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
+          "x": 1900,
+          "y": 635,
+          "width": 460,
+          "top_inset": 16
+        }
+      ],
+      "waves": [
+        {
+          "spawns": [
+            {
+              "monster": "fire_beetle",
+              "x": 2300
+            }
+          ]
+        },
+        {
+          "spawns": [
+            {
+              "monster": "fire_beetle",
+              "x": 700
+            },
+            {
+              "monster": "fire_beetle",
+              "x": 2400
+            },
+            {
+              "monster": "honey_slime",
+              "x": 1500
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mixed",
+      "width": 2400,
+      "ground_y": 885,
+      "layers": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/back.png",
+          "scroll_scale": 0.3,
+          "z_index": -30
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/wall_b.png",
+          "scroll_scale": 1.0,
+          "z_index": -10
+        }
+      ],
+      "platforms": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
+          "x": 1200,
+          "y": 635,
+          "width": 260,
+          "top_inset": 16
+        }
+      ],
+      "waves": [
+        {
+          "spawns": [
+            {
+              "monster": "little_treant",
+              "x": 1600
+            },
+            {
+              "monster": "corrupted_seedling",
+              "x": 2000
+            }
+          ]
+        },
+        {
+          "spawns": [
+            {
+              "monster": "fire_beetle",
+              "x": 2100
+            },
+            {
+              "monster": "sprout_mushroom",
+              "x": 900
+            },
+            {
+              "monster": "sprout_mushroom",
+              "x": 1500
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "den",
+      "width": 1920,
+      "ground_y": 885,
+      "layers": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/back.png",
+          "scroll_scale": 0.3,
+          "z_index": -30
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/wall_c.png",
+          "scroll_scale": 1.0,
+          "z_index": -10
+        }
+      ],
+      "platforms": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
+          "x": 960,
+          "y": 625,
+          "width": 300,
+          "top_inset": 16
+        }
+      ],
+      "waves": [
+        {
+          "spawns": [
+            {
+              "monster": "raccoon_mask",
+              "x": 1500
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

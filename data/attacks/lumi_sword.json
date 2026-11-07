@@ -37,7 +37,8 @@
       "plunge_speed": 0,
       "mana": 3,
       "stagger": 2,
-      "landing_lag_ticks": 0
+      "landing_lag_ticks": 0,
+      "guard_break": false
     },
     {
       "id": "z2",
@@ -70,7 +71,8 @@
       "plunge_speed": 0,
       "mana": 3,
       "stagger": 2,
-      "landing_lag_ticks": 0
+      "landing_lag_ticks": 0,
+      "guard_break": false
     },
     {
       "id": "z3",
@@ -103,7 +105,8 @@
       "plunge_speed": 0,
       "mana": 3,
       "stagger": 3,
-      "landing_lag_ticks": 0
+      "landing_lag_ticks": 0,
+      "guard_break": false
     },
     {
       "id": "zx",
@@ -136,7 +139,8 @@
       "plunge_speed": 0,
       "mana": 5,
       "stagger": 4,
-      "landing_lag_ticks": 0
+      "landing_lag_ticks": 0,
+      "guard_break": true
     },
     {
       "id": "x1",
@@ -169,7 +173,8 @@
       "plunge_speed": 0,
       "mana": 5,
       "stagger": 5,
-      "landing_lag_ticks": 0
+      "landing_lag_ticks": 0,
+      "guard_break": true
     },
     {
       "id": "xx",
@@ -202,7 +207,8 @@
       "plunge_speed": 0,
       "mana": 5,
       "stagger": 6,
-      "landing_lag_ticks": 0
+      "landing_lag_ticks": 0,
+      "guard_break": true
     },
     {
       "id": "s1",
@@ -235,7 +241,8 @@
       "plunge_speed": 0,
       "mana": 4,
       "stagger": 3,
-      "landing_lag_ticks": 0
+      "landing_lag_ticks": 0,
+      "guard_break": false
     },
     {
       "id": "a1",
@@ -268,7 +275,8 @@
       "plunge_speed": 0,
       "mana": 3,
       "stagger": 2,
-      "landing_lag_ticks": 0
+      "landing_lag_ticks": 0,
+      "guard_break": false
     },
     {
       "id": "ax",
@@ -301,7 +309,8 @@
       "plunge_speed": 1400,
       "mana": 5,
       "stagger": 5,
-      "landing_lag_ticks": 12
+      "landing_lag_ticks": 12,
+      "guard_break": true
     },
     {
       "id": "counter",
@@ -334,7 +343,8 @@
       "plunge_speed": 0,
       "mana": 6,
       "stagger": 8,
-      "landing_lag_ticks": 0
+      "landing_lag_ticks": 0,
+      "guard_break": true
     },
     {
       "id": "au",
@@ -367,7 +377,8 @@
       "plunge_speed": 0,
       "mana": 3,
       "stagger": 2,
-      "landing_lag_ticks": 0
+      "landing_lag_ticks": 0,
+      "guard_break": false
     }
   ],
   "first_counter": "counter",

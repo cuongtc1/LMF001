@@ -6,6 +6,10 @@ public static class GameConstants
     public const string ResourceRoot = "res://";
     public const string PrototypeScene = "res://scenes/levels/prototype/prototype_stage.tscn";
     public const string PrototypeStageId = "prototype_honey_forest";
+    public const string RunScene = "res://scenes/levels/run/run_stage.tscn";
+    public const string FirstRunId = "honey_labyrinth_stage_1";
+    public const string RunScriptPrefix = "data/debug/run_";
+    public const ulong ScriptedRunSeed = 1;
     public const string PlayerCharacterId = "lumi";
     public const string AutoplayArgument = "--autoplay=";
     public const float TicksPerSecond = 60f;

@@ -34,6 +34,12 @@ public static class MessageKeys
     public const string DebugHelp = "debug.help";
     public const string HudCombo = "hud.combo";
     public const string HudWave = "hud.wave";
+    public const string HudRoom = "hud.room";
+    public const string HudBoss = "hud.boss";
+    public const string RunDoorPrompt = "run.door_prompt";
+    public const string RunStarted = "run.started";
+    public const string RunCleared = "run.cleared";
+    public const string DebugPrototype = "debug.prototype";
     public const string HudClear = "hud.clear";
     public const string ArenaWave = "stage.arena_wave";
     public const string ArenaCleared = "stage.arena_cleared";
@@ -42,7 +48,7 @@ public static class MessageKeys
     [
         DataFileMissing, DataFileInvalid, DataUnknownId, DataDuplicateId, DataBadValue, DataLoaded, DataReloaded,
         GameBooted, StageLoaded, AssetMissing, CombatPlayerHit, CombatMonsterHit, CombatMonsterHealed,
-        AutoplayStarted, AutoplayFinished, DebugTitle, DebugDifficulty, DebugTier, DebugGodMode, DebugAirJump, DebugHeal, DebugArena, CombatStoic, CombatDizzy, CombatGuardBlock, CombatGuardPerfect, HudWave, HudClear, ArenaWave, ArenaCleared,
+        AutoplayStarted, AutoplayFinished, DebugTitle, DebugDifficulty, DebugTier, DebugGodMode, DebugAirJump, DebugHeal, DebugArena, CombatStoic, CombatDizzy, CombatGuardBlock, CombatGuardPerfect, HudRoom, HudBoss, RunDoorPrompt, RunStarted, RunCleared, DebugPrototype, HudWave, HudClear, ArenaWave, ArenaCleared,
         DebugRespawn, DebugReload, DebugHelp, HudCombo,
     ];
 }

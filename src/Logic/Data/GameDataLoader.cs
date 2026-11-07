@@ -29,6 +29,7 @@ public sealed class GameDataLoader(IDataSource source)
             AttackSets = ReadFolder<AttackSetDef>(DataPaths.Attacks, def => def.Id),
             Monsters = ReadFolder<MonsterDef>(DataPaths.Monsters, def => def.Id),
             Stages = ReadFolder<StageDef>(DataPaths.Stages, def => def.Id),
+            Runs = ReadFolder<RunDef>(DataPaths.Runs, def => def.Id),
         };
         GameDataValidator.Validate(data);
         return data;

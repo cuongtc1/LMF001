@@ -1,0 +1,63 @@
+{
+  "id": "fire_beetle",
+  "stats": {
+    "max_hp": 70,
+    "attack": 35,
+    "defense": 0,
+    "speed": 140
+  },
+  "ai": {
+    "behavior": "chaser",
+    "aggro_range": 1100,
+    "attack_range": 620,
+    "windup_ticks": 36,
+    "active_ticks": 44,
+    "recovery_ticks": 44,
+    "cooldown_ticks": 80,
+    "lunge_speed": 860,
+    "hop_velocity": 0,
+    "hop_interval_ticks": 0,
+    "hover_height": 0,
+    "super_armor": false,
+    "stun_scale": 1.0,
+    "stoic_threshold": 0,
+    "stoic_ticks": 0,
+    "stoic_reset_ticks": 0,
+    "stoic_hp_marks": [],
+    "down_ticks": 70,
+    "getup_armor_ticks": 45,
+    "stagger_max": 0,
+    "stagger_break_ticks": 0,
+    "stagger_damage_scale": 1,
+    "front_guard_scale": 1.0,
+    "bounces_off_walls": false
+  },
+  "attack": {
+    "damage_multiplier": 1.0,
+    "hitbox": {
+      "x": -30,
+      "y": -80,
+      "width": 150,
+      "height": 80
+    },
+    "knockback_speed": 420,
+    "hitstop_ticks": 5,
+    "hit_vfx": "hit_light",
+    "knockdown": false
+  },
+  "body": {
+    "width": 120,
+    "height": 80
+  },
+  "knockback_scale": 1.0,
+  "immortal": false,
+  "art": {
+    "folder": "assets/monsters/chapter_01/fire_beetle",
+    "height": 100,
+    "faces_left": true,
+    "idle": "idle.png",
+    "windup": "windup.png",
+    "hit": "windup.png",
+    "healed": "healed.png"
+  }
+}
