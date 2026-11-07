@@ -127,6 +127,7 @@ public partial class RunStage : Node2D
     private void BuildRoom()
     {
         _monsters.Clear();
+        _hud.TrackBoss(null);
         _roomNode?.QueueFree();
         _room = _run.Rooms.First(room => room.Id == _plan[_roomIndex]);
         _roomNode = new Node2D();
@@ -187,6 +188,10 @@ public partial class RunStage : Node2D
             var monster = MonsterSpawner.Spawn(_roomNode, spawn.Monster, spawn.X, _room.GroundY, _run.Tier, _gameFeel, _player);
             monster.Healed += OnHealed;
             _monsters.Add(monster);
+            if (_plan[_roomIndex] == _run.BossRoom)
+            {
+                _hud.TrackBoss(monster.Health);
+            }
         }
     }
 
@@ -195,6 +200,8 @@ public partial class RunStage : Node2D
     private void OpenDoor()
     {
         _roomCleared = true;
+        _hud.TrackBoss(null);
+        _player.Health.Heal(Mathf.RoundToInt(_player.Health.Max * _run.RoomClearHeal));
         _door.Modulate = Colors.White;
         var last = _roomIndex + 1 >= _plan.Count;
         if (last)

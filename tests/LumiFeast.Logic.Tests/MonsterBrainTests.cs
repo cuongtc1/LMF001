@@ -261,6 +261,78 @@ public class MonsterBrainTests
         Assert.Equal(-facing, brain.Facing);
     }
 
+    private static MonsterMoveDef Move(string id, float low, float high) =>
+        new(id, MonsterMoveKinds.Strike, low, high, 1, 4, 2, 2, 100, 1, new RectDef(0, 0, 1, 1), false, 0, null, 0, 0, 0, 0);
+
+    private static MonsterBrain Boss(params MonsterMoveDef[] moves) =>
+        new(Ai() with { Moves = moves, CooldownTicks = 0, PhaseTwoHp = 0.5f, PhaseTwoSpeed = 2 }, Stats);
+
+    private static void PlayMove(MonsterBrain brain, float deltaX)
+    {
+        for (var i = 0; i < 12; i++)
+        {
+            brain.Step(deltaX, true);
+        }
+    }
+
+    [Fact]
+    public void BossPicksAMoveThatFitsTheDistance()
+    {
+        var brain = Boss(Move("near", 0, 100), Move("far", 100, 450));
+        brain.Step(300, true);
+        Assert.Equal("far", brain.CurrentMove?.Id);
+    }
+
+    [Fact]
+    public void BossNeverRepeatsAMoveThreeTimes()
+    {
+        var brain = Boss(Move("a", 0, 450), Move("b", 0, 450));
+        var seen = new List<string>();
+        for (var i = 0; i < 400; i++)
+        {
+            brain.Step(80, true);
+            if (brain.CurrentMove is { } move && (seen.Count == 0 || brain.State == MonsterState.Windup && brain.StateTicksLeft == 4 && seen[^1] != "*"))
+            {
+                seen.Add(move.Id);
+                seen.Add("*");
+            }
+
+            if (brain.CurrentMove is null && seen.Count > 0 && seen[^1] == "*")
+            {
+                seen.RemoveAt(seen.Count - 1);
+            }
+        }
+
+        var ids = seen.Where(id => id != "*").ToList();
+        Assert.True(ids.Count > 3);
+        for (var i = 2; i < ids.Count; i++)
+        {
+            Assert.False(ids[i] == ids[i - 1] && ids[i] == ids[i - 2]);
+        }
+    }
+
+    [Fact]
+    public void BossCanOnlyWalkWhenNoMoveFits()
+    {
+        var brain = Boss(Move("near", 0, 100));
+        brain.Step(400, true);
+        Assert.Null(brain.CurrentMove);
+        Assert.Equal(200, brain.MoveVelocityX);
+    }
+
+    [Fact]
+    public void PhaseTwoStartsOnceAtItsHpMarkAndShortensMoves()
+    {
+        var brain = Boss(Move("a", 0, 450));
+        brain.RegisterHit(0.9f);
+        Assert.False(brain.InPhaseTwo);
+        Assert.True(brain.RegisterHit(0.5f));
+        Assert.True(brain.InPhaseTwo);
+        Assert.True(brain.IsArmored);
+        brain.Step(80, true);
+        Assert.Equal(2, brain.StateTicksLeft);
+    }
+
     [Fact]
     public void HopperOnlyHopsOnInterval()
     {

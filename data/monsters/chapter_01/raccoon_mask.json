@@ -1,19 +1,19 @@
 {
   "id": "raccoon_mask",
   "stats": {
-    "max_hp": 900,
-    "attack": 45,
+    "max_hp": 700,
+    "attack": 30,
     "defense": 0,
     "speed": 260
   },
   "ai": {
     "behavior": "chaser",
     "aggro_range": 2400,
-    "attack_range": 560,
+    "attack_range": 240,
     "windup_ticks": 34,
     "active_ticks": 26,
     "recovery_ticks": 40,
-    "cooldown_ticks": 50,
+    "cooldown_ticks": 30,
     "lunge_speed": 1000,
     "hop_velocity": 0,
     "hop_interval_ticks": 0,
@@ -23,16 +23,118 @@
     "stoic_threshold": 12,
     "stoic_ticks": 150,
     "stoic_reset_ticks": 120,
-    "stoic_hp_marks": [
-      0.65
-    ],
+    "stoic_hp_marks": [],
     "down_ticks": 70,
     "getup_armor_ticks": 90,
     "stagger_max": 40,
     "stagger_break_ticks": 150,
     "stagger_damage_scale": 1.5,
     "front_guard_scale": 1.0,
-    "bounces_off_walls": false
+    "bounces_off_walls": false,
+    "phase_two_hp": 0.65,
+    "phase_two_speed": 1.3,
+    "moves": [
+      {
+        "id": "swipe",
+        "kind": "strike",
+        "min_range": 0,
+        "max_range": 280,
+        "weight": 3,
+        "windup_ticks": 28,
+        "active_ticks": 10,
+        "recovery_ticks": 34,
+        "lunge_speed": 420,
+        "damage_multiplier": 1.0,
+        "hitbox": {
+          "x": -40,
+          "y": -230,
+          "width": 260,
+          "height": 230
+        },
+        "knockdown": false,
+        "steal_mp": 0,
+        "projectile_sprite": null,
+        "projectile_ticks": 0,
+        "projectile_gravity": 0,
+        "projectile_height": 0,
+        "marker_ticks": 0
+      },
+      {
+        "id": "dash_steal",
+        "kind": "strike",
+        "min_range": 240,
+        "max_range": 1600,
+        "weight": 3,
+        "windup_ticks": 34,
+        "active_ticks": 28,
+        "recovery_ticks": 44,
+        "lunge_speed": 1050,
+        "damage_multiplier": 1.2,
+        "hitbox": {
+          "x": -60,
+          "y": -240,
+          "width": 280,
+          "height": 240
+        },
+        "knockdown": true,
+        "steal_mp": 20,
+        "projectile_sprite": null,
+        "projectile_ticks": 0,
+        "projectile_gravity": 0,
+        "projectile_height": 0,
+        "marker_ticks": 0
+      },
+      {
+        "id": "throw_pot",
+        "kind": "throw",
+        "min_range": 300,
+        "max_range": 1600,
+        "weight": 2,
+        "windup_ticks": 30,
+        "active_ticks": 8,
+        "recovery_ticks": 30,
+        "lunge_speed": 0,
+        "damage_multiplier": 0.8,
+        "hitbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        },
+        "knockdown": false,
+        "steal_mp": 0,
+        "projectile_sprite": "assets/monsters/chapter_01/raccoon_mask/pot.png",
+        "projectile_ticks": 54,
+        "projectile_gravity": 2400,
+        "projectile_height": 90,
+        "marker_ticks": 0
+      },
+      {
+        "id": "ambush",
+        "kind": "ambush",
+        "min_range": 0,
+        "max_range": 1600,
+        "weight": 1,
+        "windup_ticks": 80,
+        "active_ticks": 14,
+        "recovery_ticks": 46,
+        "lunge_speed": 0,
+        "damage_multiplier": 1.1,
+        "hitbox": {
+          "x": -130,
+          "y": -280,
+          "width": 260,
+          "height": 280
+        },
+        "knockdown": false,
+        "steal_mp": 0,
+        "projectile_sprite": null,
+        "projectile_ticks": 0,
+        "projectile_gravity": 0,
+        "projectile_height": 0,
+        "marker_ticks": 34
+      }
+    ]
   },
   "attack": {
     "damage_multiplier": 1.0,

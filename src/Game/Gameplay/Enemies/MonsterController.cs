@@ -24,9 +24,14 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
     private const float StaggerBarWidth = 200;
     private const float StaggerBarHeight = 10;
     private const float DizzyWobble = 0.12f;
+    private const float ThrowForward = 80;
+    private const float ThrowHeight = 180;
+    private const float ThrowAimHeight = 100;
+    private const float MarkerLift = 30;
+    private const int MarkerEveryTicks = 10;
     private const string AuraShaderCode = "shader_type canvas_item; void fragment() { COLOR.rgb = vec3(1.0, 0.12, 0.1); }";
 
-    private static readonly Color TelegraphColor = new(1.3f, 0.8f, 0.75f);
+    private static readonly Color TelegraphColor = new(1.4f, 1.2f, 1.1f);
     private static readonly Color DizzyColor = new(1.4f, 1.3f, 0.5f);
 
     private MonsterDef _def = null!;
@@ -35,11 +40,13 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
     private GameFeel _gameFeel = null!;
     private PlayerController _player = null!;
     private MonsterBrain _brain = null!;
-    private Health _health = null!;
     private AttackHitbox _hitbox = null!;
     private Sprite2D _sprite = null!;
     private Sprite2D _aura = null!;
     private ColorRect? _staggerBar;
+    private float _ambushX;
+    private bool _wasHidden;
+    private int _thrownSwing;
     private Hurtbox _hurtbox = null!;
     private Texture2D _idle = null!;
     private Texture2D _windup = null!;
@@ -58,6 +65,10 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
 
     public string DefinitionId => _def.Id;
 
+    public Health Health { get; private set; } = null!;
+
+    private bool IsHidden => _brain.CurrentMove is { Kind: MonsterMoveKinds.Ambush } && _brain.State == MonsterState.Windup;
+
     public bool BlocksBody => !_healing && !_flying;
 
     public Vector2 FeetPosition => GlobalPosition;
@@ -72,7 +83,7 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         _gameFeel = gameFeel;
         _player = player;
         _brain = new MonsterBrain(def.Ai, stats);
-        _health = new Health(stats.MaxHp);
+        Health = new Health(stats.MaxHp);
         GlobalPosition = position;
         _flying = def.Ai.Behavior == MonsterBehaviors.Flyer;
         _hoverY = position.Y;
@@ -120,7 +131,7 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
 
     public bool TakeHit(in HitInfo hit)
     {
-        if (_healing)
+        if (_healing || IsHidden)
         {
             return false;
         }
@@ -130,13 +141,14 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         var damage = Mathf.Max(1, Mathf.RoundToInt(DamageCalculator.Compute(hit.Attack, hit.Multiplier, _stats.Defense) * scale));
         if (!_def.Immortal)
         {
-            _health.Damage(damage);
+            Health.Damage(damage);
         }
 
-        GameLog.Info(MessageKeys.CombatMonsterHit, _def.Id, damage, hit.SourceId, _health.Current, _health.Max);
-        if (_brain.RegisterHit((float)_health.Current / _health.Max))
+        GameLog.Info(MessageKeys.CombatMonsterHit, _def.Id, damage, hit.SourceId, Health.Current, Health.Max);
+        var wasPhaseOne = !_brain.InPhaseTwo;
+        if (_brain.RegisterHit((float)Health.Current / Health.Max))
         {
-            GameLog.Info(MessageKeys.CombatStoic, _def.Id);
+            GameLog.Info(wasPhaseOne && _brain.InPhaseTwo ? MessageKeys.CombatPhaseTwo : MessageKeys.CombatStoic, _def.Id);
         }
 
         _gameFeel.ShowDamage(GlobalPosition + new Vector2(0, -_def.Art.Height), damage, Colors.White);
@@ -158,7 +170,7 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
             _hitbox.Close();
         }
 
-        if (_health.IsDead)
+        if (Health.IsDead)
         {
             BeginHeal();
         }
@@ -206,16 +218,76 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         _velocityY = onFloor && _velocityY > 0 ? 0 : _velocityY + gravity * delta;
     }
 
+    private void StepAmbush(MonsterMoveDef move)
+    {
+        var hidden = IsHidden;
+        if (hidden && _brain.StateTicksLeft > move.MarkerTicks)
+        {
+            _ambushX = _player.GlobalPosition.X;
+        }
+        else if (hidden && _brain.StateTicksLeft % MarkerEveryTicks == 0)
+        {
+            _gameFeel.PlayEffect(_def.Attack.HitVfx, new Vector2(_ambushX, GlobalPosition.Y - MarkerLift), _brain.Facing);
+        }
+
+        if (!hidden && _wasHidden)
+        {
+            GlobalPosition = new Vector2(_ambushX, GlobalPosition.Y);
+        }
+
+        if (hidden != _wasHidden)
+        {
+            _hurtbox.SetDeferred(Area2D.PropertyName.Monitorable, !hidden);
+        }
+
+        _wasHidden = hidden;
+        _sprite.Visible = !hidden;
+    }
+
+    private void ThrowProjectile(MonsterMoveDef move)
+    {
+        var from = GlobalPosition + new Vector2(_brain.Facing * ThrowForward, -ThrowHeight);
+        var seconds = move.ProjectileTicks / GameConstants.TicksPerSecond;
+        var target = _player.GlobalPosition + new Vector2(0, -ThrowAimHeight);
+        var velocity = new Vector2((target.X - from.X) / seconds, (target.Y - from.Y) / seconds - move.ProjectileGravity * seconds / 2);
+        var pot = new Projectile();
+        GetParent().AddChild(pot);
+        pot.Launch(move.ProjectileSprite!, move.ProjectileHeight, from, velocity, move.ProjectileGravity, GlobalPosition.Y,
+            new HitInfo(_stats.Attack, move.DamageMultiplier, _brain.Facing, _def.Attack.KnockbackSpeed, 0, _def.Id));
+    }
+
     private void StepStrike()
     {
+        var move = _brain.CurrentMove;
+        if (move is { Kind: MonsterMoveKinds.Ambush })
+        {
+            StepAmbush(move);
+        }
+
         if (!_brain.StrikeActive || _player.Health.IsDead)
         {
             _hitbox.Close();
             return;
         }
 
-        var hit = new HitInfo(_stats.Attack, _def.Attack.DamageMultiplier, _brain.Facing, _def.Attack.KnockbackSpeed, 0, _def.Id, 0, _def.Attack.Knockdown);
-        var landed = _hitbox.Sweep(_brain.SwingId, _def.Attack.Hitbox, _brain.Facing, hit);
+        if (move is { Kind: MonsterMoveKinds.Throw })
+        {
+            if (_thrownSwing != _brain.SwingId)
+            {
+                _thrownSwing = _brain.SwingId;
+                ThrowProjectile(move);
+            }
+
+            return;
+        }
+
+        var hit = new HitInfo(_stats.Attack, move?.DamageMultiplier ?? _def.Attack.DamageMultiplier, _brain.Facing, _def.Attack.KnockbackSpeed, 0, _def.Id, 0, move?.Knockdown ?? _def.Attack.Knockdown);
+        var landed = _hitbox.Sweep(_brain.SwingId, move?.Hitbox ?? _def.Attack.Hitbox, _brain.Facing, hit);
+        if (landed.Count > 0 && move is { StealMp: > 0 })
+        {
+            _player.LoseMp(move.StealMp);
+        }
+
         if (landed.Count > 0)
         {
             _gameFeel.PlayEffect(_def.Attack.HitVfx, _player.GlobalPosition + new Vector2(0, -100), _brain.Facing);

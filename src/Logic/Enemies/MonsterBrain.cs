@@ -1,3 +1,4 @@
+using LumiFeast.Logic.Common;
 using LumiFeast.Logic.Data;
 using LumiFeast.Logic.Stats;
 
@@ -22,9 +23,17 @@ public static class MonsterBehaviors
     public const string Flyer = "flyer";
 }
 
-/// <summary>Shared AI: walk, hop or fly to the target, wind up, strike, recover. Numbers come from data.</summary>
-public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats)
+public static class MonsterMoveKinds
 {
+    public const string Strike = "strike";
+    public const string Throw = "throw";
+    public const string Ambush = "ambush";
+}
+
+/// <summary>Shared AI: walk, hop or fly to the target, wind up, strike, recover. Numbers come from data.</summary>
+public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats, ulong seed = 1)
+{
+    private readonly SeededRandom _random = new(seed);
     private const float TicksPerSecond = 60;
 
     private int _timer;
@@ -35,6 +44,8 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats)
     private int _hitResetTimer;
     private int _nextHpMark;
     private float _stagger;
+    private string _lastMove = string.Empty;
+    private int _moveRepeats;
 
     public MonsterState State { get; private set; } = MonsterState.Idle;
 
@@ -43,6 +54,14 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats)
     public float MoveVelocityX { get; private set; }
 
     public float MoveVelocityY { get; private set; }
+
+    /// <summary>The boss move in play, or null.</summary>
+    public MonsterMoveDef? CurrentMove { get; private set; }
+
+    public bool InPhaseTwo { get; private set; }
+
+    /// <summary>Ticks left in the current state.</summary>
+    public int StateTicksLeft => _timer;
 
     public bool WantsHop { get; private set; }
 
@@ -91,6 +110,13 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats)
 
         _hitsTaken++;
         _hitResetTimer = ai.StoicResetTicks;
+        if (!InPhaseTwo && ai.PhaseTwoHp > 0 && hpFraction <= ai.PhaseTwoHp)
+        {
+            InPhaseTwo = true;
+            EnterStoic(ai.StoicTicks);
+            return true;
+        }
+
         var crossedMark = false;
         while (_nextHpMark < ai.StoicHpMarks.Count && hpFraction <= ai.StoicHpMarks[_nextHpMark])
         {
@@ -166,18 +192,19 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats)
                 break;
             case MonsterState.Windup when _timer == 0:
                 SwingId++;
-                Set(MonsterState.Attack, ai.ActiveTicks);
+                Set(MonsterState.Attack, CurrentMove?.ActiveTicks ?? ai.ActiveTicks);
                 break;
             case MonsterState.Attack:
-                MoveVelocityX = Facing * ai.LungeSpeed;
+                MoveVelocityX = Facing * (CurrentMove?.LungeSpeed ?? ai.LungeSpeed);
                 if (_timer == 0)
                 {
-                    Set(MonsterState.Recover, Scaled(ai.RecoveryTicks));
+                    Set(MonsterState.Recover, Scaled(CurrentMove?.RecoveryTicks ?? ai.RecoveryTicks));
                 }
 
                 break;
             case MonsterState.Recover when _timer == 0:
                 _cooldown = Scaled(ai.CooldownTicks);
+                CurrentMove = null;
                 State = MonsterState.Idle;
                 break;
             case MonsterState.Stunned when _timer == 0:
@@ -221,6 +248,12 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats)
         }
 
         Facing = deltaX < 0 ? -1 : 1;
+        if (ai.Moves is { Count: > 0 } moves)
+        {
+            ThinkBoss(moves, distance);
+            return;
+        }
+
         if (distance <= ai.AttackRange)
         {
             State = MonsterState.Chase;
@@ -269,7 +302,42 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats)
         }
     }
 
-    private int Scaled(int ticks) => (int)MathF.Round(ticks * stats.CooldownScale);
+    /// <summary>Weighted pick among moves that fit the distance; never the same move three times in a row.</summary>
+    private void ThinkBoss(IReadOnlyList<MonsterMoveDef> moves, float distance)
+    {
+        State = MonsterState.Chase;
+        var choices = moves.Where(move => distance >= move.MinRange && distance <= move.MaxRange && !(move.Id == _lastMove && _moveRepeats >= 2)).ToList();
+        if (_cooldown == 0 && choices.Count > 0)
+        {
+            CurrentMove = PickWeighted(choices);
+            _moveRepeats = CurrentMove.Id == _lastMove ? _moveRepeats + 1 : 1;
+            _lastMove = CurrentMove.Id;
+            Set(MonsterState.Windup, Scaled(CurrentMove.WindupTicks));
+            return;
+        }
+
+        if (distance > ai.AttackRange)
+        {
+            MoveVelocityX = Facing * stats.Speed * (InPhaseTwo ? ai.PhaseTwoSpeed : 1);
+        }
+    }
+
+    private MonsterMoveDef PickWeighted(List<MonsterMoveDef> choices)
+    {
+        var roll = _random.NextDouble() * choices.Sum(move => move.Weight);
+        foreach (var move in choices)
+        {
+            roll -= move.Weight;
+            if (roll < 0)
+            {
+                return move;
+            }
+        }
+
+        return choices[^1];
+    }
+
+    private int Scaled(int ticks) => (int)MathF.Round(ticks * stats.CooldownScale / (InPhaseTwo ? ai.PhaseTwoSpeed : 1));
 
     private void Set(MonsterState state, int ticks)
     {

@@ -111,6 +111,27 @@ public sealed record AttackSetDef(string Id, string First, string FirstAir, stri
 
 public sealed record MonsterStatsDef(int MaxHp, int Attack, float Defense, float Speed);
 
+/// <summary>One boss move. Kind says how the game plays it; numbers come from here.</summary>
+public sealed record MonsterMoveDef(
+    string Id,
+    string Kind,
+    float MinRange,
+    float MaxRange,
+    float Weight,
+    int WindupTicks,
+    int ActiveTicks,
+    int RecoveryTicks,
+    float LungeSpeed,
+    float DamageMultiplier,
+    RectDef Hitbox,
+    bool Knockdown,
+    float StealMp,
+    string? ProjectileSprite,
+    int ProjectileTicks,
+    float ProjectileGravity,
+    float ProjectileHeight,
+    int MarkerTicks);
+
 /// <param name="SuperArmor">Armored during its own windup and strike.</param>
 /// <param name="StoicThreshold">Hits before it armors up and fights back; 0 means never.</param>
 /// <param name="FrontGuardScale">Share of damage taken from the front; 1 means no guard.</param>
@@ -140,7 +161,10 @@ public sealed record MonsterAiDef(
     int StaggerBreakTicks,
     float StaggerDamageScale,
     float FrontGuardScale,
-    bool BouncesOffWalls);
+    bool BouncesOffWalls,
+    float PhaseTwoHp = 0,
+    float PhaseTwoSpeed = 1,
+    IReadOnlyList<MonsterMoveDef>? Moves = null);
 
 public sealed record MonsterAttackDef(float DamageMultiplier, RectDef Hitbox, float KnockbackSpeed, int HitstopTicks, string HitVfx, bool Knockdown);
 
@@ -227,6 +251,7 @@ public sealed record RunDef(
     float DoorHeight,
     float DoorInset,
     int DoorPromptTicks,
+    float RoomClearHeal,
     IReadOnlyList<RoomDef> Rooms);
 
 public sealed record InputActionDef(string Action, IReadOnlyList<string> Keys, IReadOnlyList<int> PadButtons, IReadOnlyList<int> PadAxes);

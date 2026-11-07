@@ -77,7 +77,7 @@
           "x": 1150,
           "y": 635,
           "width": 460,
-          "top_inset": 16
+          "top_inset": 37
         }
       ],
       "waves": [
@@ -129,14 +129,14 @@
           "x": 800,
           "y": 645,
           "width": 400,
-          "top_inset": 16
+          "top_inset": 44
         },
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
           "x": 1500,
           "y": 635,
           "width": 260,
-          "top_inset": 16
+          "top_inset": 5
         }
       ],
       "waves": [
@@ -188,14 +188,14 @@
           "x": 1000,
           "y": 635,
           "width": 460,
-          "top_inset": 16
+          "top_inset": 37
         },
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
           "x": 1900,
           "y": 635,
           "width": 460,
-          "top_inset": 16
+          "top_inset": 37
         }
       ],
       "waves": [
@@ -247,7 +247,7 @@
           "x": 1200,
           "y": 635,
           "width": 260,
-          "top_inset": 16
+          "top_inset": 5
         }
       ],
       "waves": [
@@ -303,7 +303,7 @@
           "x": 960,
           "y": 625,
           "width": 300,
-          "top_inset": 16
+          "top_inset": 6
         }
       ],
       "waves": [
@@ -317,5 +317,6 @@
         }
       ]
     }
-  ]
+  ],
+  "room_clear_heal": 0.15
 }

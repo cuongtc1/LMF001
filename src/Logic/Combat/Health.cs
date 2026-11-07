@@ -10,5 +10,7 @@ public sealed class Health(int max)
 
     public void Damage(int amount) => Current = Math.Max(0, Current - amount);
 
+    public void Heal(int amount) => Current = Math.Min(Max, Current + amount);
+
     public void Refill() => Current = Max;
 }

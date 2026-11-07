@@ -105,6 +105,8 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         _motor.Knockback(0, 0);
     }
 
+    public void LoseMp(float amount) => Mp = Mathf.Max(0, Mp - amount);
+
     public void Heal()
     {
         Health.Refill();
