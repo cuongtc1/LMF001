@@ -184,7 +184,28 @@ public sealed record MonsterAiDef(
 
 public sealed record MonsterAttackDef(float DamageMultiplier, RectDef Hitbox, float KnockbackSpeed, int HitstopTicks, string HitVfx, bool Knockdown);
 
-public sealed record MonsterArtDef(string Folder, float Height, bool FacesLeft, string Idle, string Windup, string Hit, string Healed);
+/// <param name="Motion">Scales the code-driven animation: above 1 bouncy (slimes), below 1 stiff (treants).</param>
+public sealed record MonsterArtDef(string Folder, float Height, bool FacesLeft, string Idle, string Windup, string Hit, string Healed, float Motion = 1);
+
+/// <summary>Amounts of the code-driven monster animation. Squash values are shares of the image size; angles in radians.</summary>
+public sealed record MonsterPoseDef(
+    float Breathe,
+    int BreatheTicks,
+    float StepSpeed,
+    int StepTicks,
+    float StepHop,
+    float StepSquash,
+    float Lean,
+    float WindupSquash,
+    float WindupShake,
+    float ShakeSpeed,
+    float AttackStretch,
+    float AirStretch,
+    float LandSquash,
+    int LandTicks,
+    float HitSquash,
+    int HitTicks,
+    float DizzyWobble);
 
 public sealed record MonsterDef(
     string Id,
@@ -222,7 +243,8 @@ public sealed record GameFeelDef(
     float JuggleGravityScale,
     string GuardVfx,
     int PlayerDownTicks,
-    int PlayerGetupTicks);
+    int PlayerGetupTicks,
+    MonsterPoseDef MonsterPose);
 
 public sealed record VfxDef(string Id, int Frames, int TicksPerFrame, float Scale);
 
@@ -264,11 +286,12 @@ public sealed record RoomDef(
     bool RewardOnClear = true,
     ChallengeDef? Challenge = null);
 
-/// <summary>An optional trial: the waves wait until Lumi hits the lever, and the door is open from the start.</summary>
+/// <summary>A room trial in the style of Little Noah's Monster Lairs and no-hit rooms.</summary>
 /// <param name="Kind">One of <c>ChallengeKinds</c>.</param>
-/// <param name="Seconds">Clock of a time_limit trial; unused by no_hit.</param>
-/// <param name="RewardChoices">Amulet cards offered on a win.</param>
-public sealed record ChallengeDef(string Kind, float LeverX, int Seconds, int RewardChoices);
+/// <param name="LeverX">Where the lair lever stands; unused by no_hit.</param>
+/// <param name="TierBonus">Added to the run tier for the trial's monsters.</param>
+/// <param name="ChestX">Where the reward chest appears on a win.</param>
+public sealed record ChallengeDef(string Kind, float LeverX, int TierBonus, float ChestX);
 
 /// <param name="HpChance">Share of crates that drop an HP token; the rest drop MP.</param>
 /// <param name="CrateBrokenSprite">Drawn at the same scale as the crate, so both come from one sheet.</param>
@@ -287,7 +310,8 @@ public sealed record PickupDef(
     float ChestHeight,
     string LeverSprite,
     string LeverOnSprite,
-    float LeverHeight);
+    float LeverHeight,
+    float BigChestHeight);
 
 /// <param name="RoomsPerRun">Rooms before the boss.</param>
 /// <param name="DoorPromptTicks">Time on the ground at a door before its prompt shows.</param>

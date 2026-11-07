@@ -61,6 +61,7 @@
     "idle": "idle.png",
     "windup": "windup.png",
     "hit": "windup.png",
-    "healed": "healed.png"
+    "healed": "healed.png",
+    "motion": 0.8
   }
 }

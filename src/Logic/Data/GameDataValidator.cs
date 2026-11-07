@@ -83,8 +83,7 @@ public static class GameDataValidator
             {
                 var challenge = room.Challenge!;
                 Require(Run.ChallengeKinds.All.Contains(challenge.Kind), $"{room.Id}.challenge.kind");
-                Require(challenge.Kind != Run.ChallengeKinds.TimeLimit || challenge.Seconds > 0, $"{room.Id}.challenge.seconds");
-                Require(room.Waves.Count > 0 && challenge.RewardChoices > 0, $"{room.Id}.challenge");
+                Require(room.Waves.Count > 0 && challenge.TierBonus >= 0 && run.Tier + challenge.TierBonus <= data.Scaling.MaxTier, $"{room.Id}.challenge");
             }
 
             foreach (var spawn in run.Rooms.SelectMany(room => room.Waves).SelectMany(wave => wave.Spawns))

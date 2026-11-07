@@ -14,7 +14,6 @@ namespace LumiFeast.Game.Gameplay.Enemies;
 /// <summary>Runs any plain monster from its data file. New monsters normally need no new code.</summary>
 public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBlocker
 {
-    private const float WindupSquash = 0.14f;
     private const float FlashStrength = 2.2f;
     private const float HealRisePixels = 90;
     private const float BobPixels = 10;
@@ -23,7 +22,7 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
     private const float DownSinkShare = 0.25f;
     private const float StaggerBarWidth = 200;
     private const float StaggerBarHeight = 10;
-    private const float DizzyWobble = 0.12f;
+    private const int PosePhaseSpread = 97;
     private const float ThrowForward = 80;
     private const float ThrowHeight = 180;
     private const float ThrowAimHeight = 100;
@@ -40,6 +39,7 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
     private GameFeel _gameFeel = null!;
     private PlayerController _player = null!;
     private MonsterBrain _brain = null!;
+    private MonsterPose _pose = null!;
     private const float RunOffSeconds = 0.6f;
 
     private AttackHitbox _hitbox = null!;
@@ -85,6 +85,8 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         _gameFeel = gameFeel;
         _player = player;
         _brain = new MonsterBrain(def.Ai, stats);
+        // monsters of one wave should not breathe in step
+        _pose = new MonsterPose(feel.MonsterPose, def.Art.Motion, Mathf.PosMod((int)position.X, PosePhaseSpread));
         Health = new Health(stats.MaxHp);
         GlobalPosition = position;
         _flying = def.Ai.Behavior == MonsterBehaviors.Flyer;
@@ -160,6 +162,7 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         }
 
         _flashTicks = 6;
+        _pose.Hit();
         if (_brain.CanBeMoved && !guarded)
         {
             _knockback = hit.Direction * hit.KnockbackSpeed * _def.KnockbackScale;
@@ -309,11 +312,6 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
             _staggerBar.Size = new Vector2(StaggerBarWidth * _brain.StaggerRatio, StaggerBarHeight);
         }
 
-        if (_flying)
-        {
-            _sprite.Position = new Vector2(0, -_def.Art.Height / 2 + Mathf.Sin(_age * BobPerTick) * BobPixels);
-        }
-
         _sprite.Texture = _brain.State switch
         {
             MonsterState.Windup => _windup,
@@ -321,18 +319,18 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
             _ => _idle,
         };
 
-        var squash = _brain.State == MonsterState.Windup ? WindupSquash : 0;
+        var pose = _pose.Step(_brain.State, _brain.StateTicksLeft, _brain.MoveVelocityX, _flying || IsOnFloor(), _velocityY, _brain.Facing);
         var artDirection = _def.Art.FacesLeft ? -1 : 1;
         var flip = _brain.Facing == artDirection ? 1 : -1;
         var textureScale = _def.Art.Height / _sprite.Texture.GetHeight();
-        _sprite.Scale = new Vector2(textureScale * flip * (1 + squash), textureScale * (1 - squash));
+        _sprite.Scale = new Vector2(textureScale * flip * pose.ScaleX, textureScale * pose.ScaleY);
         var down = _brain.State == MonsterState.Down;
-        _sprite.Rotation = down ? Mathf.Pi / 2 * flip : dizzy ? Mathf.Sin(_age * BobPerTick * 2) * DizzyWobble : 0;
-        if (!_flying)
-        {
-            _sprite.Position = new Vector2(0, -_def.Art.Height * (down ? DownSinkShare : 0.5f));
-        }
+        _sprite.Rotation = down ? Mathf.Pi / 2 * flip : pose.Rotation;
 
+        // squash keeps the feet on the floor: the sprite center moves with its height
+        var centerY = down ? -_def.Art.Height * DownSinkShare : -_def.Art.Height * pose.ScaleY / 2;
+        var hover = _flying ? Mathf.Sin(_age * BobPerTick) * BobPixels : 0;
+        _sprite.Position = new Vector2(pose.OffsetX, centerY + pose.OffsetY + hover);
         _aura.Texture = _sprite.Texture;
         _aura.Visible = _brain.IsArmored;
     }

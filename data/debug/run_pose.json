@@ -1,0 +1,79 @@
+{
+  "god_mode": true,
+  "room": "mixed",
+  "end_tick": 520,
+  "screenshots": [
+    180,
+    188,
+    196,
+    204,
+    212,
+    220,
+    228,
+    236,
+    244,
+    252,
+    260,
+    268,
+    276,
+    284,
+    292,
+    300,
+    308,
+    316,
+    324,
+    332,
+    340,
+    348,
+    356,
+    364,
+    372,
+    380,
+    388,
+    396,
+    404,
+    412,
+    420,
+    428,
+    436,
+    444,
+    452,
+    460,
+    468,
+    476,
+    484,
+    492
+  ],
+  "steps": [
+    {
+      "tick": 30,
+      "action": "move_right",
+      "pressed": true
+    },
+    {
+      "tick": 90,
+      "action": "move_right",
+      "pressed": false
+    },
+    {
+      "tick": 380,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 382,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 400,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 402,
+      "action": "attack_light",
+      "pressed": false
+    }
+  ]
+}

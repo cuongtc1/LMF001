@@ -15,5 +15,24 @@
   "juggle_gravity_scale": 0.55,
   "guard_vfx": "hit_heavy",
   "player_down_ticks": 50,
-  "player_getup_ticks": 26
+  "player_getup_ticks": 26,
+  "monster_pose": {
+    "breathe": 0.03,
+    "breathe_ticks": 96,
+    "step_speed": 220,
+    "step_ticks": 14,
+    "step_hop": 10,
+    "step_squash": 0.06,
+    "lean": 0.09,
+    "windup_squash": 0.14,
+    "windup_shake": 4,
+    "shake_speed": 1.9,
+    "attack_stretch": 0.16,
+    "air_stretch": 0.1,
+    "land_squash": 0.18,
+    "land_ticks": 9,
+    "hit_squash": 0.2,
+    "hit_ticks": 10,
+    "dizzy_wobble": 0.14
+  }
 }

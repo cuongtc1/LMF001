@@ -4,13 +4,13 @@ namespace LumiFeast.Logic.Run;
 
 public static class ChallengeKinds
 {
-    /// <summary>Heal every monster before the clock runs out.</summary>
-    public const string TimeLimit = "time_limit";
+    /// <summary>Optional: the lever summons stronger monsters and locks the door until all are healed. Wins a big chest.</summary>
+    public const string Lair = "lair";
 
-    /// <summary>Heal every monster without taking a hit. Guarded hits do not count.</summary>
+    /// <summary>A normal fight room with a bonus: heal everyone without an unguarded hit for an extra chest.</summary>
     public const string NoHit = "no_hit";
 
-    public static readonly string[] All = [TimeLimit, NoHit];
+    public static readonly string[] All = [Lair, NoHit];
 }
 
 public enum ChallengeState
@@ -21,19 +21,26 @@ public enum ChallengeState
     Failed,
 }
 
-/// <summary>An optional room trial. It waits for the lever, then is won by healing the room in time.</summary>
-public sealed class ChallengeRun(ChallengeDef def, int ticksPerSecond)
+/// <summary>A room trial. A lair waits for its lever; a no-hit trial runs from the start.</summary>
+public sealed class ChallengeRun
 {
-    public ChallengeDef Def { get; } = def;
+    public ChallengeRun(ChallengeDef def)
+    {
+        Def = def;
+        if (!NeedsLever)
+        {
+            State = ChallengeState.Running;
+        }
+    }
+
+    public ChallengeDef Def { get; }
 
     public ChallengeState State { get; private set; } = ChallengeState.Waiting;
 
-    public int TicksLeft { get; private set; }
+    public bool NeedsLever => Def.Kind == ChallengeKinds.Lair;
 
-    public bool HasClock => Def.Kind == ChallengeKinds.TimeLimit;
-
-    /// <summary>Whole seconds left on the clock, rounded up so it never shows 0 while running.</summary>
-    public int SecondsLeft => (TicksLeft + ticksPerSecond - 1) / ticksPerSecond;
+    /// <summary>A lair keeps its door shut while running: once accepted, it must be finished.</summary>
+    public bool LocksDoor => NeedsLever && State == ChallengeState.Running;
 
     public bool Start()
     {
@@ -43,30 +50,21 @@ public sealed class ChallengeRun(ChallengeDef def, int ticksPerSecond)
         }
 
         State = ChallengeState.Running;
-        TicksLeft = Def.Seconds * ticksPerSecond;
         return true;
     }
 
     /// <param name="roomHealed">Every wave is spawned and healed.</param>
     public ChallengeState Step(bool roomHealed)
     {
-        if (State != ChallengeState.Running)
-        {
-            return State;
-        }
-
-        if (roomHealed)
+        if (State == ChallengeState.Running && roomHealed)
         {
             State = ChallengeState.Won;
-        }
-        else if (HasClock && --TicksLeft <= 0)
-        {
-            State = ChallengeState.Failed;
         }
 
         return State;
     }
 
+    /// <summary>Only the no-hit bonus can be lost; a lair is lost only by losing the run.</summary>
     public void PlayerHit()
     {
         if (State == ChallengeState.Running && Def.Kind == ChallengeKinds.NoHit)

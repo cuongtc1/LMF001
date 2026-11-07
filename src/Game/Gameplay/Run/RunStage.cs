@@ -35,6 +35,10 @@ public partial class RunStage : Node2D
     /// <summary>Time to watch the boss heal before the result screen comes up.</summary>
     private const int ClearScreenDelayTicks = 100;
 
+    private const float ShadeSeconds = 0.8f;
+
+    /// <summary>A lair turns the room dusky and mysterious while it runs.</summary>
+    private static readonly Color LairShade = new(0.62f, 0.57f, 0.86f);
     private static readonly Color ClosedDoor = new(0.55f, 0.5f, 0.6f);
 
     private readonly List<MonsterController> _monsters = [];
@@ -61,6 +65,7 @@ public partial class RunStage : Node2D
     private int _clearScreenTicks;
     private ChallengeRun? _challenge;
     private bool _challengeSettled;
+    private CanvasModulate _shade = null!;
 
     public override void _Ready()
     {
@@ -94,6 +99,8 @@ public partial class RunStage : Node2D
 
         _picker = new RewardPicker();
         AddChild(_picker);
+        _shade = new CanvasModulate { Color = Colors.White };
+        AddChild(_shade);
         _result = new RunResultScreen();
         AddChild(_result);
 
@@ -144,7 +151,7 @@ public partial class RunStage : Node2D
             case WaveEvent.SpawnWave:
                 SpawnWave();
                 break;
-            case WaveEvent.Cleared when _challenge is null:
+            case WaveEvent.Cleared when _challenge is not { NeedsLever: true }:
                 OpenDoor();
                 break;
         }
@@ -211,19 +218,20 @@ public partial class RunStage : Node2D
         _groundedTicks = 0;
         _waves = new WaveRunner(_room.Waves.Count, _run.WaveDelayTicks);
         _challengeSettled = false;
-        _challenge = _room.Challenge is { } trial ? new ChallengeRun(trial, (int)GameConstants.TicksPerSecond) : null;
+        _challenge = _room.Challenge is { } trial ? new ChallengeRun(trial) : null;
+        _shade.Color = Colors.White;
         _hud.ShowStatus(GameServices.Messages.Get(
             _plan[_roomIndex] == _run.BossRoom ? MessageKeys.HudBoss : MessageKeys.HudRoom, _roomIndex + 1, _plan.Count));
-        if (_challenge is null)
+        if (_challenge is { NeedsLever: true })
         {
-            _waves.Start();
-        }
-        else
-        {
-            // a trial is optional, so its door is open from the start
+            // a lair is optional, so its door is open until the lever is hit
             _roomCleared = true;
             _door.Modulate = Colors.White;
             _hud.ShowStatus(GameServices.Messages.Get(MessageKeys.TrialOffer));
+        }
+        else
+        {
+            _waves.Start();
         }
     }
 
@@ -257,7 +265,7 @@ public partial class RunStage : Node2D
             crate.Broken += BreakCrate;
         }
 
-        if (_room.Challenge is { } trial)
+        if (_room.Challenge is { Kind: ChallengeKinds.Lair } trial)
         {
             var lever = new HittableProp();
             _roomNode.AddChild(lever);
@@ -267,11 +275,16 @@ public partial class RunStage : Node2D
 
         if (_room.ChestX is { } chestX)
         {
-            var chest = new HittableProp();
-            _roomNode.AddChild(chest);
-            chest.Setup(pickups.ChestSprite, pickups.ChestHeight, new Vector2(chestX, _room.GroundY), 1);
-            chest.Broken += OpenChest;
+            SpawnChest(chestX, pickups.ChestHeight);
         }
+    }
+
+    private void SpawnChest(float x, float height)
+    {
+        var chest = new HittableProp();
+        _roomNode.AddChild(chest);
+        chest.Setup(_run.Pickups.ChestSprite, height, new Vector2(x, _room.GroundY), 1);
+        chest.Broken += OpenChest;
     }
 
     private void BreakCrate(HittableProp crate)
@@ -289,6 +302,7 @@ public partial class RunStage : Node2D
         OfferReward(RewardKind.Amulets);
     }
 
+    /// <summary>Accepting a lair darkens the room and shuts the door until every monster is healed.</summary>
     private void StartChallenge(HittableProp lever)
     {
         lever.ChangeSprite(_run.Pickups.LeverOnSprite);
@@ -298,13 +312,16 @@ public partial class RunStage : Node2D
         }
 
         GameLog.Info(MessageKeys.TrialStarted, _challenge.Def.Kind);
+        _roomCleared = false;
+        _door.Modulate = ClosedDoor;
+        CreateTween().TweenProperty(_shade, "color", LairShade, ShadeSeconds);
         _waves.Start();
     }
 
-    /// <summary>Shows the trial on the status line and settles it: a win offers amulets, a loss sends the monsters away.</summary>
+    /// <summary>Shows the trial on the status line and settles it once: a win brings a chest.</summary>
     private void StepChallenge()
     {
-        // a hit can fail the trial between steps, so settle any state past Waiting once
+        // a hit can lose the bonus between steps, so settle any state past Waiting
         if (_challenge is not { } trial || trial.State == ChallengeState.Waiting || _challengeSettled)
         {
             return;
@@ -314,27 +331,26 @@ public partial class RunStage : Node2D
         switch (trial.Step(_waves.IsCleared))
         {
             case ChallengeState.Running:
-                _hud.ShowStatus(trial.HasClock ? messages.Get(MessageKeys.TrialClock, trial.SecondsLeft) : messages.Get(MessageKeys.TrialNoHit));
+                _hud.ShowStatus(messages.Get(trial.NeedsLever ? MessageKeys.TrialLair : MessageKeys.TrialNoHit));
                 break;
             case ChallengeState.Won:
                 _challengeSettled = true;
                 GameLog.Info(MessageKeys.TrialWon);
-                _stats.RoomCleared();
                 _hud.ShowStatus(messages.Get(MessageKeys.TrialWon));
-                OfferReward(RewardKind.Amulets, trial.Def.RewardChoices);
+                if (trial.NeedsLever)
+                {
+                    _roomCleared = true;
+                    _door.Modulate = Colors.White;
+                    _stats.RoomCleared();
+                    CreateTween().TweenProperty(_shade, "color", Colors.White, ShadeSeconds);
+                }
+
+                SpawnChest(trial.Def.ChestX, trial.NeedsLever ? _run.Pickups.BigChestHeight : _run.Pickups.ChestHeight);
                 break;
             case ChallengeState.Failed:
                 _challengeSettled = true;
-                GameLog.Info(MessageKeys.TrialFailed);
-                _stats.RoomCleared();
-                _hud.ShowStatus(messages.Get(MessageKeys.TrialFailed));
-                foreach (var monster in _monsters)
-                {
-                    monster.RunOff();
-                }
-
-                _monsters.Clear();
-                _waves.Reset();
+                GameLog.Info(MessageKeys.TrialBonusLost);
+                _hud.ShowStatus(messages.Get(MessageKeys.TrialBonusLost));
                 break;
         }
     }
@@ -343,7 +359,7 @@ public partial class RunStage : Node2D
     {
         foreach (var spawn in _room.Waves[_waves.Wave].Spawns)
         {
-            var monster = MonsterSpawner.Spawn(_roomNode, spawn.Monster, spawn.X, _room.GroundY, _run.Tier, _gameFeel, _player);
+            var monster = MonsterSpawner.Spawn(_roomNode, spawn.Monster, spawn.X, _room.GroundY, _run.Tier + (_challenge?.Def.TierBonus ?? 0), _gameFeel, _player);
             monster.Healed += OnHealed;
             _monsters.Add(monster);
             if (_plan[_roomIndex] == _run.BossRoom)
