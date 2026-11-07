@@ -1,0 +1,813 @@
+{
+  "god_mode": true,
+  "room": "gate",
+  "skills": [
+    "jam_spread"
+  ],
+  "end_tick": 2100,
+  "screenshots": [
+    2080
+  ],
+  "steps": [
+    {
+      "tick": 30,
+      "action": "move_right",
+      "pressed": true
+    },
+    {
+      "tick": 90,
+      "action": "move_right",
+      "pressed": false
+    },
+    {
+      "tick": 100,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 102,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 118,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 120,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 136,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 138,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 154,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 156,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 172,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 174,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 190,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 192,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 208,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 210,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 226,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 228,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 244,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 246,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 262,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 264,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 280,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 282,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 298,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 300,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 316,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 318,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 334,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 336,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 352,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 354,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 370,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 372,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 388,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 390,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 406,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 408,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 424,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 426,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 442,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 444,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 460,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 462,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 478,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 480,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 496,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 498,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 514,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 516,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 532,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 534,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 550,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 552,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 568,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 570,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 586,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 588,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 604,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 606,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 622,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 624,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 640,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 642,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 658,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 660,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 676,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 678,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 694,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 696,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 712,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 714,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 730,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 732,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 748,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 750,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 766,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 768,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 784,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 786,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 802,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 804,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 820,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 822,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 838,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 840,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 856,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 858,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 874,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 876,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 892,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 894,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 910,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 912,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 928,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 930,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 946,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 948,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 964,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 966,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 982,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 984,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 1000,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 1002,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 1018,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 1020,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 1036,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 1038,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 1054,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 1056,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 1072,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 1074,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 1090,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 1092,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 1108,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 1110,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 1126,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 1128,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 1144,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 1146,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 1162,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 1164,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 1180,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 1182,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 1198,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 1200,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 1216,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 1218,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 1234,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 1236,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 1252,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 1254,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 1270,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 1272,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 1288,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 1290,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 1306,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 1308,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 1324,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 1326,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 1342,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 1344,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 1360,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 1362,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 1378,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 1380,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 1396,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 1398,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 1414,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 1416,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 1432,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 1434,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 1450,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 1452,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 1468,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 1470,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 1486,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 1488,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 1560,
+      "action": "move_left",
+      "pressed": true
+    },
+    {
+      "tick": 1960,
+      "action": "move_left",
+      "pressed": false
+    }
+  ]
+}

@@ -1,6 +1,9 @@
 {
   "god_mode": true,
   "room": "den",
+  "skills": [
+    "jam_spread"
+  ],
   "end_tick": 2700,
   "screenshots": [
     600,

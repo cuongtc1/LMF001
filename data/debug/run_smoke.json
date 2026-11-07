@@ -1,5 +1,9 @@
 {
   "god_mode": true,
+  "room": "gate",
+  "skills": [
+    "jam_spread"
+  ],
   "end_tick": 2400,
   "steps": [
     {

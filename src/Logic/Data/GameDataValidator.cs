@@ -76,9 +76,9 @@ public static class GameDataValidator
         foreach (var run in data.Runs.Values)
         {
             var rooms = run.Rooms.Select(room => room.Id).ToHashSet();
-            Require(rooms.Contains(run.FirstRoom) && rooms.Contains(run.BossRoom), run.Id);
+            Require(rooms.Contains(run.EntranceRoom) && rooms.Contains(run.FirstRoom) && rooms.Contains(run.BossRoom), run.Id);
             data.AmuletSet(run.AmuletSet);
-            Require(run.RoomsPerRun >= 1 && run.RoomsPerRun <= run.Rooms.Count - 1, $"{run.Id}.rooms_per_run");
+            Require(run.RoomsPerRun >= 1 && run.RoomsPerRun <= run.Rooms.Count - 2, $"{run.Id}.rooms_per_run");
             foreach (var room in run.Rooms.Where(room => room.Challenge is not null))
             {
                 var challenge = room.Challenge!;

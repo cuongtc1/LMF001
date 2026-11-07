@@ -1,6 +1,9 @@
 {
   "god_mode": true,
   "room": "lair",
+  "skills": [
+    "jam_spread"
+  ],
   "end_tick": 3600,
   "screenshots": [
     50,

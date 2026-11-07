@@ -1,6 +1,9 @@
 {
   "god_mode": true,
   "room": "mixed",
+  "skills": [
+    "jam_spread"
+  ],
   "end_tick": 520,
   "screenshots": [
     180,

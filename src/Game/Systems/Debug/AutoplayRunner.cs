@@ -45,10 +45,6 @@ public partial class AutoplayRunner : Node, IPlayerInput
             StartRoom = room.GetString();
         }
 
-        if (document.RootElement.TryGetProperty("start_hp", out var startHp))
-        {
-            _player.Health.Damage(_player.Health.Current - startHp.GetInt32());
-        }
 
         if (document.RootElement.TryGetProperty("skills", out var skills))
         {
@@ -59,6 +55,12 @@ public partial class AutoplayRunner : Node, IPlayerInput
                 _player.Loadout.Add(set.Skills.First(skill => skill.Id == id.GetString()));
             }
         }
+        // after "skills", which fills HP and MP
+        if (document.RootElement.TryGetProperty("start_hp", out var startHp))
+        {
+            _player.Health.Damage(_player.Health.Current - startHp.GetInt32());
+        }
+
         if (document.RootElement.TryGetProperty("screenshots", out var shots))
         {
             _shotTicks.UnionWith(shots.EnumerateArray().Select(tick => tick.GetInt32()));

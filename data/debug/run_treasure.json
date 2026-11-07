@@ -1,6 +1,9 @@
 {
-  "end_tick": 820,
   "room": "treasure",
+  "skills": [
+    "jam_spread"
+  ],
+  "end_tick": 820,
   "screenshots": [
     120,
     330,

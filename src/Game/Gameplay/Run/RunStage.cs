@@ -23,49 +23,66 @@ public enum RewardKind
     Amulets,
 }
 
-/// <summary>One roguelite run: builds a room, runs its waves, opens the door, moves on.</summary>
+/// <summary>
+/// One roguelite run in connected rooms (Little Noah style): Lumi walks through open room edges,
+/// can go back, and rooms remember what happened in them. See technical/connected_rooms.md.
+/// </summary>
 public partial class RunStage : Node2D
 {
     private const float FloorClearance = 4;
     private const float CameraHeight = 160;
-    private const float DoorZoneWidth = 90;
-    private const int PromptFontSize = 40;
     private const float TokenLift = 60;
     private const float BrokenCrateSeconds = 1.2f;
+    private const float GateInset = 40;
+    private const float FadeSeconds = 0.25f;
+
     /// <summary>Time to watch the boss heal before the result screen comes up.</summary>
     private const int ClearScreenDelayTicks = 100;
 
     private const float ShadeSeconds = 0.8f;
+    private const string RoomChest = "room";
+    private const string LairChest = "lair";
+    private const string BonusChest = "bonus";
 
     /// <summary>A lair turns the room dusky and mysterious while it runs.</summary>
     private static readonly Color LairShade = new(0.62f, 0.57f, 0.86f);
-    private static readonly Color ClosedDoor = new(0.55f, 0.5f, 0.6f);
+
+    private static readonly Color BossColor = new("e2506a");
+    private static readonly Color LairColor = new("a86ee0");
+    private static readonly Color ChestColor = new("ffcf5a");
+    private static readonly Color ShrineColor = new("7fc4ff");
+    private static readonly Color TrialColor = new("ff9a4d");
 
     private readonly List<MonsterController> _monsters = [];
+    private readonly List<Node2D> _gates = [];
+    private readonly RunStats _stats = new();
     private RunDef _run = null!;
     private RoomDef _room = null!;
-    private IReadOnlyList<string> _plan = [];
-    private int _roomIndex;
+    private StageMap _map = new([]);
     private GameFeel _gameFeel = null!;
     private PlayerController _player = null!;
     private PrototypeHud _hud = null!;
+    private Minimap _minimap = null!;
     private Camera2D _camera = null!;
     private WaveRunner _waves = null!;
-    private Node2D _roomNode = null!;
-    private Sprite2D _door = null!;
-    private Label _prompt = null!;
-    private int _groundedTicks;
-    private bool _roomCleared;
-    private bool _rewardPending;
+    private Node2D? _roomNode;
+    private ColorRect _fade = null!;
     private RewardPicker _picker = null!;
-    private SeededRandom _random = new(1);
     private RunResultScreen _result = null!;
-    private readonly RunStats _stats = new();
-    private bool _runOver;
-    private int _clearScreenTicks;
+    private CanvasModulate _shade = null!;
+    private SeededRandom _random = new(1);
     private ChallengeRun? _challenge;
     private bool _challengeSettled;
-    private CanvasModulate _shade = null!;
+    private bool _open;
+    private bool _rewardPending;
+    private bool _runOver;
+    private int _clearScreenTicks;
+
+    private RoomState State => _map.CurrentState;
+
+    private bool InBossRoom => _map.CurrentRoom == _run.BossRoom;
+
+    private Node2D RoomNode => _roomNode!;
 
     public override void _Ready()
     {
@@ -96,6 +113,8 @@ public partial class RunStage : Node2D
         _hud = new PrototypeHud();
         AddChild(_hud);
         _hud.Setup(_player);
+        _minimap = new Minimap();
+        AddChild(_minimap);
 
         _picker = new RewardPicker();
         AddChild(_picker);
@@ -103,10 +122,20 @@ public partial class RunStage : Node2D
         AddChild(_shade);
         _result = new RunResultScreen();
         AddChild(_result);
+        var fadeLayer = new CanvasLayer { Layer = 20 };
+        AddChild(fadeLayer);
+        _fade = new ColorRect
+        {
+            Color = Colors.Black,
+            Size = new Vector2(UiCommon.ScreenWidth, UiCommon.ScreenHeight),
+            Modulate = Colors.Transparent,
+            MouseFilter = Control.MouseFilterEnum.Ignore,
+        };
+        fadeLayer.AddChild(_fade);
 
         var debug = new DebugPanel();
         AddChild(debug);
-        debug.Setup(_player, _run.Tier, StartRun, NextRoom);
+        debug.Setup(_player, _run.Tier, StartRun, () => GoTo(_map.Neighbor(_map.Current, 1), 1));
 
         var script = AutoplayRunner.RequestedScript();
         StartRun();
@@ -117,16 +146,7 @@ public partial class RunStage : Node2D
             autoplay.Setup(script, _player);
             if (autoplay.StartRoom is { } room)
             {
-                // a room the seeded plan left out takes the second slot
-                var plan = _plan.ToList();
-                if (!plan.Contains(room))
-                {
-                    plan[1] = room;
-                }
-
-                _plan = plan;
-                _roomIndex = plan.IndexOf(room);
-                BuildRoom();
+                JumpTo(room);
             }
         }
     }
@@ -152,157 +172,298 @@ public partial class RunStage : Node2D
                 SpawnWave();
                 break;
             case WaveEvent.Cleared when _challenge is not { NeedsLever: true }:
-                OpenDoor();
+                OnRoomHealed();
                 break;
         }
 
         StepChallenge();
-        StepDoor();
+        StepExits();
     }
 
     private void StartRun()
     {
         var seed = AutoplayRunner.RequestedScript() is null ? Time.GetTicksUsec() : GameConstants.ScriptedRunSeed;
-        _plan = RunPlan.Build(_run, seed);
         _random = new SeededRandom(seed);
+        _map = new StageMap(RunPlan.Build(_run, seed));
         _player.Loadout.Clear();
         _player.Modifiers.Clear();
         _player.ApplyModifiers();
-        _roomIndex = 0;
         _stats.Reset();
         _clearScreenTicks = 0;
-        GameLog.Info(MessageKeys.RunStarted, string.Join(' ', _plan));
-        BuildRoom();
+        GameLog.Info(MessageKeys.RunStarted, string.Join(' ', _map.Rooms));
+        EnterRoom(0, 0);
         _player.Revive();
-        OfferReward(RewardKind.Skills); // the run starts with one skill, never empty-handed
     }
 
-    private void NextRoom()
+    /// <summary>Scripts start in a given room: one the seeded plan left out takes the slot after the first fight room.</summary>
+    private void JumpTo(string room)
     {
-        if (_roomIndex + 1 >= _plan.Count)
+        var rooms = _map.Rooms.ToList();
+        if (!rooms.Contains(room))
         {
-            StartRun();
+            rooms[2] = room;
+        }
+
+        _map = new StageMap(rooms);
+        _map.State(0).Visited = true;
+        _map.State(0).Cleared = true;
+        EnterRoom(rooms.IndexOf(room), -1);
+    }
+
+    /// <summary>Walks through the edge on that side; does nothing at the end of the row.</summary>
+    private void GoTo(int index, int side)
+    {
+        if (index < 0)
+        {
             return;
         }
 
-        _roomIndex++;
-        BuildRoom();
+        GameLog.Info(MessageKeys.RunMoved, _map.Rooms[index]);
+        _fade.Modulate = Colors.White;
+        CreateTween().TweenProperty(_fade, "modulate:a", 0f, FadeSeconds);
+        EnterRoom(index, -side);
     }
 
-    private void BuildRoom()
+    /// <param name="fromSide">-1 entered through the west edge, 1 through the east edge, 0 the run start.</param>
+    private void EnterRoom(int index, int fromSide)
     {
+        _map.Enter(index);
         _monsters.Clear();
+        _gates.Clear();
         _hud.TrackBoss(null);
         _roomNode?.QueueFree();
-        _room = _run.Rooms.First(room => room.Id == _plan[_roomIndex]);
+        _room = _run.Rooms.First(room => room.Id == _map.CurrentRoom);
         _roomNode = new Node2D();
         AddChild(_roomNode);
         foreach (var layer in _room.Layers)
         {
-            StageBuilder.AddLayer(_roomNode, layer);
+            StageBuilder.AddLayer(RoomNode, layer);
         }
 
-        StageBuilder.AddBounds(_roomNode, _room.Width, _room.GroundY);
+        StageBuilder.AddBounds(RoomNode, _room.Width, _room.GroundY);
         foreach (var platform in _room.Platforms)
         {
-            StageBuilder.AddPlatform(_roomNode, platform);
+            StageBuilder.AddPlatform(RoomNode, platform);
         }
 
-        BuildDoor();
-        BuildProps();
         _camera.LimitRight = (int)_room.Width;
-        var spawn = new Vector2(_run.PlayerSpawnX, _room.GroundY - FloorClearance);
+        var x = fromSide switch
+        {
+            < 0 => _run.EdgeSpawnInset,
+            > 0 => _room.Width - _run.EdgeSpawnInset,
+            _ => _run.PlayerSpawnX,
+        };
+        var spawn = new Vector2(x, _room.GroundY - FloorClearance);
         _player.SetRespawnPoint(spawn);
         _player.MoveTo(spawn);
-        _roomCleared = false;
-        _groundedTicks = 0;
+        _camera.ResetSmoothing();
+
         _waves = new WaveRunner(_room.Waves.Count, _run.WaveDelayTicks);
         _challengeSettled = false;
-        _challenge = _room.Challenge is { } trial ? new ChallengeRun(trial) : null;
+        _challenge = _room.Challenge is { } trial && !State.Cleared ? new ChallengeRun(trial) : null;
         _shade.Color = Colors.White;
-        _hud.ShowStatus(GameServices.Messages.Get(
-            _plan[_roomIndex] == _run.BossRoom ? MessageKeys.HudBoss : MessageKeys.HudRoom, _roomIndex + 1, _plan.Count));
-        if (_challenge is { NeedsLever: true })
+        if (_room.Waves.Count == 0 && _room.ShrineX is null)
         {
-            // a lair is optional, so its door is open until the lever is hit
-            _roomCleared = true;
-            _door.Modulate = Colors.White;
-            _hud.ShowStatus(GameServices.Messages.Get(MessageKeys.TrialOffer));
+            State.Cleared = true; // nothing to heal here
+        }
+
+        BuildProps();
+        var messages = GameServices.Messages;
+        _hud.ShowStatus(messages.Get(InBossRoom ? MessageKeys.HudBoss : MessageKeys.RunArea));
+        if (State.Cleared || _challenge is { NeedsLever: true })
+        {
+            SetOpen(true);
+            if (_challenge is { NeedsLever: true })
+            {
+                _hud.ShowStatus(messages.Get(MessageKeys.TrialOffer));
+            }
+        }
+        else if (_room.ShrineX is not null)
+        {
+            SetOpen(false);
+            _hud.ShowStatus(messages.Get(MessageKeys.RunShrinePrompt));
         }
         else
         {
+            SetOpen(false);
             _waves.Start();
+        }
+
+        ShowMinimap();
+    }
+
+    /// <summary>Gate pillars stand on the edges that lead somewhere while the room is shut.</summary>
+    private void SetOpen(bool open)
+    {
+        _open = open;
+        foreach (var gate in _gates)
+        {
+            gate.QueueFree();
+        }
+
+        _gates.Clear();
+        if (open)
+        {
+            return;
+        }
+
+        foreach (var side in new[] { -1, 1 })
+        {
+            if (_map.Neighbor(_map.Current, side) < 0)
+            {
+                continue;
+            }
+
+            var texture = GameServices.Texture(_run.GateSprite);
+            var gate = new Sprite2D
+            {
+                Texture = texture,
+                Scale = Vector2.One * _run.GateHeight / texture.GetHeight(),
+                Position = new Vector2(side < 0 ? GateInset : _room.Width - GateInset, _room.GroundY - _run.GateHeight / 2),
+                ZIndex = 4,
+            };
+            RoomNode.AddChild(gate);
+            _gates.Add(gate);
         }
     }
 
-    private void BuildDoor()
+    private void StepExits()
     {
-        var texture = GameServices.Texture(_run.DoorSprite);
-        var scale = _run.DoorHeight / texture.GetHeight();
-        _door = new Sprite2D
+        if (!_open)
         {
-            Texture = texture,
-            Scale = Vector2.One * scale,
-            Position = new Vector2(_room.Width - _run.DoorInset, _room.GroundY - _run.DoorHeight / 2),
-            Modulate = ClosedDoor,
-            ZIndex = -4,
-        };
-        _roomNode.AddChild(_door);
-        _prompt = UiCommon.OutlinedLabel(PromptFontSize, GameServices.Messages.Get(MessageKeys.RunDoorPrompt));
-        _prompt.Position = new Vector2(_door.Position.X - 40, _room.GroundY - _run.DoorHeight - 60);
-        _prompt.Visible = false;
-        _roomNode.AddChild(_prompt);
+            return;
+        }
+
+        var x = _player.GlobalPosition.X;
+        var side = x < _run.ExitZone ? -1 : x > _room.Width - _run.ExitZone ? 1 : 0;
+        if (side != 0 && Mathf.Sign(_player.MoveInput) == side)
+        {
+            GoTo(_map.Neighbor(_map.Current, side), side);
+        }
+    }
+
+    private void ShowMinimap()
+    {
+        var colors = new Dictionary<int, Color>();
+        for (var i = 0; i < _map.Rooms.Count; i++)
+        {
+            var room = _run.Rooms.First(item => item.Id == _map.Rooms[i]);
+            Color? accent = room.Id == _run.BossRoom ? BossColor
+                : room.Challenge?.Kind == ChallengeKinds.Lair ? LairColor
+                : room.Challenge is not null ? TrialColor
+                : room.ChestX is not null ? ChestColor
+                : room.ShrineX is not null ? ShrineColor
+                : null;
+            if (accent is { } color)
+            {
+                colors[i] = color;
+            }
+        }
+
+        _minimap.Show(_map, GameServices.Messages.Get(MessageKeys.RunArea), colors);
     }
 
     private void BuildProps()
     {
         var pickups = _run.Pickups;
-        foreach (var x in _room.Crates ?? [])
+        var crates = _room.Crates ?? [];
+        for (var i = 0; i < crates.Count; i++)
         {
+            if (State.BrokenCrates.Contains(i))
+            {
+                continue;
+            }
+
+            var index = i;
             var crate = new HittableProp();
-            _roomNode.AddChild(crate);
-            crate.Setup(pickups.CrateSprite, pickups.CrateHeight, new Vector2(x, _room.GroundY), pickups.CrateHits);
-            crate.Broken += BreakCrate;
+            RoomNode.AddChild(crate);
+            crate.Setup(pickups.CrateSprite, pickups.CrateHeight, new Vector2(crates[i], _room.GroundY), pickups.CrateHits);
+            crate.Broken += prop =>
+            {
+                State.BrokenCrates.Add(index);
+                BreakCrate(prop);
+            };
         }
 
         if (_room.Challenge is { Kind: ChallengeKinds.Lair } trial)
         {
             var lever = new HittableProp();
-            _roomNode.AddChild(lever);
-            lever.Setup(pickups.LeverSprite, pickups.LeverHeight, new Vector2(trial.LeverX, _room.GroundY), 1);
+            RoomNode.AddChild(lever);
+            lever.Setup(pickups.LeverSprite, pickups.LeverHeight, new Vector2(trial.LeverX, _room.GroundY), State.Cleared ? 0 : 1);
+            if (State.Cleared)
+            {
+                lever.ChangeSprite(pickups.LeverOnSprite);
+            }
+
             lever.Broken += StartChallenge;
         }
 
-        if (_room.ChestX is { } chestX)
+        if (_room.ShrineX is { } shrineX)
         {
-            SpawnChest(chestX, pickups.ChestHeight);
+            var shrine = new HittableProp();
+            RoomNode.AddChild(shrine);
+            shrine.Setup(_run.ShrineSprite, _run.ShrineHeight, new Vector2(shrineX, _room.GroundY), State.Cleared ? 0 : 1);
+            shrine.Broken += _ => OfferReward(RewardKind.Skills, () =>
+            {
+                State.Cleared = true;
+                SetOpen(true);
+                ShowMinimap();
+            });
+        }
+
+        if (_room.ChestX is not null)
+        {
+            State.Chests.TryAdd(RoomChest, false);
+        }
+
+        foreach (var name in State.Chests.Keys.ToList())
+        {
+            SpawnChest(name);
         }
     }
 
-    private void SpawnChest(float x, float height)
+    private void SpawnChest(string name)
     {
+        var pickups = _run.Pickups;
+        var (x, height) = name switch
+        {
+            LairChest => (_room.Challenge!.ChestX, pickups.BigChestHeight),
+            BonusChest => (_room.Challenge!.ChestX, pickups.ChestHeight),
+            _ => (_room.ChestX ?? 0, pickups.ChestHeight),
+        };
+        var opened = State.Chests[name];
         var chest = new HittableProp();
-        _roomNode.AddChild(chest);
-        chest.Setup(_run.Pickups.ChestSprite, height, new Vector2(x, _room.GroundY), 1);
-        chest.Broken += OpenChest;
+        RoomNode.AddChild(chest);
+        chest.Setup(pickups.ChestSprite, height, new Vector2(x, _room.GroundY), opened ? 0 : 1);
+        if (opened)
+        {
+            chest.ChangeSprite(pickups.ChestOpenSprite);
+        }
+
+        chest.Broken += prop =>
+        {
+            State.Chests[name] = true;
+            prop.ChangeSprite(pickups.ChestOpenSprite);
+            OfferReward(RewardKind.Amulets);
+        };
+    }
+
+    private void AddChest(string name)
+    {
+        State.Chests[name] = false;
+        SpawnChest(name);
     }
 
     private void BreakCrate(HittableProp crate)
     {
         var token = new Pickup();
-        _roomNode.AddChild(token);
+        RoomNode.AddChild(token);
         token.Setup(_player, _run.Pickups, _random.NextDouble() < _run.Pickups.HpChance, crate.GlobalPosition + new Vector2(0, -TokenLift));
         crate.ChangeSprite(_run.Pickups.CrateBrokenSprite);
         crate.FadeAway(BrokenCrateSeconds);
     }
 
-    private void OpenChest(HittableProp chest)
-    {
-        chest.ChangeSprite(_run.Pickups.ChestOpenSprite);
-        OfferReward(RewardKind.Amulets);
-    }
-
-    /// <summary>Accepting a lair darkens the room and shuts the door until every monster is healed.</summary>
+    /// <summary>Accepting a lair darkens the room and shuts its edges until every monster is healed.</summary>
     private void StartChallenge(HittableProp lever)
     {
         lever.ChangeSprite(_run.Pickups.LeverOnSprite);
@@ -312,8 +473,7 @@ public partial class RunStage : Node2D
         }
 
         GameLog.Info(MessageKeys.TrialStarted, _challenge.Def.Kind);
-        _roomCleared = false;
-        _door.Modulate = ClosedDoor;
+        SetOpen(false);
         CreateTween().TweenProperty(_shade, "color", LairShade, ShadeSeconds);
         _waves.Start();
     }
@@ -339,13 +499,11 @@ public partial class RunStage : Node2D
                 _hud.ShowStatus(messages.Get(MessageKeys.TrialWon));
                 if (trial.NeedsLever)
                 {
-                    _roomCleared = true;
-                    _door.Modulate = Colors.White;
-                    _stats.RoomCleared();
+                    MarkCleared();
                     CreateTween().TweenProperty(_shade, "color", Colors.White, ShadeSeconds);
                 }
 
-                SpawnChest(trial.Def.ChestX, trial.NeedsLever ? _run.Pickups.BigChestHeight : _run.Pickups.ChestHeight);
+                AddChest(trial.NeedsLever ? LairChest : BonusChest);
                 break;
             case ChallengeState.Failed:
                 _challengeSettled = true;
@@ -359,10 +517,10 @@ public partial class RunStage : Node2D
     {
         foreach (var spawn in _room.Waves[_waves.Wave].Spawns)
         {
-            var monster = MonsterSpawner.Spawn(_roomNode, spawn.Monster, spawn.X, _room.GroundY, _run.Tier + (_challenge?.Def.TierBonus ?? 0), _gameFeel, _player);
+            var monster = MonsterSpawner.Spawn(RoomNode, spawn.Monster, spawn.X, _room.GroundY, _run.Tier + (_challenge?.Def.TierBonus ?? 0), _gameFeel, _player);
             monster.Healed += OnHealed;
             _monsters.Add(monster);
-            if (_plan[_roomIndex] == _run.BossRoom)
+            if (InBossRoom)
             {
                 _hud.TrackBoss(monster.Health);
             }
@@ -375,23 +533,32 @@ public partial class RunStage : Node2D
         _stats.Healed();
     }
 
-    private void OpenDoor()
+    private void MarkCleared()
     {
-        _roomCleared = true;
+        State.Cleared = true;
         _stats.RoomCleared();
-        _hud.TrackBoss(null);
-        _door.Modulate = Colors.White;
-        var last = _roomIndex + 1 >= _plan.Count;
-        if (!last && _room.RewardOnClear)
-        {
-            OfferReward(RewardKind.Any);
-        }
+        SetOpen(true);
+        ShowMinimap();
+    }
 
-        if (last)
+    /// <summary>Every wave healed: the gates open, then the reward pick; the boss ends the run.</summary>
+    private void OnRoomHealed()
+    {
+        MarkCleared();
+        _hud.TrackBoss(null);
+        if (InBossRoom)
         {
             GameLog.Info(MessageKeys.RunCleared);
             _hud.ShowStatus(GameServices.Messages.Get(MessageKeys.HudClear));
             _clearScreenTicks = ClearScreenDelayTicks;
+            return;
+        }
+
+        _hud.ShowStatus(GameServices.Messages.Get(MessageKeys.RunRoomHealed));
+        if (_room.RewardOnClear && !State.RewardTaken)
+        {
+            State.RewardTaken = true;
+            OfferReward(RewardKind.Any);
         }
     }
 
@@ -401,7 +568,7 @@ public partial class RunStage : Node2D
         var messages = GameServices.Messages;
         if (!cleared)
         {
-            GameLog.Info(MessageKeys.RunDefeated, _roomIndex + 1);
+            GameLog.Info(MessageKeys.RunDefeated, _map.Current + 1);
         }
 
         var picked = _player.Loadout.Slots.OfType<SkillDef>().Select(skill => messages.Get(MessageKeys.SkillPrefix + skill.Id))
@@ -409,7 +576,7 @@ public partial class RunStage : Node2D
         var lines = new List<string>
         {
             messages.Get(MessageKeys.ResultTime, _stats.Time((int)GameConstants.TicksPerSecond)),
-            messages.Get(MessageKeys.ResultRooms, _stats.RoomsCleared, _plan.Count),
+            messages.Get(MessageKeys.ResultRooms, _stats.RoomsCleared, _map.Rooms.Count),
             messages.Get(MessageKeys.ResultHealed, _stats.MonstersHealed),
             messages.Get(MessageKeys.ResultCombo, _stats.BestCombo),
             messages.Get(MessageKeys.ResultLoadout, string.Join(", ", picked)),
@@ -420,7 +587,7 @@ public partial class RunStage : Node2D
         _result.Open(
             cleared,
             messages.Get(cleared ? MessageKeys.ResultClearTitle : MessageKeys.ResultDefeatTitle),
-            messages.Get(cleared ? MessageKeys.ResultClearLine : MessageKeys.ResultDefeatLine, _roomIndex + 1, _plan.Count),
+            messages.Get(cleared ? MessageKeys.ResultClearLine : MessageKeys.ResultDefeatLine, _map.Current + 1, _map.Rooms.Count),
             lines,
             messages.Get(cleared ? MessageKeys.ResultAgain : MessageKeys.ResultRetry),
             () =>
@@ -433,7 +600,7 @@ public partial class RunStage : Node2D
     }
 
     /// <summary>One of three: skills while a slot is free, and amulets not taken yet.</summary>
-    private void OfferReward(RewardKind kind, int? choices = null)
+    private void OfferReward(RewardKind kind, System.Action? onPicked = null)
     {
         var data = GameServices.Data;
         var skills = data.SkillSet(data.Character(GameConstants.PlayerCharacterId).Combat.SkillSet).Skills;
@@ -448,7 +615,7 @@ public partial class RunStage : Node2D
         {
             pool.AddRange(amulets.Where(amulet => !_player.Modifiers.Has(amulet.Id)).Select(amulet => MessageKeys.AmuletPrefix + amulet.Id));
         }
-        var picks = RewardDraw.Pick(pool, choices ?? _run.RewardChoices, _random);
+        var picks = RewardDraw.Pick(pool, _run.RewardChoices, _random);
         if (picks.Count == 0)
         {
             return;
@@ -476,25 +643,11 @@ public partial class RunStage : Node2D
             GameLog.Info(MessageKeys.RewardPicked, key);
             _rewardPending = false;
             _player.InputPaused = false;
+            onPicked?.Invoke();
         });
         if (AutoplayRunner.RequestedScript() is not null)
         {
             _picker.Choose(0);
-        }
-    }
-
-    /// <summary>The prompt waits until Lumi has stood still on the ground, so nobody presses it from the air.</summary>
-    private void StepDoor()
-    {
-        var atDoor = _roomCleared && !_rewardPending && Mathf.Abs(_player.GlobalPosition.X - _door.Position.X) < DoorZoneWidth && _player.OnGround;
-        _groundedTicks = atDoor ? _groundedTicks + 1 : 0;
-        var ready = _groundedTicks >= _run.DoorPromptTicks;
-        _prompt.Visible = ready;
-        _player.SuppressJump = ready;
-        if (ready && _player.UpPressed)
-        {
-            _player.SuppressJump = false;
-            NextRoom();
         }
     }
 }

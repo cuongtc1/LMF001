@@ -1,16 +1,40 @@
 {
   "id": "honey_labyrinth_stage_1",
   "tier": 1,
-  "rooms_per_run": 4,
+  "rooms_per_run": 5,
   "wave_delay_ticks": 60,
   "player_spawn_x": 200,
+  "entrance_room": "entrance",
   "first_room": "gate",
   "boss_room": "den",
-  "door_sprite": "assets/backgrounds/chapter_01/honey_labyrinth/door.png",
-  "door_height": 300,
-  "door_inset": 160,
-  "door_prompt_ticks": 60,
+  "gate_sprite": "assets/props/common/gate.png",
+  "gate_height": 330,
+  "shrine_sprite": "assets/props/common/shrine.png",
+  "shrine_height": 240,
+  "exit_zone": 60,
+  "edge_spawn_inset": 160,
   "rooms": [
+    {
+      "id": "entrance",
+      "width": 1920,
+      "ground_y": 885,
+      "layers": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/back.png",
+          "scroll_scale": 0.3,
+          "z_index": -30
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/wall_a.png",
+          "scroll_scale": 1.0,
+          "z_index": -10
+        }
+      ],
+      "platforms": [],
+      "waves": [],
+      "crates": [],
+      "shrine_x": 1100
+    },
     {
       "id": "gate",
       "width": 1920,
@@ -622,7 +646,7 @@
     "chest_height": 120,
     "lever_sprite": "assets/props/common/lever.png",
     "lever_on_sprite": "assets/props/common/lever_on.png",
-    "lever_height": 130,
+    "lever_height": 150,
     "big_chest_height": 180
   }
 }

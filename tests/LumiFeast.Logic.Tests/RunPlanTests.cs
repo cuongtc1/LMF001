@@ -8,12 +8,13 @@ public class RunPlanTests
     private static Data.RunDef Run => TestData.Game.Run("honey_labyrinth_stage_1");
 
     [Fact]
-    public void StartsAtTheGateAndEndsAtTheBoss()
+    public void StartsAtTheEntranceAndEndsAtTheBoss()
     {
         var plan = RunPlan.Build(Run, 7);
-        Assert.Equal(Run.FirstRoom, plan[0]);
+        Assert.Equal(Run.EntranceRoom, plan[0]);
+        Assert.Equal(Run.FirstRoom, plan[1]);
         Assert.Equal(Run.BossRoom, plan[^1]);
-        Assert.Equal(Run.RoomsPerRun + 1, plan.Count);
+        Assert.Equal(Run.RoomsPerRun + 2, plan.Count);
     }
 
     [Fact]

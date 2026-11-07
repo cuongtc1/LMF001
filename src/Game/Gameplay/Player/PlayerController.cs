@@ -62,10 +62,8 @@ public partial class PlayerController : CharacterBody2D, IDamageable
 
     public bool OnGround => IsOnFloor();
 
-    /// <summary>Up opens the door Lumi stands at instead of jumping.</summary>
-    public bool SuppressJump { get; set; }
-
-    public bool UpPressed { get; private set; }
+    /// <summary>Left/right held this tick, -1 to 1. Room exits need it, so a lunge never carries Lumi out.</summary>
+    public float MoveInput { get; private set; }
 
     /// <summary>Menus open: Lumi ignores buttons.</summary>
     public bool InputPaused { get; set; }
@@ -225,12 +223,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         }
 
         var input = InputPaused ? PlayerFrameInput.None : InputSource.Read();
-        UpPressed = input.JumpPressed;
-        if (SuppressJump)
-        {
-            input = input with { JumpPressed = false };
-        }
-
+        MoveInput = input.MoveX;
         if ((input.AttackPressed || input.HeavyPressed) && _stunTicks == 0 && _landingLagTicks == 0)
         {
             _combo.PressAttack(input.HeavyPressed);

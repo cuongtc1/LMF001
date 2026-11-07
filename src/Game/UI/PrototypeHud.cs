@@ -9,6 +9,9 @@ namespace LumiFeast.Game.UI;
 /// <summary>HP, MP, combo counter and the arena wave.</summary>
 public partial class PrototypeHud : CanvasLayer
 {
+    private const float StatusLeft = 480;
+    private const float StatusTop = 150;
+
     private PlayerController _player = null!;
     private ProgressBar _hp = null!;
     private ProgressBar _mp = null!;
@@ -50,8 +53,11 @@ public partial class PrototypeHud : CanvasLayer
         _bossBar.AddThemeStyleboxOverride("fill", new StyleBoxFlat { BgColor = new Color("b45cc9") });
         AddChild(_bossBar);
 
-        _status = UiCommon.OutlinedLabel(42);
-        _status.Position = new Vector2(860, 40);
+        // centered under the bars, clear of the minimap in the top-right corner
+        _status = UiCommon.OutlinedLabel(38);
+        _status.Position = new Vector2(StatusLeft, StatusTop);
+        _status.Size = new Vector2(UiCommon.ScreenWidth - StatusLeft * 2, 0);
+        _status.HorizontalAlignment = HorizontalAlignment.Center;
         _status.Visible = false;
         AddChild(_status);
     }

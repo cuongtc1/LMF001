@@ -1,6 +1,9 @@
 {
   "god_mode": false,
   "room": "untouched",
+  "skills": [
+    "jam_spread"
+  ],
   "end_tick": 1500,
   "screenshots": [
     50,

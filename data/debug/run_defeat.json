@@ -1,6 +1,10 @@
 {
-  "end_tick": 900,
+  "room": "gate",
   "start_hp": 1,
+  "skills": [
+    "jam_spread"
+  ],
+  "end_tick": 900,
   "screenshots": [
     300,
     700,

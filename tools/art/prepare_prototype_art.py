@@ -133,6 +133,10 @@ def props():
     heart, star = row_items(V + 'M/ver12_M_2.png', 6)[4:6]
     save(heart, PROPS + 'hp_token.png')
     save(star, PROPS + 'mp_token.png')
+    # N_2: the gear reads as a mechanism that wakes the lair (producer's pick too)
+    lever, lever_on = row_items(V + 'N/ver12_N_2.png', 2)
+    save(lever, PROPS + 'lever.png')
+    save(lever_on, PROPS + 'lever_on.png')
 
 
 def labyrinth():

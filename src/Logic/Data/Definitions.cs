@@ -284,7 +284,8 @@ public sealed record RoomDef(
     IReadOnlyList<float>? Crates = null,
     float? ChestX = null,
     bool RewardOnClear = true,
-    ChallengeDef? Challenge = null);
+    ChallengeDef? Challenge = null,
+    float? ShrineX = null);
 
 /// <summary>A room trial in the style of Little Noah's Monster Lairs and no-hit rooms.</summary>
 /// <param name="Kind">One of <c>ChallengeKinds</c>.</param>
@@ -313,20 +314,25 @@ public sealed record PickupDef(
     float LeverHeight,
     float BigChestHeight);
 
-/// <param name="RoomsPerRun">Rooms before the boss.</param>
-/// <param name="DoorPromptTicks">Time on the ground at a door before its prompt shows.</param>
+/// <param name="RoomsPerRun">Rooms from the first fight room up to the boss, not counting the entrance.</param>
+/// <param name="EntranceRoom">Stage 0: the skill shrine, no monsters.</param>
+/// <param name="ExitZone">Standing this close to an open edge walks Lumi into the next room.</param>
+/// <param name="EdgeSpawnInset">Where Lumi appears in the next room, measured from the edge she came through.</param>
 public sealed record RunDef(
     string Id,
     int Tier,
     int RoomsPerRun,
     int WaveDelayTicks,
     float PlayerSpawnX,
+    string EntranceRoom,
     string FirstRoom,
     string BossRoom,
-    string DoorSprite,
-    float DoorHeight,
-    float DoorInset,
-    int DoorPromptTicks,
+    string GateSprite,
+    float GateHeight,
+    string ShrineSprite,
+    float ShrineHeight,
+    float ExitZone,
+    float EdgeSpawnInset,
     PickupDef Pickups,
     string AmuletSet,
     int RewardChoices,
