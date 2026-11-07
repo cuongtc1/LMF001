@@ -34,11 +34,19 @@ public partial class HittableProp : Node2D, IDamageable
         ZIndex = -3;
     }
 
+    /// <summary>Swaps the drawing at the same scale and keeps it standing on the floor.</summary>
     public void ChangeSprite(string sprite)
     {
-        var height = _sprite.Texture.GetHeight() * _sprite.Scale.Y;
         _sprite.Texture = GameServices.Texture(sprite);
-        _sprite.Scale = Vector2.One * height / _sprite.Texture.GetHeight();
+        _sprite.Position = new Vector2(0, -_sprite.Texture.GetHeight() * _sprite.Scale.Y / 2);
+    }
+
+    public void FadeAway(float seconds)
+    {
+        var tween = CreateTween();
+        tween.TweenInterval(seconds / 2);
+        tween.TweenProperty(this, CanvasItem.PropertyName.Modulate.ToString(), Colors.Transparent, seconds / 2);
+        tween.TweenCallback(Callable.From(QueueFree));
     }
 
     public bool TakeHit(in HitInfo hit)

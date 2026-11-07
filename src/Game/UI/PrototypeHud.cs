@@ -32,34 +32,27 @@ public partial class PrototypeHud : CanvasLayer
         column.AddChild(row);
         for (var i = 0; i < player.Loadout.Slots.Count; i++)
         {
-            var label = new Label { CustomMinimumSize = new Vector2(260, 0) };
-            label.AddThemeFontSizeOverride("font_size", 26);
-            label.AddThemeColorOverride("font_outline_color", Colors.Black);
-            label.AddThemeConstantOverride("outline_size", 8);
+            var label = UiCommon.OutlinedLabel(26);
+            label.CustomMinimumSize = new Vector2(260, 0);
             row.AddChild(label);
             _skills.Add(label);
         }
 
-        _amulets = new Label();
-        _amulets.AddThemeFontSizeOverride("font_size", 22);
-        _amulets.AddThemeColorOverride("font_outline_color", Colors.Black);
-        _amulets.AddThemeConstantOverride("outline_size", 6);
+        _amulets = UiCommon.OutlinedLabel(22);
         column.AddChild(_amulets);
 
-        _combo = new Label { Position = new Vector2(1600, 300), Visible = false };
-        _combo.AddThemeFontSizeOverride("font_size", 48);
-        _combo.AddThemeColorOverride("font_outline_color", Colors.Black);
-        _combo.AddThemeConstantOverride("outline_size", 10);
+        _combo = UiCommon.OutlinedLabel(48);
+        _combo.Position = new Vector2(1600, 300);
+        _combo.Visible = false;
         AddChild(_combo);
 
         _bossBar = new ProgressBar { ShowPercentage = false, Position = new Vector2(460, 980), CustomMinimumSize = new Vector2(1000, 24), Visible = false };
         _bossBar.AddThemeStyleboxOverride("fill", new StyleBoxFlat { BgColor = new Color("b45cc9") });
         AddChild(_bossBar);
 
-        _status = new Label { Position = new Vector2(860, 40), Visible = false };
-        _status.AddThemeFontSizeOverride("font_size", 42);
-        _status.AddThemeColorOverride("font_outline_color", Colors.Black);
-        _status.AddThemeConstantOverride("outline_size", 10);
+        _status = UiCommon.OutlinedLabel(42);
+        _status.Position = new Vector2(860, 40);
+        _status.Visible = false;
         AddChild(_status);
     }
 

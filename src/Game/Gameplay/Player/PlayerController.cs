@@ -49,6 +49,12 @@ public partial class PlayerController : CharacterBody2D, IDamageable
 
     public event System.Action? Respawned;
 
+    /// <summary>Raised once the death pause ends while <see cref="AutoRespawn"/> is off.</summary>
+    public event System.Action? Fell;
+
+    /// <summary>The test stage brings Lumi back by herself; a run shows its result screen instead.</summary>
+    public bool AutoRespawn { get; set; } = true;
+
     public Health Health { get; private set; } = null!;
 
     public bool OnGround => IsOnFloor();
@@ -214,7 +220,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             StepDead();
         }
 
-        var input = InputPaused ? default : InputSource.Read();
+        var input = InputPaused ? PlayerFrameInput.None : InputSource.Read();
         UpPressed = input.JumpPressed;
         if (SuppressJump)
         {
@@ -472,15 +478,35 @@ public partial class PlayerController : CharacterBody2D, IDamageable
 
     private void StepDead()
     {
-        _respawnTicks--;
         if (_respawnTicks <= 0)
         {
-            Health.Refill();
-            GlobalPosition = _spawn;
-            _motor.Knockback(0, 0);
-            _invulnerableTicks = _feel.HurtInvulnerableTicks;
-            Respawned?.Invoke();
+            return;
         }
+
+        _respawnTicks--;
+        if (_respawnTicks > 0)
+        {
+            return;
+        }
+
+        if (AutoRespawn)
+        {
+            Revive();
+        }
+        else
+        {
+            Fell?.Invoke();
+        }
+    }
+
+    /// <summary>Full HP at the respawn point.</summary>
+    public void Revive()
+    {
+        Health.Refill();
+        GlobalPosition = _spawn;
+        _motor.Knockback(0, 0);
+        _invulnerableTicks = _feel.HurtInvulnerableTicks;
+        Respawned?.Invoke();
     }
 
     private void ShowView(AttackDef? attack)

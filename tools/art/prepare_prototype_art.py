@@ -13,6 +13,7 @@ GAME_W, GAME_H = 1920, 1080
 FOREST = 'assets/backgrounds/chapter_01/honey_forest/'
 LABYRINTH = 'assets/backgrounds/chapter_01/honey_labyrinth/'
 MONSTERS = 'assets/monsters/chapter_01/'
+PROPS = 'assets/props/common/'
 SKY_KEY_DISTANCE = 40
 WHITE_CUTOFF = 244
 SKY_DISTANCE = 26
@@ -105,6 +106,33 @@ def pieces(path, count):
         x, y, w, h = stats[i, :4]
         out.append(crop_alpha(cut_white(a[y:y + h, x:x + w])))
     return out
+
+
+def row_items(path, count):
+    """The drawings in one row on a white sheet. Columns split at empty bands; the narrowest bands
+    are joined until `count` remain, so the loose planks of a broken crate stay one drawing."""
+    a = rgb(path)
+    used = (a.astype(np.int32) < WHITE_CUTOFF).any(2).any(0)
+    edges = np.flatnonzero(np.diff(np.r_[0, used.astype(np.int8), 0]))
+    spans = [list(span) for span in edges.reshape(-1, 2)]
+    while len(spans) > count:
+        i = min(range(len(spans) - 1), key=lambda k: spans[k + 1][0] - spans[k][1])
+        spans[i:i + 2] = [[spans[i][0], spans[i + 1][1]]]
+    return [crop_alpha(cut_white(a[:, x0:x1])) for x0, x1 in spans]
+
+
+def props():
+    """Crate pair from M_1 (straight side view), chest pair from M_5 (red wood stands apart from the honey crates),
+    tokens from M_2 (yellow star reads best at token size)."""
+    crate, broken = row_items(V + 'M/ver12_M_1.png', 6)[:2]
+    save(crate, PROPS + 'crate.png')
+    save(broken, PROPS + 'crate_broken.png')
+    chest, chest_open = row_items(V + 'M/ver12_M_5.png', 6)[2:4]
+    save(chest, PROPS + 'chest.png')
+    save(chest_open, PROPS + 'chest_open.png')
+    heart, star = row_items(V + 'M/ver12_M_2.png', 6)[4:6]
+    save(heart, PROPS + 'hp_token.png')
+    save(star, PROPS + 'mp_token.png')
 
 
 def labyrinth():
@@ -203,3 +231,4 @@ if __name__ == '__main__':
     effects()
     labyrinth()
     first_run_monsters()
+    props()

@@ -54,6 +54,18 @@ public static class MessageKeys
     public const string HudClear = "hud.clear";
     public const string ArenaWave = "stage.arena_wave";
     public const string ArenaCleared = "stage.arena_cleared";
+    public const string ResultDefeatTitle = "result.defeat_title";
+    public const string ResultDefeatLine = "result.defeat_line";
+    public const string ResultClearTitle = "result.clear_title";
+    public const string ResultClearLine = "result.clear_line";
+    public const string ResultTime = "result.time";
+    public const string ResultRooms = "result.rooms";
+    public const string ResultHealed = "result.healed";
+    public const string ResultCombo = "result.combo";
+    public const string ResultLoadout = "result.loadout";
+    public const string ResultRetry = "result.retry";
+    public const string ResultAgain = "result.again";
+    public const string RunDefeated = "run.defeated";
 
     public static readonly string[] All =
     [
@@ -61,5 +73,6 @@ public static class MessageKeys
         GameBooted, StageLoaded, AssetMissing, CombatPlayerHit, CombatMonsterHit, CombatMonsterHealed,
         AutoplayStarted, AutoplayFinished, DebugTitle, DebugDifficulty, DebugTier, DebugGodMode, DebugAirJump, DebugHeal, DebugArena, CombatStoic, CombatDizzy, CombatPhaseTwo, CombatGuardBlock, CombatGuardPerfect, HudRoom, HudBoss, RunDoorPrompt, RunStarted, RunCleared, RewardPicked, DebugPrototype, RewardSkill, RewardAmulet, HudSkillSlot, HudSkillReady, HudSkillCooldown, HudSkillEmpty, HudWave, HudClear, ArenaWave, ArenaCleared,
         DebugRespawn, DebugReload, DebugHelp, HudCombo,
+        ResultDefeatTitle, ResultDefeatLine, ResultClearTitle, ResultClearLine, ResultTime, ResultRooms, ResultHealed, ResultCombo, ResultLoadout, ResultRetry, ResultAgain, RunDefeated,
     ];
 }

@@ -31,6 +31,9 @@ public partial class RunStage : Node2D
     private const float DoorZoneWidth = 90;
     private const int PromptFontSize = 40;
     private const float TokenLift = 60;
+    private const float BrokenCrateSeconds = 1.2f;
+    /// <summary>Time to watch the boss heal before the result screen comes up.</summary>
+    private const int ClearScreenDelayTicks = 100;
 
     private static readonly Color ClosedDoor = new(0.55f, 0.5f, 0.6f);
 
@@ -52,6 +55,10 @@ public partial class RunStage : Node2D
     private bool _rewardPending;
     private RewardPicker _picker = null!;
     private SeededRandom _random = new(1);
+    private RunResultScreen _result = null!;
+    private readonly RunStats _stats = new();
+    private bool _runOver;
+    private int _clearScreenTicks;
 
     public override void _Ready()
     {
@@ -72,7 +79,8 @@ public partial class RunStage : Node2D
         AddChild(_player);
         _player.Setup(lumi, data.AttackSet(lumi.Combat.AttackSet), data.Feel, _gameFeel, Vector2.Zero);
         _player.Blockers = _monsters;
-        _player.Respawned += StartRun;
+        _player.AutoRespawn = false;
+        _player.Fell += () => ShowResult(false);
         _player.AddChild(_camera);
         _camera.Position = new Vector2(0, -CameraHeight);
         _camera.MakeCurrent();
@@ -83,6 +91,8 @@ public partial class RunStage : Node2D
 
         _picker = new RewardPicker();
         AddChild(_picker);
+        _result = new RunResultScreen();
+        AddChild(_result);
 
         var debug = new DebugPanel();
         AddChild(debug);
@@ -95,15 +105,28 @@ public partial class RunStage : Node2D
             var autoplay = new AutoplayRunner();
             AddChild(autoplay);
             autoplay.Setup(script, _player);
+            if (autoplay.StartRoom is { } room && _plan.Contains(room))
+            {
+                _roomIndex = _plan.ToList().IndexOf(room);
+                BuildRoom();
+            }
         }
     }
 
     public override void _PhysicsProcess(double delta)
     {
-        if (_gameFeel.Frozen || _rewardPending)
+        if (_clearScreenTicks > 0 && --_clearScreenTicks == 0)
+        {
+            ShowResult(true);
+        }
+
+        if (_gameFeel.Frozen || _rewardPending || _runOver)
         {
             return;
         }
+
+        _stats.Step();
+        _stats.Combo(_player.ComboHits);
 
         switch (_waves.Step(_monsters.Count))
         {
@@ -127,8 +150,11 @@ public partial class RunStage : Node2D
         _player.Modifiers.Clear();
         _player.ApplyModifiers();
         _roomIndex = 0;
+        _stats.Reset();
+        _clearScreenTicks = 0;
         GameLog.Info(MessageKeys.RunStarted, string.Join(' ', _plan));
         BuildRoom();
+        _player.Revive();
         OfferReward(RewardKind.Skills); // the run starts with one skill, never empty-handed
     }
 
@@ -190,15 +216,9 @@ public partial class RunStage : Node2D
             ZIndex = -4,
         };
         _roomNode.AddChild(_door);
-        _prompt = new Label
-        {
-            Text = GameServices.Messages.Get(MessageKeys.RunDoorPrompt),
-            Position = new Vector2(_door.Position.X - 40, _room.GroundY - _run.DoorHeight - 60),
-            Visible = false,
-        };
-        _prompt.AddThemeFontSizeOverride("font_size", PromptFontSize);
-        _prompt.AddThemeColorOverride("font_outline_color", Colors.Black);
-        _prompt.AddThemeConstantOverride("outline_size", 8);
+        _prompt = UiCommon.OutlinedLabel(PromptFontSize, GameServices.Messages.Get(MessageKeys.RunDoorPrompt));
+        _prompt.Position = new Vector2(_door.Position.X - 40, _room.GroundY - _run.DoorHeight - 60);
+        _prompt.Visible = false;
         _roomNode.AddChild(_prompt);
     }
 
@@ -227,7 +247,8 @@ public partial class RunStage : Node2D
         var token = new Pickup();
         _roomNode.AddChild(token);
         token.Setup(_player, _run.Pickups, _random.NextDouble() < _run.Pickups.HpChance, crate.GlobalPosition + new Vector2(0, -TokenLift));
-        crate.QueueFree();
+        crate.ChangeSprite(_run.Pickups.CrateBrokenSprite);
+        crate.FadeAway(BrokenCrateSeconds);
     }
 
     private void OpenChest(HittableProp chest)
@@ -250,11 +271,16 @@ public partial class RunStage : Node2D
         }
     }
 
-    private void OnHealed(MonsterController monster) => _monsters.Remove(monster);
+    private void OnHealed(MonsterController monster)
+    {
+        _monsters.Remove(monster);
+        _stats.Healed();
+    }
 
     private void OpenDoor()
     {
         _roomCleared = true;
+        _stats.RoomCleared();
         _hud.TrackBoss(null);
         _door.Modulate = Colors.White;
         var last = _roomIndex + 1 >= _plan.Count;
@@ -267,7 +293,45 @@ public partial class RunStage : Node2D
         {
             GameLog.Info(MessageKeys.RunCleared);
             _hud.ShowStatus(GameServices.Messages.Get(MessageKeys.HudClear));
+            _clearScreenTicks = ClearScreenDelayTicks;
         }
+    }
+
+    /// <summary>Freezes the room behind a summary; attack starts the next run.</summary>
+    private void ShowResult(bool cleared)
+    {
+        var messages = GameServices.Messages;
+        if (!cleared)
+        {
+            GameLog.Info(MessageKeys.RunDefeated, _roomIndex + 1);
+        }
+
+        var picked = _player.Loadout.Slots.OfType<SkillDef>().Select(skill => messages.Get(MessageKeys.SkillPrefix + skill.Id))
+            .Concat(_player.Modifiers.Amulets.Select(amulet => messages.Get(MessageKeys.AmuletPrefix + amulet.Id)));
+        var lines = new List<string>
+        {
+            messages.Get(MessageKeys.ResultTime, _stats.Time((int)GameConstants.TicksPerSecond)),
+            messages.Get(MessageKeys.ResultRooms, _stats.RoomsCleared, _plan.Count),
+            messages.Get(MessageKeys.ResultHealed, _stats.MonstersHealed),
+            messages.Get(MessageKeys.ResultCombo, _stats.BestCombo),
+            messages.Get(MessageKeys.ResultLoadout, string.Join(", ", picked)),
+        };
+        _runOver = true;
+        _player.InputPaused = true;
+        GetTree().Paused = true;
+        _result.Open(
+            cleared,
+            messages.Get(cleared ? MessageKeys.ResultClearTitle : MessageKeys.ResultDefeatTitle),
+            messages.Get(cleared ? MessageKeys.ResultClearLine : MessageKeys.ResultDefeatLine, _roomIndex + 1, _plan.Count),
+            lines,
+            messages.Get(cleared ? MessageKeys.ResultAgain : MessageKeys.ResultRetry),
+            () =>
+            {
+                GetTree().Paused = false;
+                _runOver = false;
+                _player.InputPaused = false;
+                StartRun();
+            });
     }
 
     /// <summary>One of three: skills while a slot is free, and amulets not taken yet.</summary>

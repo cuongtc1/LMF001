@@ -1,5 +1,12 @@
 {
   "end_tick": 820,
+  "room": "treasure",
+  "screenshots": [
+    120,
+    330,
+    560,
+    815
+  ],
   "steps": [
     {
       "tick": 40,

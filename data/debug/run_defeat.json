@@ -1,0 +1,21 @@
+{
+  "end_tick": 900,
+  "start_hp": 1,
+  "screenshots": [
+    300,
+    700,
+    880
+  ],
+  "steps": [
+    {
+      "tick": 40,
+      "action": "move_right",
+      "pressed": true
+    },
+    {
+      "tick": 400,
+      "action": "move_right",
+      "pressed": false
+    }
+  ]
+}

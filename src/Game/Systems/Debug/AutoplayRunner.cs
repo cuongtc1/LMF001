@@ -17,6 +17,10 @@ public partial class AutoplayRunner : Node, IPlayerInput
     private PlayerController _player = null!;
     private int _tick;
     private int _endTick;
+    private readonly HashSet<int> _shotTicks = [];
+
+    /// <summary>Room id a run script starts in (the boss den, say), or null for the first room.</summary>
+    public string? StartRoom { get; private set; }
 
     public static string? RequestedScript() =>
         OS.GetCmdlineUserArgs().FirstOrDefault(arg => arg.StartsWith(GameConstants.AutoplayArgument, System.StringComparison.Ordinal))
@@ -26,6 +30,7 @@ public partial class AutoplayRunner : Node, IPlayerInput
     {
         _player = player;
         ProcessPhysicsPriority = -200; // apply steps before the player reads input this tick
+        ProcessMode = ProcessModeEnum.Always; // keeps counting to end_tick while a result screen pauses the game
         player.InputSource = this;
         using var document = JsonDocument.Parse(new GodotDataSource().ReadText(path));
         _endTick = document.RootElement.GetProperty("end_tick").GetInt32();
@@ -35,6 +40,16 @@ public partial class AutoplayRunner : Node, IPlayerInput
         }
 
         GameServices.GodMode = document.RootElement.TryGetProperty("god_mode", out var god) && god.GetBoolean();
+        if (document.RootElement.TryGetProperty("room", out var room))
+        {
+            StartRoom = room.GetString();
+        }
+
+        if (document.RootElement.TryGetProperty("start_hp", out var startHp))
+        {
+            _player.Health.Damage(_player.Health.Current - startHp.GetInt32());
+        }
+
         if (document.RootElement.TryGetProperty("skills", out var skills))
         {
             _player.Heal();
@@ -44,6 +59,11 @@ public partial class AutoplayRunner : Node, IPlayerInput
                 _player.Loadout.Add(set.Skills.First(skill => skill.Id == id.GetString()));
             }
         }
+        if (document.RootElement.TryGetProperty("screenshots", out var shots))
+        {
+            _shotTicks.UnionWith(shots.EnumerateArray().Select(tick => tick.GetInt32()));
+        }
+
         foreach (var step in document.RootElement.GetProperty("steps").EnumerateArray())
         {
             _steps.Add(new Step(step.GetProperty("tick").GetInt32(), step.GetProperty("action").GetString()!, step.GetProperty("pressed").GetBoolean()));
@@ -66,6 +86,12 @@ public partial class AutoplayRunner : Node, IPlayerInput
             {
                 _held.Remove(step.Action);
             }
+        }
+
+        if (_shotTicks.Contains(_tick))
+        {
+            // user:// is %APPDATA%/Godot/app_userdata/<project name>
+            GetViewport().GetTexture().GetImage().SavePng($"user://autoplay_{_tick}.png");
         }
 
         _tick++;

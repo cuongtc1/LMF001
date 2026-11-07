@@ -18,6 +18,7 @@ public partial class RewardPicker : CanvasLayer
     private readonly List<PanelContainer> _cards = [];
     private System.Action<int> _onPick = null!;
     private int _selected;
+    private ulong _openedFrame;
 
     public bool IsOpen => Visible;
 
@@ -37,7 +38,7 @@ public partial class RewardPicker : CanvasLayer
         _cards.Clear();
         _onPick = onPick;
         _selected = 0;
-        var left = (1920 - choices.Count * CardWidth - (choices.Count - 1) * CardGap) / 2;
+        var left = (UiCommon.ScreenWidth - choices.Count * CardWidth - (choices.Count - 1) * CardGap) / 2;
         for (var i = 0; i < choices.Count; i++)
         {
             var card = new PanelContainer { Position = new Vector2(left + i * (CardWidth + CardGap), CardTop), CustomMinimumSize = new Vector2(CardWidth, CardHeight) };
@@ -54,6 +55,7 @@ public partial class RewardPicker : CanvasLayer
         }
 
         Visible = true;
+        _openedFrame = Engine.GetProcessFrames();
         Refresh();
     }
 
@@ -65,7 +67,8 @@ public partial class RewardPicker : CanvasLayer
 
     public override void _Process(double delta)
     {
-        if (!Visible)
+        // the key that closed the screen before this one must not pick a card too
+        if (!Visible || Engine.GetProcessFrames() == _openedFrame)
         {
             return;
         }
@@ -90,7 +93,7 @@ public partial class RewardPicker : CanvasLayer
     {
         for (var i = 0; i < _cards.Count; i++)
         {
-            _cards[i].AddThemeStyleboxOverride("panel", new StyleBoxFlat { BgColor = i == _selected ? Selected : Normal, CornerRadiusTopLeft = 16, CornerRadiusTopRight = 16, CornerRadiusBottomLeft = 16, CornerRadiusBottomRight = 16, ContentMarginLeft = 18, ContentMarginTop = 14, ContentMarginRight = 18 });
+            _cards[i].AddThemeStyleboxOverride("panel", UiCommon.RoundPanel(i == _selected ? Selected : Normal, 18));
         }
     }
 }

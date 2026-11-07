@@ -365,6 +365,7 @@
   "reward_choices": 3,
   "pickups": {
     "crate_sprite": "assets/props/common/crate.png",
+    "crate_broken_sprite": "assets/props/common/crate_broken.png",
     "crate_height": 90,
     "crate_hits": 2,
     "hp_chance": 0.7,

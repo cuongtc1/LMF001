@@ -264,8 +264,10 @@ public sealed record RoomDef(
     bool RewardOnClear = true);
 
 /// <param name="HpChance">Share of crates that drop an HP token; the rest drop MP.</param>
+/// <param name="CrateBrokenSprite">Drawn at the same scale as the crate, so both come from one sheet.</param>
 public sealed record PickupDef(
     string CrateSprite,
+    string CrateBrokenSprite,
     float CrateHeight,
     int CrateHits,
     float HpChance,

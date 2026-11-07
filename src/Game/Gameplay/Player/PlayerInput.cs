@@ -3,7 +3,11 @@ using LumiFeast.Game.Common;
 
 namespace LumiFeast.Game.Gameplay.Player;
 
-public readonly record struct PlayerFrameInput(float MoveX, bool JumpPressed, bool JumpHeld, bool DashPressed, bool AttackPressed, bool DownHeld, bool HeavyPressed, bool DownPressed, bool GuardHeld, int SkillPressed = -1);
+public readonly record struct PlayerFrameInput(float MoveX, bool JumpPressed, bool JumpHeld, bool DashPressed, bool AttackPressed, bool DownHeld, bool HeavyPressed, bool DownPressed, bool GuardHeld, int SkillPressed = -1)
+{
+    /// <summary>No button held. Use this, not <c>default</c>, which would read as skill slot 0.</summary>
+    public static readonly PlayerFrameInput None = new(0, false, false, false, false, false, false, false, false);
+}
 
 /// <summary>Where the player's buttons come from: the device, or a script in smoke tests.</summary>
 public interface IPlayerInput
