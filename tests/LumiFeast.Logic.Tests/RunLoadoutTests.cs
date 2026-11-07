@@ -58,6 +58,22 @@ public class RunLoadoutTests
     }
 
     [Fact]
+    public void EffectsWithAnHpMinimumSwitchOffBelowIt()
+    {
+        var mods = new RunModifiers();
+        mods.Add(new AmuletDef("s", [new AmuletEffectDef(AmuletEffects.Speed, 0.12f, MinHpRatio: 0.7f)]));
+        Assert.Equal(0.12f, mods.Total(AmuletEffects.Speed, 0.9f), 3);
+        Assert.Equal(0f, mods.Total(AmuletEffects.Speed, 0.5f));
+    }
+
+    [Fact]
+    public void TokensStayWhenTheyWouldNotHelp()
+    {
+        Assert.False(PickupRules.Helps(300, 300));
+        Assert.True(PickupRules.Helps(299, 300));
+    }
+
+    [Fact]
     public void RewardDrawGivesDistinctChoices()
     {
         var picks = RewardDraw.Pick(["a", "b", "c", "d"], 3, new SeededRandom(5));

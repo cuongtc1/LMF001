@@ -53,6 +53,9 @@
             }
           ]
         }
+      ],
+      "crates": [
+        600
       ]
     },
     {
@@ -105,6 +108,10 @@
             }
           ]
         }
+      ],
+      "crates": [
+        1150,
+        2100
       ]
     },
     {
@@ -164,6 +171,9 @@
             }
           ]
         }
+      ],
+      "crates": [
+        300
       ]
     },
     {
@@ -223,6 +233,9 @@
             }
           ]
         }
+      ],
+      "crates": [
+        1450
       ]
     },
     {
@@ -279,7 +292,36 @@
             }
           ]
         }
+      ],
+      "crates": [
+        700,
+        2150
       ]
+    },
+    {
+      "id": "treasure",
+      "width": 1920,
+      "ground_y": 885,
+      "layers": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/back.png",
+          "scroll_scale": 0.3,
+          "z_index": -30
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/wall_a.png",
+          "scroll_scale": 1.0,
+          "z_index": -10
+        }
+      ],
+      "platforms": [],
+      "waves": [],
+      "crates": [
+        500,
+        1350
+      ],
+      "chest_x": 960,
+      "reward_on_clear": false
     },
     {
       "id": "den",
@@ -315,10 +357,23 @@
             }
           ]
         }
-      ]
+      ],
+      "crates": []
     }
   ],
-  "room_clear_heal": 0.15,
   "amulet_set": "honey_labyrinth",
-  "reward_choices": 3
+  "reward_choices": 3,
+  "pickups": {
+    "crate_sprite": "assets/props/common/crate.png",
+    "crate_height": 90,
+    "crate_hits": 2,
+    "hp_chance": 0.7,
+    "hp_heal": 0.12,
+    "mp_gain": 25,
+    "hp_token_sprite": "assets/props/common/hp_token.png",
+    "mp_token_sprite": "assets/props/common/mp_token.png",
+    "chest_sprite": "assets/props/common/chest.png",
+    "chest_open_sprite": "assets/props/common/chest_open.png",
+    "chest_height": 120
+  }
 }

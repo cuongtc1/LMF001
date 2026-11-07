@@ -16,6 +16,13 @@ using LumiFeast.Logic.Stages;
 
 namespace LumiFeast.Game.Gameplay.Run;
 
+public enum RewardKind
+{
+    Any,
+    Skills,
+    Amulets,
+}
+
 /// <summary>One roguelite run: builds a room, runs its waves, opens the door, moves on.</summary>
 public partial class RunStage : Node2D
 {
@@ -23,6 +30,7 @@ public partial class RunStage : Node2D
     private const float CameraHeight = 160;
     private const float DoorZoneWidth = 90;
     private const int PromptFontSize = 40;
+    private const float TokenLift = 60;
 
     private static readonly Color ClosedDoor = new(0.55f, 0.5f, 0.6f);
 
@@ -92,7 +100,7 @@ public partial class RunStage : Node2D
 
     public override void _PhysicsProcess(double delta)
     {
-        if (_gameFeel.Frozen)
+        if (_gameFeel.Frozen || _rewardPending)
         {
             return;
         }
@@ -121,6 +129,7 @@ public partial class RunStage : Node2D
         _roomIndex = 0;
         GameLog.Info(MessageKeys.RunStarted, string.Join(' ', _plan));
         BuildRoom();
+        OfferReward(RewardKind.Skills); // the run starts with one skill, never empty-handed
     }
 
     private void NextRoom()
@@ -155,6 +164,7 @@ public partial class RunStage : Node2D
         }
 
         BuildDoor();
+        BuildProps();
         _camera.LimitRight = (int)_room.Width;
         var spawn = new Vector2(_run.PlayerSpawnX, _room.GroundY - FloorClearance);
         _player.SetRespawnPoint(spawn);
@@ -192,6 +202,40 @@ public partial class RunStage : Node2D
         _roomNode.AddChild(_prompt);
     }
 
+    private void BuildProps()
+    {
+        var pickups = _run.Pickups;
+        foreach (var x in _room.Crates ?? [])
+        {
+            var crate = new HittableProp();
+            _roomNode.AddChild(crate);
+            crate.Setup(pickups.CrateSprite, pickups.CrateHeight, new Vector2(x, _room.GroundY), pickups.CrateHits);
+            crate.Broken += BreakCrate;
+        }
+
+        if (_room.ChestX is { } chestX)
+        {
+            var chest = new HittableProp();
+            _roomNode.AddChild(chest);
+            chest.Setup(pickups.ChestSprite, pickups.ChestHeight, new Vector2(chestX, _room.GroundY), 1);
+            chest.Broken += OpenChest;
+        }
+    }
+
+    private void BreakCrate(HittableProp crate)
+    {
+        var token = new Pickup();
+        _roomNode.AddChild(token);
+        token.Setup(_player, _run.Pickups, _random.NextDouble() < _run.Pickups.HpChance, crate.GlobalPosition + new Vector2(0, -TokenLift));
+        crate.QueueFree();
+    }
+
+    private void OpenChest(HittableProp chest)
+    {
+        chest.ChangeSprite(_run.Pickups.ChestOpenSprite);
+        OfferReward(RewardKind.Amulets);
+    }
+
     private void SpawnWave()
     {
         foreach (var spawn in _room.Waves[_waves.Wave].Spawns)
@@ -212,12 +256,11 @@ public partial class RunStage : Node2D
     {
         _roomCleared = true;
         _hud.TrackBoss(null);
-        _player.Health.Heal(Mathf.RoundToInt(_player.Health.Max * (_run.RoomClearHeal + _player.Modifiers.Total(AmuletEffects.RoomHeal))));
         _door.Modulate = Colors.White;
         var last = _roomIndex + 1 >= _plan.Count;
-        if (!last)
+        if (!last && _room.RewardOnClear)
         {
-            OfferReward();
+            OfferReward(RewardKind.Any);
         }
 
         if (last)
@@ -228,18 +271,21 @@ public partial class RunStage : Node2D
     }
 
     /// <summary>One of three: skills while a slot is free, and amulets not taken yet.</summary>
-    private void OfferReward()
+    private void OfferReward(RewardKind kind)
     {
         var data = GameServices.Data;
         var skills = data.SkillSet(data.Character(GameConstants.PlayerCharacterId).Combat.SkillSet).Skills;
         var amulets = data.AmuletSet(_run.AmuletSet).Amulets;
         var pool = new List<string>();
-        if (!_player.Loadout.IsFull)
+        if (!_player.Loadout.IsFull && kind != RewardKind.Amulets)
         {
             pool.AddRange(skills.Where(skill => !_player.Loadout.Has(skill.Id)).Select(skill => MessageKeys.SkillPrefix + skill.Id));
         }
 
-        pool.AddRange(amulets.Where(amulet => !_player.Modifiers.Has(amulet.Id)).Select(amulet => MessageKeys.AmuletPrefix + amulet.Id));
+        if (kind != RewardKind.Skills)
+        {
+            pool.AddRange(amulets.Where(amulet => !_player.Modifiers.Has(amulet.Id)).Select(amulet => MessageKeys.AmuletPrefix + amulet.Id));
+        }
         var picks = RewardDraw.Pick(pool, _run.RewardChoices, _random);
         if (picks.Count == 0)
         {

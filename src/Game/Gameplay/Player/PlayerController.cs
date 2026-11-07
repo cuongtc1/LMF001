@@ -84,9 +84,9 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         _combo = new ComboRunner(attacks, def.Combat.AttackBufferTicks);
         _skills = GameServices.Data.SkillSet(def.Combat.SkillSet);
         Loadout = new SkillLoadout(_skills.Slots);
+        Health = new Health(def.Stats.MaxHp);
         ApplyModifiers();
         _guard = new GuardState(def.Guard);
-        Health = new Health(def.Stats.MaxHp);
         GlobalPosition = spawn;
         CollisionLayer = 0;
         CollisionMask = PhysicsLayers.World | PhysicsLayers.Platform;
@@ -112,7 +112,8 @@ public partial class PlayerController : CharacterBody2D, IDamageable
     /// <summary>Recomputes what amulets change on Lumi herself.</summary>
     public void ApplyModifiers()
     {
-        var speed = StatScaler.ForSpeed(_def.Stats.Speed + Modifiers.Total(AmuletEffects.Speed), GameServices.Data.Scaling.Speed);
+        var hpRatio = (float)Health.Current / Health.Max;
+        var speed = StatScaler.ForSpeed(_def.Stats.Speed + Modifiers.Total(AmuletEffects.Speed, hpRatio), GameServices.Data.Scaling.Speed);
         _motor.Tempo = speed.Move;
         _combo.AttackSpeed = speed.Attack;
     }
@@ -133,6 +134,8 @@ public partial class PlayerController : CharacterBody2D, IDamageable
     }
 
     public void LoseMp(float amount) => Mp = Mathf.Max(0, Mp - amount);
+
+    public void GainMp(float amount) => Mp = Mathf.Min(MaxMp, Mp + amount);
 
     public void Heal()
     {
@@ -443,6 +446,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         _guardHitTicks = Mathf.Max(0, _guardHitTicks - 1);
         _skillInvulnerableTicks = Mathf.Max(0, _skillInvulnerableTicks - 1);
         Loadout.Step();
+        ApplyModifiers();
         if (_downTicks > 0)
         {
             _downTicks--;

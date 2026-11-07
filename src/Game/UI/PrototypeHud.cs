@@ -32,13 +32,18 @@ public partial class PrototypeHud : CanvasLayer
         column.AddChild(row);
         for (var i = 0; i < player.Loadout.Slots.Count; i++)
         {
-            var label = new Label { CustomMinimumSize = new Vector2(250, 0) };
-            label.AddThemeFontSizeOverride("font_size", 22);
+            var label = new Label { CustomMinimumSize = new Vector2(260, 0) };
+            label.AddThemeFontSizeOverride("font_size", 26);
+            label.AddThemeColorOverride("font_outline_color", Colors.Black);
+            label.AddThemeConstantOverride("outline_size", 8);
             row.AddChild(label);
             _skills.Add(label);
         }
 
         _amulets = new Label();
+        _amulets.AddThemeFontSizeOverride("font_size", 22);
+        _amulets.AddThemeColorOverride("font_outline_color", Colors.Black);
+        _amulets.AddThemeConstantOverride("outline_size", 6);
         column.AddChild(_amulets);
 
         _combo = new Label { Position = new Vector2(1600, 300), Visible = false };

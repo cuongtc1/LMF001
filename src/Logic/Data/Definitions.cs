@@ -36,7 +36,8 @@ public sealed record ProjectileDef(string Id, string Sprite, float Speed, int Ti
 
 public sealed record SkillSetDef(string Id, int Slots, IReadOnlyList<SkillDef> Skills, IReadOnlyList<ProjectileDef> Projectiles);
 
-public sealed record AmuletEffectDef(string Kind, float Value, string? Target = null, string? Projectile = null);
+/// <param name="MinHpRatio">The effect works only while HP is at least this share of max HP.</param>
+public sealed record AmuletEffectDef(string Kind, float Value, string? Target = null, string? Projectile = null, float MinHpRatio = 0);
 
 public sealed record AmuletDef(string Id, IReadOnlyList<AmuletEffectDef> Effects);
 
@@ -250,7 +251,31 @@ public sealed record StageDef(
     IReadOnlyList<SpawnDef> Spawns,
     ArenaDef? Arena);
 
-public sealed record RoomDef(string Id, float Width, float GroundY, IReadOnlyList<LayerDef> Layers, IReadOnlyList<PlatformDef> Platforms, IReadOnlyList<WaveDef> Waves);
+/// <param name="RewardOnClear">Fight rooms offer a reward when healed; a treasure room gives it from its chest.</param>
+public sealed record RoomDef(
+    string Id,
+    float Width,
+    float GroundY,
+    IReadOnlyList<LayerDef> Layers,
+    IReadOnlyList<PlatformDef> Platforms,
+    IReadOnlyList<WaveDef> Waves,
+    IReadOnlyList<float>? Crates = null,
+    float? ChestX = null,
+    bool RewardOnClear = true);
+
+/// <param name="HpChance">Share of crates that drop an HP token; the rest drop MP.</param>
+public sealed record PickupDef(
+    string CrateSprite,
+    float CrateHeight,
+    int CrateHits,
+    float HpChance,
+    float HpHeal,
+    float MpGain,
+    string HpTokenSprite,
+    string MpTokenSprite,
+    string ChestSprite,
+    string ChestOpenSprite,
+    float ChestHeight);
 
 /// <param name="RoomsPerRun">Rooms before the boss.</param>
 /// <param name="DoorPromptTicks">Time on the ground at a door before its prompt shows.</param>
@@ -266,7 +291,7 @@ public sealed record RunDef(
     float DoorHeight,
     float DoorInset,
     int DoorPromptTicks,
-    float RoomClearHeal,
+    PickupDef Pickups,
     string AmuletSet,
     int RewardChoices,
     IReadOnlyList<RoomDef> Rooms);

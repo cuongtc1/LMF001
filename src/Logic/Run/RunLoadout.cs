@@ -65,12 +65,12 @@ public static class AmuletEffects
     public const string Speed = "speed";
     public const string ManaGain = "mana_gain";
     public const string DamageTaken = "damage_taken";
-    public const string RoomHeal = "room_heal";
+    public const string TokenHeal = "token_heal";
     public const string SkillCooldown = "skill_cooldown";
     public const string AttackProjectile = "attack_projectile";
 
     public static readonly string[] All =
-        [LightDamage, HeavyDamage, HeavyStagger, Speed, ManaGain, DamageTaken, RoomHeal, SkillCooldown, AttackProjectile];
+        [LightDamage, HeavyDamage, HeavyStagger, Speed, ManaGain, DamageTaken, TokenHeal, SkillCooldown, AttackProjectile];
 }
 
 /// <summary>The amulets of one run, read as numbers by whoever needs them.</summary>
@@ -86,10 +86,11 @@ public sealed class RunModifiers
 
     public void Clear() => _amulets.Clear();
 
-    public float Total(string kind) => Effects(kind).Sum(effect => effect.Value);
+    /// <param name="hpRatio">Current HP share; effects with a higher minimum are off.</param>
+    public float Total(string kind, float hpRatio = 1) => Effects(kind).Where(effect => hpRatio >= effect.MinHpRatio).Sum(effect => effect.Value);
 
     /// <summary>1 plus every bonus of this kind; a value of -0.15 gives 0.85.</summary>
-    public float Scale(string kind) => Math.Max(0, 1 + Total(kind));
+    public float Scale(string kind, float hpRatio = 1) => Math.Max(0, 1 + Total(kind, hpRatio));
 
     /// <summary>Projectiles that amulets add to this attack.</summary>
     public IEnumerable<string> ProjectilesFor(string attackId) =>
@@ -97,6 +98,12 @@ public sealed class RunModifiers
 
     private IEnumerable<AmuletEffectDef> Effects(string kind) =>
         _amulets.SelectMany(amulet => amulet.Effects).Where(effect => effect.Kind == kind);
+}
+
+/// <summary>Tokens are taken only when they help, so a full HP bar leaves them on the floor.</summary>
+public static class PickupRules
+{
+    public static bool Helps(float current, float max) => current < max;
 }
 
 /// <summary>Draws the choices of a reward pedestal.</summary>
