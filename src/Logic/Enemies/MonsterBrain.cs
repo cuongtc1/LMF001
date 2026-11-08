@@ -33,6 +33,9 @@ public static class MonsterMoveKinds
 /// <summary>Shared AI: walk, hop or fly to the target, wind up, strike, recover. Numbers come from data.</summary>
 public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats, ulong seed = 1)
 {
+    /// <summary>Close enough under an unreachable Lumi to stop and wait (or jump, for climbers).</summary>
+    private const float UnderTargetDistance = 20;
+
     private readonly SeededRandom _random = new(seed);
     private const float TicksPerSecond = 60;
 
@@ -164,7 +167,8 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats, ulong seed
 
     /// <param name="deltaX">Target x minus monster x.</param>
     /// <param name="hoverError">Flyers only: pixels below the hover height.</param>
-    public void Step(float deltaX, bool onFloor, float hoverError = 0)
+    /// <param name="canReach">False when Lumi is far above or below: ground monsters walk under her instead of swinging.</param>
+    public void Step(float deltaX, bool onFloor, float hoverError = 0, bool canReach = true)
     {
         WantsHop = false;
         MoveVelocityX = 0;
@@ -188,7 +192,7 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats, ulong seed
         {
             case MonsterState.Idle:
             case MonsterState.Chase:
-                Think(deltaX, onFloor);
+                Think(deltaX, onFloor, canReach);
                 break;
             case MonsterState.Windup when _timer == 0:
                 SwingId++;
@@ -238,7 +242,7 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats, ulong seed
         }
     }
 
-    private void Think(float deltaX, bool onFloor)
+    private void Think(float deltaX, bool onFloor, bool canReach)
     {
         var distance = Math.Abs(deltaX);
         if (distance > ai.AggroRange)
@@ -251,6 +255,13 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats, ulong seed
         if (ai.Moves is { Count: > 0 } moves)
         {
             ThinkBoss(moves, distance);
+            return;
+        }
+
+        if (!canReach)
+        {
+            State = MonsterState.Chase;
+            MoveVelocityX = distance > UnderTargetDistance ? Facing * stats.Speed : 0;
             return;
         }
 

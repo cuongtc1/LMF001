@@ -180,7 +180,14 @@ public sealed record MonsterAiDef(
     bool BouncesOffWalls,
     float PhaseTwoHp = 0,
     float PhaseTwoSpeed = 1,
-    IReadOnlyList<MonsterMoveDef>? Moves = null);
+    IReadOnlyList<MonsterMoveDef>? Moves = null,
+    bool Climbs = false);
+
+/// <summary>How climbing monsters follow Lumi onto ledges (all pixels; ticks at 60 per second).</summary>
+/// <param name="StepHeight">Height difference that counts as "on another level".</param>
+/// <param name="WaitTicks">Lumi must stay on the other level this long first, so a quick hop still dodges.</param>
+/// <param name="ReachHeight">Ground monsters only swing when Lumi is within this height.</param>
+public sealed record MonsterClimbDef(float StepHeight, int WaitTicks, float JumpReach, float MaxJumpHeight, float Clearance, int CooldownTicks, int DropTicks, float ReachHeight);
 
 public sealed record MonsterAttackDef(float DamageMultiplier, RectDef Hitbox, float KnockbackSpeed, int HitstopTicks, string HitVfx, bool Knockdown);
 
@@ -244,7 +251,8 @@ public sealed record GameFeelDef(
     string GuardVfx,
     int PlayerDownTicks,
     int PlayerGetupTicks,
-    MonsterPoseDef MonsterPose);
+    MonsterPoseDef MonsterPose,
+    MonsterClimbDef MonsterClimb);
 
 public sealed record VfxDef(string Id, int Frames, int TicksPerFrame, float Scale);
 

@@ -1,0 +1,34 @@
+{
+  "god_mode": true,
+  "room": "roots",
+  "skills": [
+    "jam_spread"
+  ],
+  "end_tick": 700,
+  "screenshots": [
+    100,
+    220,
+    300,
+    380,
+    460,
+    560
+  ],
+  "steps": [
+    {
+      "tick": 20,
+      "action": "teleport",
+      "x": 1500,
+      "y": 600
+    },
+    {
+      "tick": 480,
+      "action": "move_down",
+      "pressed": true
+    },
+    {
+      "tick": 484,
+      "action": "move_down",
+      "pressed": false
+    }
+  ]
+}

@@ -23,6 +23,7 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
     private const float StaggerBarWidth = 200;
     private const float StaggerBarHeight = 10;
     private const int PosePhaseSpread = 97;
+    private const float LedgeMargin = 20;
     private const float ThrowForward = 80;
     private const float ThrowHeight = 180;
     private const float ThrowAimHeight = 100;
@@ -40,6 +41,9 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
     private PlayerController _player = null!;
     private MonsterBrain _brain = null!;
     private MonsterPose _pose = null!;
+    private PlatformChase? _climb;
+    private float _floorY;
+    private int _dropTicks;
     private const float RunOffSeconds = 0.6f;
 
     private AttackHitbox _hitbox = null!;
@@ -86,6 +90,8 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         _player = player;
         _brain = new MonsterBrain(def.Ai, stats);
         // monsters of one wave should not breathe in step
+        _climb = def.Ai.Climbs ? new PlatformChase(feel.MonsterClimb) : null;
+        _floorY = position.Y;
         _pose = new MonsterPose(feel.MonsterPose, def.Art.Motion, Mathf.PosMod((int)position.X, PosePhaseSpread));
         Health = new Health(stats.MaxHp);
         GlobalPosition = position;
@@ -191,11 +197,17 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         }
 
         var onFloor = _flying || IsOnFloor();
-        _brain.Step(_player.GlobalPosition.X - GlobalPosition.X, onFloor, GlobalPosition.Y - _hoverY);
+        var deltaX = _player.GlobalPosition.X - GlobalPosition.X;
+        var deltaY = _player.GlobalPosition.Y - GlobalPosition.Y;
+        // bosses and flyers have their own reach (thrown pots, hovering); ground monsters do not swing at the air
+        var canReach = _flying || _def.Ai.Moves is not null || Mathf.Abs(deltaY) <= _feel.MonsterClimb.ReachHeight;
+        _brain.Step(deltaX, onFloor, GlobalPosition.Y - _hoverY, canReach);
         if (_brain.WantsHop)
         {
             _velocityY = -_def.Ai.HopVelocity;
         }
+
+        StepClimb(deltaX, deltaY, onFloor);
 
         StepVertical((float)delta, onFloor);
         _knockback = Mathf.MoveToward(_knockback, 0, _feel.KnockbackDecay * (float)delta);
@@ -208,6 +220,32 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
 
         StepStrike();
         ShowState();
+    }
+
+    /// <summary>Climbers follow Lumi onto ledges and drop back down after her.</summary>
+    private void StepClimb(float deltaX, float deltaY, bool onFloor)
+    {
+        if (_dropTicks > 0 && --_dropTicks == 0)
+        {
+            CollisionMask = PhysicsLayers.World | PhysicsLayers.Platform;
+        }
+
+        if (_climb is null || _brain.State is not (MonsterState.Idle or MonsterState.Chase))
+        {
+            return;
+        }
+
+        var onLedge = onFloor && GlobalPosition.Y < _floorY - LedgeMargin;
+        switch (_climb.Step(deltaX, deltaY, onFloor, onLedge, _player.OnGround, _feel.EnemyGravity))
+        {
+            case ClimbAction.Jump:
+                _velocityY = -_climb.JumpVelocity;
+                break;
+            case ClimbAction.Drop:
+                _dropTicks = _feel.MonsterClimb.DropTicks;
+                CollisionMask = PhysicsLayers.World;
+                break;
+        }
     }
 
     private void StepVertical(float delta, bool onFloor)

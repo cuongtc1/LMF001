@@ -34,5 +34,15 @@
     "hit_squash": 0.2,
     "hit_ticks": 10,
     "dizzy_wobble": 0.14
+  },
+  "monster_climb": {
+    "step_height": 80,
+    "wait_ticks": 40,
+    "jump_reach": 240,
+    "max_jump_height": 520,
+    "clearance": 60,
+    "cooldown_ticks": 70,
+    "drop_ticks": 18,
+    "reach_height": 140
   }
 }
