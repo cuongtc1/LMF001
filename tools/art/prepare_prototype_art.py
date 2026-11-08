@@ -150,6 +150,28 @@ def labyrinth():
     save(pieces(V + 'L/L3/ver12_L3_6.png', 4)[3], LABYRINTH + 'door.png')
 
 
+def sky_and_gates():
+    """Round 51 picks: O_12 gates (grey-lavender stone stands out from the beige walls), P_11 shrine,
+    Q_10 sky (clear middle where Lumi plays), R_1 floating ledges (flat tops, same line as the labyrinth ledges)."""
+    gate, gate_off = row_items(V + 'O/ver12_O_12.png', 2)
+    save(gate, PROPS + 'gate.png')
+    save(gate_off, PROPS + 'gate_off.png')
+    shrine, shrine_used = row_items(V + 'P/ver12_P_11.png', 2)
+    save(shrine, PROPS + 'shrine.png')
+    save(shrine_used, PROPS + 'shrine_used.png')
+    save(fit_height(rgb(V + 'Q/ver12_Q_10.png')), LABYRINTH + 'sky_back.png')
+    small, wide, slab = pieces(V + 'R/ver12_R_1.png', 3)
+    for name, piece in (('sky_small', small), ('sky_wide', wide), ('sky_slab', slab)):
+        save(piece, LABYRINTH + f'platforms/{name}.png')
+
+
+def top_share(path):
+    """Share of the sprite height above its walkable top: the first row that is mostly solid."""
+    alpha = np.asarray(Image.open(path))[..., 3] > 128
+    widths = alpha.sum(1)
+    return float(np.argmax(widths >= widths.max() * 0.8)) / alpha.shape[0]
+
+
 def first_run_monsters():
     for name, path in (('corrupted_seedling', 'J/ver12_J1_1.png'), ('little_treant', 'J/ver12_J2_2.png'), ('fire_beetle', 'J/ver12_J3_3.png')):
         idle, windup, healed = pieces(V + path, 3)
@@ -236,3 +258,4 @@ if __name__ == '__main__':
     labyrinth()
     first_run_monsters()
     props()
+    sky_and_gates()

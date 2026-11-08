@@ -34,15 +34,19 @@ public class StatScalerTests
         Assert.Equal(0.5f, stats.CooldownScale);
     }
 
+    // early-game rhythm, as in Elsword: Z about every 0.35 s, the opener a little slower and the follow-up quicker;
+    // gear and buffs may bring it to 0.3 later
     [Fact]
-    // early-game rhythm, as in Elsword: Z every 0.35 s; gear and buffs may bring it to 0.3 later
-    public void ComboHitsAreAboutPointThreeFiveSecondsApart()
+    public void ComboHitsAverageAboutPointThreeFiveSecondsAndSpeedUp()
     {
         var set = TestData.Game.AttackSet("lumi_sword");
         var z1 = set.Attacks.First(attack => attack.Id == "z1");
         var z2 = set.Attacks.First(attack => attack.Id == z1.Next);
-        var ticks = z1.ChainFromTick + z2.StartupTicks - z1.StartupTicks;
-        Assert.Equal(0.35f, ticks / 60f, 2);
+        var z3 = set.Attacks.First(attack => attack.Id == z2.Next);
+        var first = z1.ChainFromTick + z2.StartupTicks - z1.StartupTicks;
+        var second = z2.ChainFromTick + z3.StartupTicks - z2.StartupTicks;
+        Assert.Equal(0.35f, (first + second) / 2f / 60f, 1);
+        Assert.True(second < first);
     }
 
     [Theory]

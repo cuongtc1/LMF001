@@ -4,9 +4,10 @@
   "wave_delay_ticks": 60,
   "player_spawn_x": 200,
   "gate_sprite": "assets/props/common/gate.png",
-  "gate_height": 330,
+  "gate_height": 420,
   "shrine_sprite": "assets/props/common/shrine.png",
-  "shrine_height": 240,
+  "shrine_used_sprite": "assets/props/common/shrine_used.png",
+  "shrine_height": 280,
   "exit_zone": 60,
   "edge_spawn_inset": 160,
   "vertical_exit_margin": 20,
@@ -641,46 +642,46 @@
       "ground_y": 885,
       "layers": [
         {
-          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/back.png",
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/sky_back.png",
           "scroll_scale": 0.3,
           "z_index": -30
         }
       ],
       "platforms": [
         {
-          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/sky_small.png",
           "x": 150,
           "y": 885,
           "width": 300,
-          "top_inset": 5
+          "top_inset": 7
         },
         {
-          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/sky_small.png",
           "x": 1770,
           "y": 885,
           "width": 300,
-          "top_inset": 5
+          "top_inset": 7
         },
         {
-          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/sky_wide.png",
           "x": 960,
           "y": 900,
           "width": 460,
-          "top_inset": 37
+          "top_inset": 39
         },
         {
-          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/sky_slab.png",
           "x": 600,
           "y": 660,
-          "width": 260,
-          "top_inset": 5
+          "width": 280,
+          "top_inset": 2
         },
         {
-          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/sky_wide.png",
           "x": 1250,
           "y": 430,
           "width": 460,
-          "top_inset": 37
+          "top_inset": 39
         }
       ],
       "waves": [],
@@ -703,46 +704,46 @@
       "ground_y": 885,
       "layers": [
         {
-          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/back.png",
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/sky_back.png",
           "scroll_scale": 0.3,
           "z_index": -30
         }
       ],
       "platforms": [
         {
-          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/sky_small.png",
           "x": 150,
           "y": 885,
           "width": 300,
-          "top_inset": 5
+          "top_inset": 7
         },
         {
-          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/sky_small.png",
           "x": 1770,
           "y": 885,
           "width": 300,
-          "top_inset": 5
+          "top_inset": 7
         },
         {
-          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/sky_wide.png",
           "x": 960,
           "y": 900,
           "width": 460,
-          "top_inset": 37
+          "top_inset": 39
         },
         {
-          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/sky_slab.png",
           "x": 560,
           "y": 660,
-          "width": 260,
-          "top_inset": 5
+          "width": 280,
+          "top_inset": 2
         },
         {
-          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/sky_small.png",
           "x": 1360,
           "y": 660,
-          "width": 260,
-          "top_inset": 5
+          "width": 280,
+          "top_inset": 7
         }
       ],
       "waves": [],

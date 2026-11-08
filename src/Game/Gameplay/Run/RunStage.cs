@@ -33,7 +33,7 @@ public partial class RunStage : Node2D
     private const float CameraHeight = 160;
     private const float TokenLift = 60;
     private const float BrokenCrateSeconds = 1.2f;
-    private const float GateInset = 40;
+    private const float GateInset = 70;
     private const float FadeSeconds = 0.25f;
 
     /// <summary>No exit right after arriving, so Lumi never bounces straight back through the gap she came in.</summary>
@@ -492,8 +492,14 @@ public partial class RunStage : Node2D
             var shrine = new HittableProp();
             RoomNode.AddChild(shrine);
             shrine.Setup(_run.ShrineSprite, _run.ShrineHeight, new Vector2(shrineX, _room.GroundY), State.Cleared ? 0 : 1);
+            if (State.Cleared)
+            {
+                shrine.ChangeSprite(_run.ShrineUsedSprite);
+            }
+
             shrine.Broken += _ => OfferReward(RewardKind.Skills, () =>
             {
+                shrine.ChangeSprite(_run.ShrineUsedSprite);
                 State.Cleared = true;
                 SetOpen(true);
                 ShowMinimap();

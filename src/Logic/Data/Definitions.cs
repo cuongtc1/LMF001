@@ -347,6 +347,7 @@ public sealed record RunDef(
     string GateSprite,
     float GateHeight,
     string ShrineSprite,
+    string ShrineUsedSprite,
     float ShrineHeight,
     float ExitZone,
     float EdgeSpawnInset,
