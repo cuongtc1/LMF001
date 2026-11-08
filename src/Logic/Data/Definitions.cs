@@ -68,7 +68,7 @@ public sealed record SpineViewDef(
 /// <param name="DamageScale">Share of damage taken through a guard.</param>
 /// <param name="PerfectTicks">A hit this soon after raising the guard is a perfect guard.</param>
 /// <param name="CounterTicks">Time to press Z after a perfect guard.</param>
-/// <param name="AutoCounter">Every block makes Lumi counter by herself, no Z press needed.</param>
+/// <param name="AutoCounter">Every block makes Lumi counter by herself, no Z press needed (normally off; the Steam Bath amulet turns it on).</param>
 public sealed record GuardDef(float DamageScale, int PerfectTicks, int CounterTicks, float PushSpeed, int PerfectHitstopTicks, int HitTicks, bool AutoCounter = false);
 
 public sealed record BodyDef(float Width, float Height);

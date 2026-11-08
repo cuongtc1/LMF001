@@ -1,0 +1,40 @@
+{
+  "god_mode": false,
+  "room": "hedge",
+  "skills": [
+    "jam_spread"
+  ],
+  "end_tick": 600,
+  "screenshots": [],
+  "steps": [
+    {
+      "tick": 20,
+      "action": "teleport",
+      "x": 1650,
+      "y": 700
+    },
+    {
+      "tick": 24,
+      "action": "move_right",
+      "pressed": true
+    },
+    {
+      "tick": 26,
+      "action": "move_right",
+      "pressed": false
+    },
+    {
+      "tick": 30,
+      "action": "guard",
+      "pressed": true
+    },
+    {
+      "tick": 590,
+      "action": "guard",
+      "pressed": false
+    }
+  ],
+  "amulets": [
+    "steam_bath"
+  ]
+}

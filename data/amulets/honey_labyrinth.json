@@ -79,6 +79,18 @@
           "min_hp_ratio": 0
         }
       ]
+    },
+    {
+      "id": "steam_bath",
+      "effects": [
+        {
+          "kind": "auto_counter",
+          "value": 1,
+          "target": null,
+          "projectile": null,
+          "min_hp_ratio": 0
+        }
+      ]
     }
   ]
 }

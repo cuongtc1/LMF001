@@ -11,8 +11,8 @@ public enum GuardResult
 
 /// <summary>
 /// Holding guard blocks frontal hits. A hit right after raising it is a perfect guard (no chip damage).
-/// With <see cref="GuardDef.AutoCounter"/> every block makes Lumi counter by herself (round 55); otherwise only
-/// a perfect guard opens a short window to press Z.
+/// Normally only a perfect guard opens a short window to press Z (C + Z). With <see cref="AutoCounter"/>
+/// (Steam Bath amulet) every block makes Lumi counter by herself.
 /// </summary>
 public sealed class GuardState(GuardDef guard)
 {
@@ -23,6 +23,8 @@ public sealed class GuardState(GuardDef guard)
     public bool IsGuarding => _heldTicks > 0;
 
     public bool CounterReady => _counterTimer > 0;
+
+    public bool AutoCounter { get; set; } = guard.AutoCounter;
 
     public void Step(bool wantsGuard)
     {
@@ -54,10 +56,10 @@ public sealed class GuardState(GuardDef guard)
         }
 
         var result = _heldTicks > guard.PerfectTicks ? GuardResult.Blocked : GuardResult.Perfect;
-        if (guard.AutoCounter || result == GuardResult.Perfect)
+        if (AutoCounter || result == GuardResult.Perfect)
         {
             _counterTimer = guard.CounterTicks;
-            _autoCounter = guard.AutoCounter;
+            _autoCounter = AutoCounter;
         }
 
         return result;

@@ -69,8 +69,11 @@ public static class AmuletEffects
     public const string SkillCooldown = "skill_cooldown";
     public const string AttackProjectile = "attack_projectile";
 
+    /// <summary>Any value above 0: every guard block counters by itself (Steam Bath).</summary>
+    public const string AutoCounter = "auto_counter";
+
     public static readonly string[] All =
-        [LightDamage, HeavyDamage, HeavyStagger, Speed, ManaGain, DamageTaken, TokenHeal, SkillCooldown, AttackProjectile];
+        [LightDamage, HeavyDamage, HeavyStagger, Speed, ManaGain, DamageTaken, TokenHeal, SkillCooldown, AttackProjectile, AutoCounter];
 }
 
 /// <summary>The amulets of one run, read as numbers by whoever needs them.</summary>

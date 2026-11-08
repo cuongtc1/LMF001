@@ -60,6 +60,18 @@ public partial class AutoplayRunner : Node, IPlayerInput
                 _player.Loadout.Add(set.Skills.First(skill => skill.Id == id.GetString()));
             }
         }
+
+        if (document.RootElement.TryGetProperty("amulets", out var amulets))
+        {
+            var all = GameServices.Data.AmuletSets.Values.SelectMany(set => set.Amulets).ToList();
+            foreach (var id in amulets.EnumerateArray())
+            {
+                _player.Modifiers.Add(all.First(amulet => amulet.Id == id.GetString()));
+            }
+
+            _player.ApplyModifiers();
+        }
+
         // after "skills", which fills HP and MP
         if (document.RootElement.TryGetProperty("start_hp", out var startHp))
         {

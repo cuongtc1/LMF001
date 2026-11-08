@@ -92,8 +92,8 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         _skills = GameServices.Data.SkillSet(def.Combat.SkillSet);
         Loadout = new SkillLoadout(_skills.Slots);
         Health = new Health(def.Stats.MaxHp);
-        ApplyModifiers();
         _guard = new GuardState(def.Guard);
+        ApplyModifiers();
         GlobalPosition = spawn;
         CollisionLayer = 0;
         CollisionMask = PhysicsLayers.World | PhysicsLayers.Platform;
@@ -123,6 +123,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         var speed = StatScaler.ForSpeed(_def.Stats.Speed + Modifiers.Total(AmuletEffects.Speed, hpRatio), GameServices.Data.Scaling.Speed);
         _motor.Tempo = speed.Move;
         _combo.AttackSpeed = speed.Attack;
+        _guard.AutoCounter = _def.Guard.AutoCounter || Modifiers.Total(AmuletEffects.AutoCounter) > 0;
     }
 
     /// <summary>Where Lumi comes back after she falls.</summary>

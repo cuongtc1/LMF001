@@ -65,6 +65,9 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
     private bool _healing;
     private bool _flying;
     private float _hoverY;
+
+    /// <summary>Flyers have no floor collision; their feet stop here so a swoop touches the ground but never sinks into it.</summary>
+    private float _flyerGroundY;
     private int _age;
 
     public event Action<MonsterController>? Healed;
@@ -97,6 +100,7 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         GlobalPosition = position;
         _flying = def.Ai.Behavior == MonsterBehaviors.Flyer;
         _hoverY = position.Y;
+        _flyerGroundY = position.Y + def.Ai.HoverHeight;
         CollisionLayer = 0;
         CollisionMask = _flying ? 0 : PhysicsLayers.World | PhysicsLayers.Platform;
 
@@ -219,6 +223,12 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         _knockback = Mathf.MoveToward(_knockback, 0, _feel.KnockbackDecay * (float)delta);
         Velocity = new Vector2(_brain.MoveVelocityX + _knockback, _velocityY + _brain.MoveVelocityY);
         MoveAndSlide();
+        if (_flying && GlobalPosition.Y > _flyerGroundY)
+        {
+            GlobalPosition = new Vector2(GlobalPosition.X, _flyerGroundY);
+            _velocityY = Mathf.Min(_velocityY, 0);
+        }
+
         if (IsOnWall())
         {
             _brain.BounceOffWall();
