@@ -1,18 +1,35 @@
 {
   "id": "honey_labyrinth_stage_1",
   "tier": 1,
-  "rooms_per_run": 5,
   "wave_delay_ticks": 60,
   "player_spawn_x": 200,
-  "entrance_room": "entrance",
-  "first_room": "gate",
-  "boss_room": "den",
   "gate_sprite": "assets/props/common/gate.png",
   "gate_height": 330,
   "shrine_sprite": "assets/props/common/shrine.png",
   "shrine_height": 240,
   "exit_zone": 60,
   "edge_spawn_inset": 160,
+  "vertical_exit_margin": 20,
+  "pickups": {
+    "crate_sprite": "assets/props/common/crate.png",
+    "crate_broken_sprite": "assets/props/common/crate_broken.png",
+    "crate_height": 90,
+    "crate_hits": 2,
+    "hp_chance": 0.7,
+    "hp_heal": 0.12,
+    "mp_gain": 25,
+    "hp_token_sprite": "assets/props/common/hp_token.png",
+    "mp_token_sprite": "assets/props/common/mp_token.png",
+    "chest_sprite": "assets/props/common/chest.png",
+    "chest_open_sprite": "assets/props/common/chest_open.png",
+    "chest_height": 120,
+    "lever_sprite": "assets/props/common/lever.png",
+    "lever_on_sprite": "assets/props/common/lever_on.png",
+    "lever_height": 150,
+    "big_chest_height": 180
+  },
+  "amulet_set": "honey_labyrinth",
+  "reward_choices": 3,
   "rooms": [
     {
       "id": "entrance",
@@ -33,7 +50,8 @@
       "platforms": [],
       "waves": [],
       "crates": [],
-      "shrine_x": 1100
+      "shrine_x": 1100,
+      "kind": "entrance"
     },
     {
       "id": "gate",
@@ -80,7 +98,8 @@
       ],
       "crates": [
         600
-      ]
+      ],
+      "kind": "fight"
     },
     {
       "id": "hedge",
@@ -136,7 +155,8 @@
       "crates": [
         1150,
         2100
-      ]
+      ],
+      "kind": "fight"
     },
     {
       "id": "roots",
@@ -198,7 +218,8 @@
       ],
       "crates": [
         300
-      ]
+      ],
+      "kind": "fight"
     },
     {
       "id": "beetle_run",
@@ -260,7 +281,8 @@
       ],
       "crates": [
         1450
-      ]
+      ],
+      "kind": "fight"
     },
     {
       "id": "mixed",
@@ -320,7 +342,8 @@
       "crates": [
         700,
         2150
-      ]
+      ],
+      "kind": "fight"
     },
     {
       "id": "treasure",
@@ -345,7 +368,8 @@
         1350
       ],
       "chest_x": 960,
-      "reward_on_clear": false
+      "reward_on_clear": false,
+      "kind": "treasure"
     },
     {
       "id": "lair",
@@ -416,7 +440,8 @@
         "lever_x": 520,
         "tier_bonus": 1,
         "chest_x": 960
-      }
+      },
+      "kind": "trial"
     },
     {
       "id": "untouched",
@@ -467,10 +492,11 @@
         "lever_x": 0,
         "tier_bonus": 0,
         "chest_x": 960
-      }
+      },
+      "kind": "trial"
     },
     {
-      "id": "lair",
+      "id": "climb_a",
       "width": 1920,
       "ground_y": 885,
       "layers": [
@@ -480,92 +506,43 @@
           "z_index": -30
         },
         {
-          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/wall_a.png",
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/wall_b.png",
           "scroll_scale": 1.0,
           "z_index": -10
         }
       ],
-      "platforms": [],
+      "platforms": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
+          "x": 520,
+          "y": 650,
+          "width": 260,
+          "top_inset": 5
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/root.png",
+          "x": 900,
+          "y": 440,
+          "width": 360,
+          "top_inset": 44
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
+          "x": 1380,
+          "y": 250,
+          "width": 460,
+          "top_inset": 37
+        }
+      ],
       "waves": [
         {
           "spawns": [
             {
               "monster": "honey_slime",
-              "x": 1100
+              "x": 1200
             },
             {
               "monster": "corrupted_seedling",
-              "x": 1500
-            },
-            {
-              "monster": "sprout_mushroom",
-              "x": 1700
-            }
-          ]
-        },
-        {
-          "spawns": [
-            {
-              "monster": "little_treant",
-              "x": 1300
-            },
-            {
-              "monster": "fire_beetle",
-              "x": 1750
-            }
-          ]
-        },
-        {
-          "spawns": [
-            {
-              "monster": "fire_beetle",
-              "x": 300
-            },
-            {
-              "monster": "corrupted_seedling",
-              "x": 1700
-            },
-            {
-              "monster": "little_treant",
-              "x": 1000
-            }
-          ]
-        }
-      ],
-      "crates": [],
-      "challenge": {
-        "kind": "lair",
-        "lever_x": 520,
-        "tier_bonus": 1,
-        "chest_x": 960
-      }
-    },
-    {
-      "id": "untouched",
-      "width": 1920,
-      "ground_y": 885,
-      "layers": [
-        {
-          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/back.png",
-          "scroll_scale": 0.3,
-          "z_index": -30
-        },
-        {
-          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/wall_a.png",
-          "scroll_scale": 1.0,
-          "z_index": -10
-        }
-      ],
-      "platforms": [],
-      "waves": [
-        {
-          "spawns": [
-            {
-              "monster": "little_treant",
-              "x": 1300
-            },
-            {
-              "monster": "honey_slime",
               "x": 1600
             }
           ]
@@ -573,22 +550,211 @@
         {
           "spawns": [
             {
-              "monster": "corrupted_seedling",
-              "x": 1500
-            },
-            {
               "monster": "sprout_mushroom",
-              "x": 1100
+              "x": 1400
             }
           ]
         }
       ],
       "crates": [],
-      "challenge": {
-        "kind": "no_hit",
-        "lever_x": 0,
-        "tier_bonus": 0,
-        "chest_x": 960
+      "kind": "fight",
+      "up": {
+        "x": 1380,
+        "width": 460,
+        "spawn_x": 1380,
+        "spawn_y": -20
+      }
+    },
+    {
+      "id": "climb_b",
+      "width": 1920,
+      "ground_y": 885,
+      "layers": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/back.png",
+          "scroll_scale": 0.3,
+          "z_index": -30
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/wall_c.png",
+          "scroll_scale": 1.0,
+          "z_index": -10
+        }
+      ],
+      "platforms": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
+          "x": 1400,
+          "y": 650,
+          "width": 260,
+          "top_inset": 5
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
+          "x": 1000,
+          "y": 440,
+          "width": 260,
+          "top_inset": 5
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
+          "x": 560,
+          "y": 250,
+          "width": 460,
+          "top_inset": 37
+        }
+      ],
+      "waves": [
+        {
+          "spawns": [
+            {
+              "monster": "little_treant",
+              "x": 1300
+            },
+            {
+              "monster": "honey_slime",
+              "x": 1650
+            }
+          ]
+        },
+        {
+          "spawns": [
+            {
+              "monster": "fire_beetle",
+              "x": 1700
+            }
+          ]
+        }
+      ],
+      "crates": [],
+      "kind": "fight",
+      "up": {
+        "x": 560,
+        "width": 460,
+        "spawn_x": 560,
+        "spawn_y": -20
+      }
+    },
+    {
+      "id": "sky_nest",
+      "width": 1920,
+      "ground_y": 885,
+      "layers": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/back.png",
+          "scroll_scale": 0.3,
+          "z_index": -30
+        }
+      ],
+      "platforms": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
+          "x": 150,
+          "y": 885,
+          "width": 300,
+          "top_inset": 5
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
+          "x": 1770,
+          "y": 885,
+          "width": 300,
+          "top_inset": 5
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
+          "x": 960,
+          "y": 900,
+          "width": 460,
+          "top_inset": 37
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
+          "x": 600,
+          "y": 660,
+          "width": 260,
+          "top_inset": 5
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
+          "x": 1250,
+          "y": 430,
+          "width": 460,
+          "top_inset": 37
+        }
+      ],
+      "waves": [],
+      "crates": [],
+      "kind": "sky",
+      "has_floor": false,
+      "reward_on_clear": false,
+      "down": {
+        "x": 960,
+        "width": 1920,
+        "spawn_x": 960,
+        "spawn_y": 895
+      },
+      "chest_x": 1250,
+      "chest_y": 430
+    },
+    {
+      "id": "sky_bridge",
+      "width": 1920,
+      "ground_y": 885,
+      "layers": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/back.png",
+          "scroll_scale": 0.3,
+          "z_index": -30
+        }
+      ],
+      "platforms": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
+          "x": 150,
+          "y": 885,
+          "width": 300,
+          "top_inset": 5
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
+          "x": 1770,
+          "y": 885,
+          "width": 300,
+          "top_inset": 5
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
+          "x": 960,
+          "y": 900,
+          "width": 460,
+          "top_inset": 37
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
+          "x": 560,
+          "y": 660,
+          "width": 260,
+          "top_inset": 5
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
+          "x": 1360,
+          "y": 660,
+          "width": 260,
+          "top_inset": 5
+        }
+      ],
+      "waves": [],
+      "crates": [],
+      "kind": "sky",
+      "has_floor": false,
+      "reward_on_clear": false,
+      "down": {
+        "x": 960,
+        "width": 1920,
+        "spawn_x": 960,
+        "spawn_y": 895
       }
     },
     {
@@ -626,27 +792,150 @@
           ]
         }
       ],
-      "crates": []
+      "crates": [],
+      "kind": "boss"
     }
   ],
-  "amulet_set": "honey_labyrinth",
-  "reward_choices": 3,
-  "pickups": {
-    "crate_sprite": "assets/props/common/crate.png",
-    "crate_broken_sprite": "assets/props/common/crate_broken.png",
-    "crate_height": 90,
-    "crate_hits": 2,
-    "hp_chance": 0.7,
-    "hp_heal": 0.12,
-    "mp_gain": 25,
-    "hp_token_sprite": "assets/props/common/hp_token.png",
-    "mp_token_sprite": "assets/props/common/mp_token.png",
-    "chest_sprite": "assets/props/common/chest.png",
-    "chest_open_sprite": "assets/props/common/chest_open.png",
-    "chest_height": 120,
-    "lever_sprite": "assets/props/common/lever.png",
-    "lever_on_sprite": "assets/props/common/lever_on.png",
-    "lever_height": 150,
-    "big_chest_height": 180
-  }
+  "layouts": [
+    {
+      "id": "nest_branch",
+      "cells": [
+        {
+          "x": 0,
+          "y": 0,
+          "kind": "entrance"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "kind": "fight"
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "kind": "fight"
+        },
+        {
+          "x": 2,
+          "y": -1,
+          "kind": "sky"
+        },
+        {
+          "x": 3,
+          "y": 0,
+          "kind": "treasure"
+        },
+        {
+          "x": 4,
+          "y": 0,
+          "kind": "fight"
+        },
+        {
+          "x": 5,
+          "y": 0,
+          "kind": "trial"
+        },
+        {
+          "x": 6,
+          "y": 0,
+          "kind": "boss"
+        }
+      ]
+    },
+    {
+      "id": "high_road",
+      "cells": [
+        {
+          "x": 0,
+          "y": 0,
+          "kind": "entrance"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "kind": "fight"
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "kind": "trial"
+        },
+        {
+          "x": 3,
+          "y": 0,
+          "kind": "fight"
+        },
+        {
+          "x": 3,
+          "y": -1,
+          "kind": "sky"
+        },
+        {
+          "x": 4,
+          "y": -1,
+          "kind": "sky"
+        },
+        {
+          "x": 4,
+          "y": 0,
+          "kind": "fight"
+        },
+        {
+          "x": 5,
+          "y": 0,
+          "kind": "treasure"
+        },
+        {
+          "x": 6,
+          "y": 0,
+          "kind": "boss"
+        }
+      ]
+    },
+    {
+      "id": "early_climb",
+      "cells": [
+        {
+          "x": 0,
+          "y": 0,
+          "kind": "entrance"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "kind": "fight"
+        },
+        {
+          "x": 1,
+          "y": -1,
+          "kind": "sky"
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "kind": "fight"
+        },
+        {
+          "x": 3,
+          "y": 0,
+          "kind": "trial"
+        },
+        {
+          "x": 4,
+          "y": 0,
+          "kind": "fight"
+        },
+        {
+          "x": 5,
+          "y": 0,
+          "kind": "treasure"
+        },
+        {
+          "x": 6,
+          "y": 0,
+          "kind": "boss"
+        }
+      ]
+    }
+  ]
 }

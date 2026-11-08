@@ -27,11 +27,16 @@ public static class StageBuilder
         parent.AddChild(parallax);
     }
 
-    public static void AddBounds(Node parent, float width, float groundY)
+    /// <param name="floor">False for sky rooms, whose open bottom leads to the room below.</param>
+    public static void AddBounds(Node parent, float width, float groundY, bool floor = true)
     {
         var body = new StaticBody2D { CollisionLayer = PhysicsLayers.World, CollisionMask = 0 };
-        var groundSize = new Vector2(width + WallThickness * 2, GroundThickness);
-        AddSolid(body, new Vector2(width / 2, groundY + GroundThickness / 2), groundSize);
+        if (floor)
+        {
+            var groundSize = new Vector2(width + WallThickness * 2, GroundThickness);
+            AddSolid(body, new Vector2(width / 2, groundY + GroundThickness / 2), groundSize);
+        }
+
         var wallSize = new Vector2(WallThickness, groundY * 2);
         AddSolid(body, new Vector2(-WallThickness / 2, 0), wallSize);
         AddSolid(body, new Vector2(width + WallThickness / 2, 0), wallSize);

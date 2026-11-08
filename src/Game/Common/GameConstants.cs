@@ -35,6 +35,7 @@ public static class InputActions
     public const string AttackHeavy = "attack_heavy";
     public const string Dash = "dash";
     public const string Guard = "guard";
+    public const string Map = "map";
 
     public static readonly string[] Skills = ["skill_1", "skill_2", "skill_3", "skill_4"];
     public const string DebugPanel = "debug_panel";

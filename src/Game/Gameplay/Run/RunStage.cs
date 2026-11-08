@@ -36,6 +36,9 @@ public partial class RunStage : Node2D
     private const float GateInset = 40;
     private const float FadeSeconds = 0.25f;
 
+    /// <summary>No exit right after arriving, so Lumi never bounces straight back through the gap she came in.</summary>
+    private const int ArrivalTicks = 20;
+
     /// <summary>Time to watch the boss heal before the result screen comes up.</summary>
     private const int ClearScreenDelayTicks = 100;
 
@@ -63,6 +66,7 @@ public partial class RunStage : Node2D
     private PlayerController _player = null!;
     private PrototypeHud _hud = null!;
     private Minimap _minimap = null!;
+    private MapScreen _mapScreen = null!;
     private Camera2D _camera = null!;
     private WaveRunner _waves = null!;
     private Node2D? _roomNode;
@@ -77,10 +81,11 @@ public partial class RunStage : Node2D
     private bool _rewardPending;
     private bool _runOver;
     private int _clearScreenTicks;
+    private int _arrivalTicks;
 
     private RoomState State => _map.CurrentState;
 
-    private bool InBossRoom => _map.CurrentRoom == _run.BossRoom;
+    private bool InBossRoom => _room.Kind == RoomKinds.Boss;
 
     private Node2D RoomNode => _roomNode!;
 
@@ -115,6 +120,8 @@ public partial class RunStage : Node2D
         _hud.Setup(_player);
         _minimap = new Minimap();
         AddChild(_minimap);
+        _mapScreen = new MapScreen();
+        AddChild(_mapScreen);
 
         _picker = new RewardPicker();
         AddChild(_picker);
@@ -135,7 +142,7 @@ public partial class RunStage : Node2D
 
         var debug = new DebugPanel();
         AddChild(debug);
-        debug.Setup(_player, _run.Tier, StartRun, () => GoTo(_map.Neighbor(_map.Current, 1), 1));
+        debug.Setup(_player, _run.Tier, StartRun, () => GoTo(_map.Neighbor(_map.Current, 1), 1, 0));
 
         var script = AutoplayRunner.RequestedScript();
         StartRun();
@@ -146,7 +153,7 @@ public partial class RunStage : Node2D
             autoplay.Setup(script, _player);
             if (autoplay.StartRoom is { } room)
             {
-                JumpTo(room);
+                JumpTo(room, autoplay.StartCleared);
             }
         }
     }
@@ -160,6 +167,12 @@ public partial class RunStage : Node2D
 
         if (_gameFeel.Frozen || _rewardPending || _runOver)
         {
+            return;
+        }
+
+        if (Input.IsActionJustPressed(InputActions.Map) && !_mapScreen.IsOpen)
+        {
+            OpenMap();
             return;
         }
 
@@ -184,34 +197,42 @@ public partial class RunStage : Node2D
     {
         var seed = AutoplayRunner.RequestedScript() is null ? Time.GetTicksUsec() : GameConstants.ScriptedRunSeed;
         _random = new SeededRandom(seed);
-        _map = new StageMap(RunPlan.Build(_run, seed));
+        _map = StageMap.Generate(_run, seed);
         _player.Loadout.Clear();
         _player.Modifiers.Clear();
         _player.ApplyModifiers();
         _stats.Reset();
         _clearScreenTicks = 0;
         GameLog.Info(MessageKeys.RunStarted, string.Join(' ', _map.Rooms));
-        EnterRoom(0, 0);
+        EnterRoom(0, Entry.Start);
         _player.Revive();
     }
 
-    /// <summary>Scripts start in a given room: one the seeded plan left out takes the slot after the first fight room.</summary>
-    private void JumpTo(string room)
+    /// <summary>Scripts start in a given room: one the map left out replaces a cell of its kind (or a fight cell).</summary>
+    private void JumpTo(string room, bool cleared)
     {
         var rooms = _map.Rooms.ToList();
         if (!rooms.Contains(room))
         {
-            rooms[2] = room;
+            // prefer a cell of the same kind whose stacked neighbors match the room's gaps
+            var def = RoomById(room);
+            var slots = Enumerable.Range(1, rooms.Count - 1).Where(i => RoomById(rooms[i]).Kind == def.Kind)
+                .OrderByDescending(i => (_map.Neighbor(i, 0, -1) >= 0) == (def.Up is not null)).ToList();
+            rooms[slots.Count > 0 ? slots[0] : rooms.FindIndex(id => RoomById(id).Kind == RoomKinds.Fight)] = room;
         }
 
-        _map = new StageMap(rooms);
+        var cells = Enumerable.Range(0, rooms.Count).Select(_map.Cell).ToList();
+        _map = new StageMap(rooms, cells);
         _map.State(0).Visited = true;
         _map.State(0).Cleared = true;
-        EnterRoom(rooms.IndexOf(room), -1);
+        _map.State(rooms.IndexOf(room)).Cleared = cleared;
+        EnterRoom(rooms.IndexOf(room), Entry.West);
     }
 
-    /// <summary>Walks through the edge on that side; does nothing at the end of the row.</summary>
-    private void GoTo(int index, int side)
+    private RoomDef RoomById(string id) => _run.Rooms.First(room => room.Id == id);
+
+    /// <summary>Moves through an edge: (dx, dy) is the direction of travel. Does nothing where no room is.</summary>
+    private void GoTo(int index, int dx, int dy)
     {
         if (index < 0)
         {
@@ -221,13 +242,33 @@ public partial class RunStage : Node2D
         GameLog.Info(MessageKeys.RunMoved, _map.Rooms[index]);
         _fade.Modulate = Colors.White;
         CreateTween().TweenProperty(_fade, "modulate:a", 0f, FadeSeconds);
-        EnterRoom(index, -side);
+        EnterRoom(index, (dx, dy) switch
+        {
+            (> 0, _) => Entry.West,
+            (< 0, _) => Entry.East,
+            (_, < 0) => Entry.Bottom,
+            _ => Entry.Top,
+        });
     }
 
-    /// <param name="fromSide">-1 entered through the west edge, 1 through the east edge, 0 the run start.</param>
-    private void EnterRoom(int index, int fromSide)
+    /// <summary>Where Lumi comes into a room.</summary>
+    private enum Entry
+    {
+        Start,
+        West,
+        East,
+
+        /// <summary>Falling in through the top gap.</summary>
+        Top,
+
+        /// <summary>Climbing up through the open bottom of a sky room.</summary>
+        Bottom,
+    }
+
+    private void EnterRoom(int index, Entry entry)
     {
         _map.Enter(index);
+        _arrivalTicks = ArrivalTicks;
         _monsters.Clear();
         _gates.Clear();
         _hud.TrackBoss(null);
@@ -240,20 +281,22 @@ public partial class RunStage : Node2D
             StageBuilder.AddLayer(RoomNode, layer);
         }
 
-        StageBuilder.AddBounds(RoomNode, _room.Width, _room.GroundY);
+        StageBuilder.AddBounds(RoomNode, _room.Width, _room.GroundY, _room.HasFloor);
         foreach (var platform in _room.Platforms)
         {
             StageBuilder.AddPlatform(RoomNode, platform);
         }
 
         _camera.LimitRight = (int)_room.Width;
-        var x = fromSide switch
+        var ground = _room.GroundY - FloorClearance;
+        var spawn = entry switch
         {
-            < 0 => _run.EdgeSpawnInset,
-            > 0 => _room.Width - _run.EdgeSpawnInset,
-            _ => _run.PlayerSpawnX,
+            Entry.West => new Vector2(_run.EdgeSpawnInset, ground),
+            Entry.East => new Vector2(_room.Width - _run.EdgeSpawnInset, ground),
+            Entry.Top when _room.Up is { } up => new Vector2(up.SpawnX, up.SpawnY),
+            Entry.Bottom when _room.Down is { } down => new Vector2(down.SpawnX, down.SpawnY - FloorClearance),
+            _ => new Vector2(_run.PlayerSpawnX, ground),
         };
-        var spawn = new Vector2(x, _room.GroundY - FloorClearance);
         _player.SetRespawnPoint(spawn);
         _player.MoveTo(spawn);
         _camera.ResetSmoothing();
@@ -329,26 +372,72 @@ public partial class RunStage : Node2D
 
     private void StepExits()
     {
-        if (!_open)
+        var (x, y) = (_player.GlobalPosition.X, _player.GlobalPosition.Y);
+        if (y > UiCommon.ScreenHeight + _run.VerticalExitMargin && (!_open || _room.Down is null || _map.Neighbor(_map.Current, 0, 1) < 0))
+        {
+            _player.MoveTo(_player.RespawnPoint); // fell where no room is: back to where she came in
+            return;
+        }
+
+        if (!_open || --_arrivalTicks > 0)
         {
             return;
         }
 
-        var x = _player.GlobalPosition.X;
         var side = x < _run.ExitZone ? -1 : x > _room.Width - _run.ExitZone ? 1 : 0;
         if (side != 0 && Mathf.Sign(_player.MoveInput) == side)
         {
-            GoTo(_map.Neighbor(_map.Current, side), side);
+            GoTo(_map.Neighbor(_map.Current, side), side, 0);
+        }
+        else if (y < -_run.VerticalExitMargin && _room.Up is { } up && Mathf.Abs(x - up.X) <= up.Width / 2)
+        {
+            GoTo(_map.Neighbor(_map.Current, 0, -1), 0, -1);
+        }
+        else if (y > UiCommon.ScreenHeight + _run.VerticalExitMargin && _room.Down is not null)
+        {
+            GoTo(_map.Neighbor(_map.Current, 0, 1), 0, 1);
         }
     }
 
-    private void ShowMinimap()
+    private void OpenMap()
+    {
+        var messages = GameServices.Messages;
+        var legend = new List<(string, Color)>
+        {
+            (messages.Get(MessageKeys.MapHere), new Color("f29bbd")),
+            (messages.Get(MessageKeys.MapShrine), ShrineColor),
+            (messages.Get(MessageKeys.MapTreasure), ChestColor),
+            (messages.Get(MessageKeys.MapLair), LairColor),
+            (messages.Get(MessageKeys.MapTrial), TrialColor),
+            (messages.Get(MessageKeys.MapBoss), BossColor),
+        };
+        _mapScreen.Open(_map, messages.Get(MessageKeys.RunArea), messages.Get(MessageKeys.MapHint), Accents(), legend, Warp);
+    }
+
+    /// <summary>Warp from an open room to a healed room already visited (Little Noah allows the same).</summary>
+    private bool Warp(int index)
+    {
+        if (!_open || !_map.State(index).Visited || !_map.State(index).Cleared)
+        {
+            return false;
+        }
+
+        GameLog.Info(MessageKeys.RunMoved, _map.Rooms[index]);
+        _fade.Modulate = Colors.White;
+        CreateTween().TweenProperty(_fade, "modulate:a", 0f, FadeSeconds);
+        EnterRoom(index, Entry.West);
+        return true;
+    }
+
+    private void ShowMinimap() => _minimap.Show(_map, GameServices.Messages.Get(MessageKeys.RunArea), Accents());
+
+    private Dictionary<int, Color> Accents()
     {
         var colors = new Dictionary<int, Color>();
         for (var i = 0; i < _map.Rooms.Count; i++)
         {
             var room = _run.Rooms.First(item => item.Id == _map.Rooms[i]);
-            Color? accent = room.Id == _run.BossRoom ? BossColor
+            Color? accent = room.Kind == RoomKinds.Boss ? BossColor
                 : room.Challenge?.Kind == ChallengeKinds.Lair ? LairColor
                 : room.Challenge is not null ? TrialColor
                 : room.ChestX is not null ? ChestColor
@@ -360,7 +449,7 @@ public partial class RunStage : Node2D
             }
         }
 
-        _minimap.Show(_map, GameServices.Messages.Get(MessageKeys.RunArea), colors);
+        return colors;
     }
 
     private void BuildProps()
@@ -431,10 +520,11 @@ public partial class RunStage : Node2D
             BonusChest => (_room.Challenge!.ChestX, pickups.ChestHeight),
             _ => (_room.ChestX ?? 0, pickups.ChestHeight),
         };
+        var feet = name == RoomChest ? _room.ChestY ?? _room.GroundY : _room.GroundY;
         var opened = State.Chests[name];
         var chest = new HittableProp();
         RoomNode.AddChild(chest);
-        chest.Setup(pickups.ChestSprite, height, new Vector2(x, _room.GroundY), opened ? 0 : 1);
+        chest.Setup(pickups.ChestSprite, height, new Vector2(x, feet), opened ? 0 : 1);
         if (opened)
         {
             chest.ChangeSprite(pickups.ChestOpenSprite);

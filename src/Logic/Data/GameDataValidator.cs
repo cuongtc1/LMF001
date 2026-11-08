@@ -76,9 +76,17 @@ public static class GameDataValidator
         foreach (var run in data.Runs.Values)
         {
             var rooms = run.Rooms.Select(room => room.Id).ToHashSet();
-            Require(rooms.Contains(run.EntranceRoom) && rooms.Contains(run.FirstRoom) && rooms.Contains(run.BossRoom), run.Id);
+            Require(rooms.Count == run.Rooms.Count, $"{run.Id}.rooms");
+            Require(run.Rooms.All(room => Stages.RoomKinds.All.Contains(room.Kind)), $"{run.Id}.rooms.kind");
+            Require(run.Rooms.All(room => room.HasFloor || (room.Down is not null && room.Waves.Count == 0)), $"{run.Id}.rooms.sky");
+            Require(run.Layouts.Count > 0, $"{run.Id}.layouts");
+            foreach (var layout in run.Layouts)
+            {
+                Require(layout.Cells.All(cell => Stages.RoomKinds.All.Contains(cell.Kind)), $"{layout.Id}.kind");
+                Require(layout.Cells.Count(cell => cell.Kind == Stages.RoomKinds.Entrance) == 1 && layout.Cells.Count(cell => cell.Kind == Stages.RoomKinds.Boss) == 1, layout.Id);
+                Require(layout.Cells.Select(cell => (cell.X, cell.Y)).Distinct().Count() == layout.Cells.Count, $"{layout.Id}.cells");
+            }
             data.AmuletSet(run.AmuletSet);
-            Require(run.RoomsPerRun >= 1 && run.RoomsPerRun <= run.Rooms.Count - 2, $"{run.Id}.rooms_per_run");
             foreach (var room in run.Rooms.Where(room => room.Challenge is not null))
             {
                 var challenge = room.Challenge!;

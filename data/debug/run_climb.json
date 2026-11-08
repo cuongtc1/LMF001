@@ -1,0 +1,92 @@
+{
+  "god_mode": true,
+  "room": "climb_a",
+  "cleared": true,
+  "skills": [
+    "jam_spread"
+  ],
+  "end_tick": 640,
+  "screenshots": [
+    60,
+    150,
+    330,
+    500,
+    620
+  ],
+  "steps": [
+    {
+      "tick": 30,
+      "action": "teleport",
+      "x": 1380,
+      "y": 245
+    },
+    {
+      "tick": 70,
+      "action": "jump",
+      "pressed": true
+    },
+    {
+      "tick": 90,
+      "action": "jump",
+      "pressed": false
+    },
+    {
+      "tick": 200,
+      "action": "move_right",
+      "pressed": true
+    },
+    {
+      "tick": 240,
+      "action": "move_right",
+      "pressed": false
+    },
+    {
+      "tick": 420,
+      "action": "map",
+      "pressed": true,
+      "global": true
+    },
+    {
+      "tick": 424,
+      "action": "map",
+      "pressed": false,
+      "global": true
+    },
+    {
+      "tick": 460,
+      "action": "move_left",
+      "pressed": true,
+      "global": true
+    },
+    {
+      "tick": 464,
+      "action": "move_left",
+      "pressed": false,
+      "global": true
+    },
+    {
+      "tick": 480,
+      "action": "move_left",
+      "pressed": true,
+      "global": true
+    },
+    {
+      "tick": 484,
+      "action": "move_left",
+      "pressed": false,
+      "global": true
+    },
+    {
+      "tick": 520,
+      "action": "attack_light",
+      "pressed": true,
+      "global": true
+    },
+    {
+      "tick": 524,
+      "action": "attack_light",
+      "pressed": false,
+      "global": true
+    }
+  ]
+}

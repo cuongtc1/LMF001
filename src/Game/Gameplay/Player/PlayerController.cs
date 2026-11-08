@@ -128,6 +128,8 @@ public partial class PlayerController : CharacterBody2D, IDamageable
     /// <summary>Where Lumi comes back after she falls.</summary>
     public void SetRespawnPoint(Vector2 point) => _spawn = point;
 
+    public Vector2 RespawnPoint => _spawn;
+
     public void MoveTo(Vector2 position)
     {
         GlobalPosition = position;

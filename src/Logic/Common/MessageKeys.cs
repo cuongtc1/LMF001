@@ -49,6 +49,13 @@ public static class MessageKeys
     public const string RunShrinePrompt = "run.shrine_prompt";
     public const string RunRoomHealed = "run.room_healed";
     public const string RunMoved = "run.moved";
+    public const string MapHere = "map.here";
+    public const string MapShrine = "map.shrine";
+    public const string MapTreasure = "map.treasure";
+    public const string MapLair = "map.lair";
+    public const string MapTrial = "map.trial";
+    public const string MapBoss = "map.boss";
+    public const string MapHint = "map.hint";
     public const string RunStarted = "run.started";
     public const string RunCleared = "run.cleared";
     public const string RewardPicked = "run.reward_picked";
@@ -79,7 +86,7 @@ public static class MessageKeys
     [
         DataFileMissing, DataFileInvalid, DataUnknownId, DataDuplicateId, DataBadValue, DataLoaded, DataReloaded,
         GameBooted, StageLoaded, AssetMissing, CombatPlayerHit, CombatMonsterHit, CombatMonsterHealed,
-        AutoplayStarted, AutoplayFinished, DebugTitle, DebugDifficulty, DebugTier, DebugGodMode, DebugAirJump, DebugHeal, DebugArena, CombatStoic, CombatDizzy, CombatPhaseTwo, CombatGuardBlock, CombatGuardPerfect, HudBoss, RunArea, RunShrinePrompt, RunRoomHealed, RunMoved, RunStarted, RunCleared, RewardPicked, DebugPrototype, RewardSkill, RewardAmulet, HudSkillSlot, HudSkillReady, HudSkillCooldown, HudSkillEmpty, HudWave, HudClear, ArenaWave, ArenaCleared,
+        AutoplayStarted, AutoplayFinished, DebugTitle, DebugDifficulty, DebugTier, DebugGodMode, DebugAirJump, DebugHeal, DebugArena, CombatStoic, CombatDizzy, CombatPhaseTwo, CombatGuardBlock, CombatGuardPerfect, HudBoss, RunArea, RunShrinePrompt, RunRoomHealed, RunMoved, MapHere, MapShrine, MapTreasure, MapLair, MapTrial, MapBoss, MapHint, RunStarted, RunCleared, RewardPicked, DebugPrototype, RewardSkill, RewardAmulet, HudSkillSlot, HudSkillReady, HudSkillCooldown, HudSkillEmpty, HudWave, HudClear, ArenaWave, ArenaCleared,
         DebugRespawn, DebugReload, DebugHelp, HudCombo,
         ResultDefeatTitle, ResultDefeatLine, ResultClearTitle, ResultClearLine, ResultTime, ResultRooms, ResultHealed, ResultCombo, ResultLoadout, ResultRetry, ResultAgain, RunDefeated,
         TrialOffer, TrialStarted, TrialLair, TrialNoHit, TrialWon, TrialBonusLost,

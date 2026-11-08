@@ -273,7 +273,12 @@ public sealed record StageDef(
     IReadOnlyList<SpawnDef> Spawns,
     ArenaDef? Arena);
 
+/// <param name="Kind">One of <c>RoomKinds</c>; a layout cell asks for a kind.</param>
 /// <param name="RewardOnClear">Fight rooms offer a reward when healed; a treasure room gives it from its chest.</param>
+/// <param name="Up">An opening in the top edge: Lumi climbs out, or falls in from the room above.</param>
+/// <param name="Down">An open bottom (sky rooms): Lumi falls out, or arrives from the room below.</param>
+/// <param name="ChestY">Feet of the chest when it stands on a ledge; the ground otherwise.</param>
+/// <param name="HasFloor">Sky rooms have no ground, only ledges.</param>
 public sealed record RoomDef(
     string Id,
     float Width,
@@ -285,7 +290,25 @@ public sealed record RoomDef(
     float? ChestX = null,
     bool RewardOnClear = true,
     ChallengeDef? Challenge = null,
-    float? ShrineX = null);
+    float? ShrineX = null,
+    string Kind = "fight",
+    VerticalExitDef? Up = null,
+    VerticalExitDef? Down = null,
+    float? ChestY = null,
+    bool HasFloor = true);
+
+/// <summary>A gap in the top or bottom edge of a room.</summary>
+/// <param name="X">Center of the gap.</param>
+/// <param name="Width">Lumi must pass through this span.</param>
+/// <param name="SpawnX">Where Lumi appears when she comes in through this gap.</param>
+/// <param name="SpawnY">Feet height on arrival: above the top edge to fall in, or on a ledge above an open bottom.</param>
+public sealed record VerticalExitDef(float X, float Width, float SpawnX, float SpawnY);
+
+/// <summary>A hand-made room arrangement; rooms of each kind are drawn at random into its cells.</summary>
+public sealed record LayoutDef(string Id, IReadOnlyList<LayoutCellDef> Cells);
+
+/// <param name="Y">Grid row; -1 is above the main row.</param>
+public sealed record LayoutCellDef(int X, int Y, string Kind);
 
 /// <summary>A room trial in the style of Little Noah's Monster Lairs and no-hit rooms.</summary>
 /// <param name="Kind">One of <c>ChallengeKinds</c>.</param>
@@ -314,29 +337,25 @@ public sealed record PickupDef(
     float LeverHeight,
     float BigChestHeight);
 
-/// <param name="RoomsPerRun">Rooms from the first fight room up to the boss, not counting the entrance.</param>
-/// <param name="EntranceRoom">Stage 0: the skill shrine, no monsters.</param>
 /// <param name="ExitZone">Standing this close to an open edge walks Lumi into the next room.</param>
 /// <param name="EdgeSpawnInset">Where Lumi appears in the next room, measured from the edge she came through.</param>
 public sealed record RunDef(
     string Id,
     int Tier,
-    int RoomsPerRun,
     int WaveDelayTicks,
     float PlayerSpawnX,
-    string EntranceRoom,
-    string FirstRoom,
-    string BossRoom,
     string GateSprite,
     float GateHeight,
     string ShrineSprite,
     float ShrineHeight,
     float ExitZone,
     float EdgeSpawnInset,
+    float VerticalExitMargin,
     PickupDef Pickups,
     string AmuletSet,
     int RewardChoices,
-    IReadOnlyList<RoomDef> Rooms);
+    IReadOnlyList<RoomDef> Rooms,
+    IReadOnlyList<LayoutDef> Layouts);
 
 public sealed record InputActionDef(string Action, IReadOnlyList<string> Keys, IReadOnlyList<int> PadButtons, IReadOnlyList<int> PadAxes);
 

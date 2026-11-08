@@ -22,6 +22,9 @@ public partial class AutoplayRunner : Node, IPlayerInput
     /// <summary>Room id a run script starts in (the boss den, say), or null for the first room.</summary>
     public string? StartRoom { get; private set; }
 
+    /// <summary>The start room counts as already healed, to test moving around it.</summary>
+    public bool StartCleared { get; private set; }
+
     public static string? RequestedScript() =>
         OS.GetCmdlineUserArgs().FirstOrDefault(arg => arg.StartsWith(GameConstants.AutoplayArgument, System.StringComparison.Ordinal))
             ?[GameConstants.AutoplayArgument.Length..];
@@ -44,6 +47,8 @@ public partial class AutoplayRunner : Node, IPlayerInput
         {
             StartRoom = room.GetString();
         }
+
+        StartCleared = document.RootElement.TryGetProperty("cleared", out var cleared) && cleared.GetBoolean();
 
 
         if (document.RootElement.TryGetProperty("skills", out var skills))
@@ -68,7 +73,9 @@ public partial class AutoplayRunner : Node, IPlayerInput
 
         foreach (var step in document.RootElement.GetProperty("steps").EnumerateArray())
         {
-            _steps.Add(new Step(step.GetProperty("tick").GetInt32(), step.GetProperty("action").GetString()!, step.GetProperty("pressed").GetBoolean()));
+            var global = step.TryGetProperty("global", out var flag) && flag.GetBoolean();
+            var at = step.TryGetProperty("x", out var x) ? new Vector2(x.GetSingle(), step.GetProperty("y").GetSingle()) : (Vector2?)null;
+            _steps.Add(new Step(step.GetProperty("tick").GetInt32(), step.GetProperty("action").GetString()!, step.TryGetProperty("pressed", out var pressed) && pressed.GetBoolean(), global, at));
         }
 
         GameLog.Info(MessageKeys.AutoplayStarted, path);
@@ -79,7 +86,23 @@ public partial class AutoplayRunner : Node, IPlayerInput
         _pressedNow.Clear();
         foreach (var step in _steps.Where(item => item.Tick == _tick))
         {
-            if (step.Pressed)
+            if (step.Action == TeleportAction && step.At is { } at)
+            {
+                _player.MoveTo(at);
+            }
+            else if (step.Global)
+            {
+                // menus such as the map read Godot's Input, not the player's input source
+                if (step.Pressed)
+                {
+                    Input.ActionPress(step.Action);
+                }
+                else
+                {
+                    Input.ActionRelease(step.Action);
+                }
+            }
+            else if (step.Pressed)
             {
                 _held.Add(step.Action);
                 _pressedNow.Add(step.Action);
@@ -123,5 +146,9 @@ public partial class AutoplayRunner : Node, IPlayerInput
         _held.Contains(InputActions.Guard),
         System.Array.FindIndex(InputActions.Skills, _pressedNow.Contains));
 
-    private readonly record struct Step(int Tick, string Action, bool Pressed);
+    /// <param name="Global">Pressed on Godot's Input for menus instead of fed to Lumi.</param>
+    private readonly record struct Step(int Tick, string Action, bool Pressed, bool Global, Vector2? At);
+
+    /// <summary>A step that puts Lumi at its x and y, for tests of hard-to-script platforming.</summary>
+    private const string TeleportAction = "teleport";
 }

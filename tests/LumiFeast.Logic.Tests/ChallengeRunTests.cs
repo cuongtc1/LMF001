@@ -57,7 +57,7 @@ public class ChallengeRunTests
         Assert.Equal(2, challenges.Count);
         for (ulong seed = 0; seed < 200; seed++)
         {
-            Assert.True(RunPlan.Build(run, seed).Count(challenges.Contains) <= 1);
+            Assert.True(StageMap.Generate(run, seed).Rooms.Count(challenges.Contains) <= 1);
         }
     }
 }

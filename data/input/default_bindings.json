@@ -135,6 +135,17 @@
       ],
       "pad_buttons": [],
       "pad_axes": []
+    },
+    {
+      "action": "map",
+      "keys": [
+        "M",
+        "Tab"
+      ],
+      "pad_buttons": [
+        4
+      ],
+      "pad_axes": []
     }
   ]
 }
