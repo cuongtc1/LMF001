@@ -15,6 +15,8 @@ public sealed class GameData
 
     public required VfxSetDef Vfx { get; init; }
 
+    public required SoundSetDef Sounds { get; init; }
+
     public required IReadOnlyDictionary<string, CharacterDef> Characters { get; init; }
 
     public required IReadOnlyDictionary<string, AttackSetDef> AttackSets { get; init; }

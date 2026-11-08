@@ -9,6 +9,7 @@ public static class DataPaths
     public const string GameFeel = "data/balance/game_feel.json";
     public const string Input = "data/input/default_bindings.json";
     public const string CommonVfx = "data/vfx/common.json";
+    public const string Sounds = "data/audio/sfx.json";
     public const string Characters = "data/characters";
     public const string Attacks = "data/attacks";
     public const string Monsters = "data/monsters";

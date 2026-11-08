@@ -19,6 +19,14 @@ public static class GameDataValidator
         Require(data.Scaling.Speed.AttackWeight >= 0 && data.Scaling.Speed.MoveWeight >= 0, "scaling.speed");
         Require(data.Scaling.Speed.MaxSpeed >= 1, "scaling.speed.max_speed");
 
+        var sounds = data.Sounds.Sounds.Select(sound => sound.Id).ToList();
+        Require(sounds.Count == sounds.Distinct().Count(), "sfx.ids");
+        Require(data.Sounds.Sounds.All(sound => sound.Files.Count > 0 && sound.PitchSpread is >= 0 and < 0.5f), "sfx.files");
+        foreach (var id in SoundIds.All)
+        {
+            Require(sounds.Contains(id), $"sfx.{id}");
+        }
+
         foreach (var character in data.Characters.Values)
         {
             Require(character.Stats.MaxHp > 0 && character.Stats.Attack > 0 && character.Stats.Speed > 0, character.Id);

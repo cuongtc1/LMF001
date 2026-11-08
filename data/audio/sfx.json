@@ -1,0 +1,33 @@
+{
+  "folder": "assets/audio/sfx",
+  "sounds": [
+    { "id": "swing_light", "files": ["own/whoosh_light.ogg", "own/whoosh_light2.ogg"], "volume_db": -6, "pitch_spread": 0.06 },
+    { "id": "swing_heavy", "files": ["own/whoosh_heavy.ogg"], "volume_db": -4, "pitch_spread": 0.04 },
+    { "id": "hit_light", "files": ["kenney/chop.ogg", "kenney/knifeSlice.ogg", "kenney/knifeSlice2.ogg"], "volume_db": -2, "pitch_spread": 0.06 },
+    { "id": "hit_heavy", "files": ["kenney/metalPot1.ogg", "kenney/metalPot2.ogg", "kenney/metalPot3.ogg"], "volume_db": -3, "pitch_spread": 0.05 },
+    { "id": "jump", "files": ["kenney/cloth1.ogg"], "volume_db": -8, "pitch_spread": 0.05 },
+    { "id": "land", "files": ["kenney/footstep00.ogg", "kenney/footstep03.ogg"], "volume_db": -8, "pitch_spread": 0.05 },
+    { "id": "dash", "files": ["kenney/cloth3.ogg"], "volume_db": -6, "pitch_spread": 0.05 },
+    { "id": "guard_block", "files": ["kenney/metalLatch.ogg"], "volume_db": -3, "pitch_spread": 0.05 },
+    { "id": "guard_perfect", "files": ["kenney/glass_001.ogg"], "volume_db": -2 },
+    { "id": "hurt", "files": ["kenney/error_004.ogg"], "volume_db": -5 },
+    { "id": "skill", "files": ["kenney/maximize_003.ogg"], "volume_db": -6 },
+    { "id": "monster_attack", "files": ["kenney/creak1.ogg"], "volume_db": -10, "pitch_spread": 0.1 },
+    { "id": "monster_healed", "files": ["kenney/maximize_006.ogg"], "volume_db": -4, "pitch_spread": 0.04 },
+    { "id": "crate_hit", "files": ["kenney/bookPlace1.ogg"], "volume_db": -4, "pitch_spread": 0.06 },
+    { "id": "crate_break", "files": ["kenney/doorClose_2.ogg"], "volume_db": -4, "pitch_spread": 0.05 },
+    { "id": "chest_open", "files": ["kenney/doorOpen_1.ogg"], "volume_db": -3 },
+    { "id": "token_pickup", "files": ["kenney/pluck_001.ogg"], "volume_db": -4, "pitch_spread": 0.05 },
+    { "id": "lever", "files": ["kenney/metalClick.ogg"], "volume_db": -2 },
+    { "id": "gate_shut", "files": ["kenney/doorClose_4.ogg"], "volume_db": -2 },
+    { "id": "gate_open", "files": ["kenney/doorOpen_2.ogg"], "volume_db": -3 },
+    { "id": "shrine", "files": ["kenney/glass_003.ogg"], "volume_db": -3 },
+    { "id": "ui_move", "files": ["kenney/select_001.ogg"], "volume_db": -8 },
+    { "id": "ui_confirm", "files": ["kenney/confirmation_001.ogg"], "volume_db": -5 },
+    { "id": "ui_back", "files": ["kenney/back_001.ogg"], "volume_db": -6 },
+    { "id": "map_open", "files": ["kenney/bookOpen.ogg"], "volume_db": -5 },
+    { "id": "room_healed", "files": ["kenney/jingles_PIZZA03.ogg"], "volume_db": -5 },
+    { "id": "run_clear", "files": ["kenney/jingles_PIZZA00.ogg"], "volume_db": -3 },
+    { "id": "run_defeat", "files": ["kenney/jingles_SAX03.ogg"], "volume_db": -4 }
+  ]
+}

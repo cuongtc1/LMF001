@@ -1,0 +1,26 @@
+{
+  "god_mode": true,
+  "room": "hedge",
+  "skills": [
+    "jam_spread"
+  ],
+  "end_tick": 520,
+  "screenshots": [
+    120,
+    160,
+    190,
+    210,
+    230,
+    250,
+    270,
+    300
+  ],
+  "steps": [
+    {
+      "tick": 30,
+      "action": "teleport",
+      "x": 1250,
+      "y": 700
+    }
+  ]
+}

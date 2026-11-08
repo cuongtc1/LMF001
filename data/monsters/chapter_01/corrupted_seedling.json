@@ -4,20 +4,20 @@
     "max_hp": 50,
     "attack": 30,
     "defense": 0,
-    "speed": 120
+    "speed": 220
   },
   "ai": {
-    "behavior": "chaser",
-    "aggro_range": 1100,
-    "attack_range": 460,
-    "windup_ticks": 34,
-    "active_ticks": 70,
-    "recovery_ticks": 40,
-    "cooldown_ticks": 70,
-    "lunge_speed": 640,
+    "behavior": "flyer",
+    "aggro_range": 1200,
+    "attack_range": 260,
+    "windup_ticks": 30,
+    "active_ticks": 26,
+    "recovery_ticks": 34,
+    "cooldown_ticks": 80,
+    "lunge_speed": 700,
     "hop_velocity": 0,
     "hop_interval_ticks": 0,
-    "hover_height": 0,
+    "hover_height": 190,
     "super_armor": false,
     "stun_scale": 1.0,
     "stoic_threshold": 0,
@@ -30,16 +30,16 @@
     "stagger_break_ticks": 0,
     "stagger_damage_scale": 1,
     "front_guard_scale": 1.0,
-    "bounces_off_walls": true,
-    "climbs": true
+    "bounces_off_walls": false,
+    "climbs": false
   },
   "attack": {
     "damage_multiplier": 1.0,
     "hitbox": {
-      "x": -20,
-      "y": -90,
-      "width": 120,
-      "height": 90
+      "x": -40,
+      "y": -110,
+      "width": 160,
+      "height": 120
     },
     "knockback_speed": 420,
     "hitstop_ticks": 5,

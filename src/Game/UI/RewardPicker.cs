@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Godot;
+using LumiFeast.Logic.Common;
 using LumiFeast.Game.Common;
 
 namespace LumiFeast.Game.UI;
@@ -76,15 +77,18 @@ public partial class RewardPicker : CanvasLayer
         if (Input.IsActionJustPressed(InputActions.MoveLeft))
         {
             _selected = (_selected + _cards.Count - 1) % _cards.Count;
+            AudioService.Play(SoundIds.UiMove);
             Refresh();
         }
         else if (Input.IsActionJustPressed(InputActions.MoveRight))
         {
             _selected = (_selected + 1) % _cards.Count;
+            AudioService.Play(SoundIds.UiMove);
             Refresh();
         }
         else if (Input.IsActionJustPressed(InputActions.AttackLight))
         {
+            AudioService.Play(SoundIds.UiConfirm);
             Choose(_selected);
         }
     }

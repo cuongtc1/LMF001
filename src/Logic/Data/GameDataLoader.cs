@@ -25,6 +25,7 @@ public sealed class GameDataLoader(IDataSource source)
             Feel = Read<GameFeelDef>(DataPaths.GameFeel),
             Input = Read<InputSetDef>(DataPaths.Input),
             Vfx = Read<VfxSetDef>(DataPaths.CommonVfx),
+            Sounds = Read<SoundSetDef>(DataPaths.Sounds),
             Characters = ReadFolder<CharacterDef>(DataPaths.Characters, def => def.Id),
             AttackSets = ReadFolder<AttackSetDef>(DataPaths.Attacks, def => def.Id),
             Monsters = ReadFolder<MonsterDef>(DataPaths.Monsters, def => def.Id),

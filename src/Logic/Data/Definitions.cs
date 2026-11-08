@@ -68,7 +68,8 @@ public sealed record SpineViewDef(
 /// <param name="DamageScale">Share of damage taken through a guard.</param>
 /// <param name="PerfectTicks">A hit this soon after raising the guard is a perfect guard.</param>
 /// <param name="CounterTicks">Time to press Z after a perfect guard.</param>
-public sealed record GuardDef(float DamageScale, int PerfectTicks, int CounterTicks, float PushSpeed, int PerfectHitstopTicks, int HitTicks);
+/// <param name="AutoCounter">Every block makes Lumi counter by herself, no Z press needed.</param>
+public sealed record GuardDef(float DamageScale, int PerfectTicks, int CounterTicks, float PushSpeed, int PerfectHitstopTicks, int HitTicks, bool AutoCounter = false);
 
 public sealed record BodyDef(float Width, float Height);
 
@@ -253,6 +254,13 @@ public sealed record GameFeelDef(
     int PlayerGetupTicks,
     MonsterPoseDef MonsterPose,
     MonsterClimbDef MonsterClimb);
+
+/// <summary>One sound: a random file from <paramref name="Files"/> plays each time, with a small random pitch change.</summary>
+/// <param name="VolumeDb">Loudness change; 0 keeps the file as it is.</param>
+/// <param name="PitchSpread">0.05 plays between 95% and 105% pitch, so repeated sounds do not tire the ear.</param>
+public sealed record SoundDef(string Id, IReadOnlyList<string> Files, float VolumeDb = 0, float PitchSpread = 0);
+
+public sealed record SoundSetDef(string Folder, IReadOnlyList<SoundDef> Sounds);
 
 public sealed record VfxDef(string Id, int Frames, int TicksPerFrame, float Scale);
 

@@ -201,7 +201,13 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         var deltaY = _player.GlobalPosition.Y - GlobalPosition.Y;
         // bosses and flyers have their own reach (thrown pots, hovering); ground monsters do not swing at the air
         var canReach = _flying || _def.Ai.Moves is not null || Mathf.Abs(deltaY) <= _feel.MonsterClimb.ReachHeight;
+        var wasWindup = _brain.State == MonsterState.Windup;
         _brain.Step(deltaX, onFloor, GlobalPosition.Y - _hoverY, canReach);
+        if (!wasWindup && _brain.State == MonsterState.Windup && !IsHidden)
+        {
+            AudioService.Play(SoundIds.MonsterAttack);
+        }
+
         if (_brain.WantsHop)
         {
             _velocityY = -_def.Ai.HopVelocity;
@@ -376,6 +382,7 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
     private void BeginHeal()
     {
         _healing = true;
+        AudioService.Play(SoundIds.MonsterHealed);
         _hurtbox.SetDeferred(Area2D.PropertyName.Monitorable, false);
         _sprite.Texture = _healed;
         _sprite.Modulate = Colors.White;

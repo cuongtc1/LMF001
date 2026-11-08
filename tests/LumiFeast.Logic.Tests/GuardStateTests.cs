@@ -53,4 +53,27 @@ public class GuardStateTests
 
         Assert.False(guard.CounterReady);
     }
+
+    [Fact]
+    public void AutoCounterFollowsEveryBlockOnce()
+    {
+        var guard = new GuardState(Def with { AutoCounter = true });
+        for (var i = 0; i < 10; i++)
+        {
+            guard.Step(true);
+        }
+
+        Assert.Equal(GuardResult.Blocked, guard.Resolve(-1, 1));
+        Assert.True(guard.CounterReady);
+        Assert.True(guard.TakeAutoCounter());
+        Assert.False(guard.TakeAutoCounter());
+    }
+
+    [Fact]
+    public void WithoutAutoCounterNothingStartsByItself()
+    {
+        var guard = Held(2);
+        guard.Resolve(-1, 1);
+        Assert.False(guard.TakeAutoCounter());
+    }
 }

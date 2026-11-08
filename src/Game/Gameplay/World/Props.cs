@@ -1,5 +1,6 @@
 using System;
 using Godot;
+using LumiFeast.Logic.Common;
 using LumiFeast.Game.Common;
 using LumiFeast.Game.Gameplay.Combat;
 using LumiFeast.Game.Gameplay.Player;
@@ -58,6 +59,7 @@ public partial class HittableProp : Node2D, IDamageable
 
         _hitsLeft--;
         _flash = FlashTicks;
+        AudioService.Play(SoundIds.CrateHit);
         if (_hitsLeft == 0)
         {
             _hurtbox.SetDeferred(Area2D.PropertyName.Monitorable, false);
@@ -111,11 +113,13 @@ public partial class Pickup : Node2D
         if (_hp && PickupRules.Helps(health.Current, health.Max))
         {
             health.Heal(Mathf.RoundToInt(health.Max * _def.HpHeal * _player.Modifiers.Scale(AmuletEffects.TokenHeal)));
+            AudioService.Play(SoundIds.TokenPickup);
             QueueFree();
         }
         else if (!_hp && PickupRules.Helps(_player.Mp, _player.MaxMp))
         {
             _player.GainMp(_def.MpGain);
+            AudioService.Play(SoundIds.TokenPickup);
             QueueFree();
         }
     }

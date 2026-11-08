@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
+using LumiFeast.Logic.Common;
 using LumiFeast.Game.Common;
 using LumiFeast.Logic.Stages;
 
@@ -53,6 +54,7 @@ public partial class MapScreen : CanvasLayer
         _canvas.Legend = legend;
         _openedFrame = Engine.GetProcessFrames();
         Visible = true;
+        AudioService.Play(SoundIds.MapOpen);
         GetTree().Paused = true;
         _canvas.QueueRedraw();
     }
@@ -72,12 +74,14 @@ public partial class MapScreen : CanvasLayer
 
         if (Input.IsActionJustPressed(InputActions.Map) || Input.IsActionJustPressed(InputActions.Guard))
         {
+            AudioService.Play(SoundIds.UiBack);
             Close();
             return;
         }
 
         if (Input.IsActionJustPressed(InputActions.AttackLight) && _cursor != _map.Current && _warp(_cursor))
         {
+            AudioService.Play(SoundIds.UiConfirm);
             Close();
             return;
         }
@@ -90,6 +94,7 @@ public partial class MapScreen : CanvasLayer
         if (step != (0, 0))
         {
             _cursor = Nearest(step);
+            AudioService.Play(SoundIds.UiMove);
             _canvas.QueueRedraw();
         }
     }

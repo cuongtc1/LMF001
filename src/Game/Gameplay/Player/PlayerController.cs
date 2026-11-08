@@ -169,6 +169,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         var damage = Mathf.Max(1, Mathf.RoundToInt(DamageCalculator.Compute(hit.Attack, hit.Multiplier, _def.Stats.Defense) * Modifiers.Scale(AmuletEffects.DamageTaken)));
         Health.Damage(damage);
         Hurt?.Invoke();
+        AudioService.Play(SoundIds.Hurt);
         GameLog.Info(MessageKeys.CombatPlayerHit, damage, Health.Current, Health.Max);
         _gameFeel.ShowDamage(GlobalPosition + new Vector2(0, -_def.Body.Height), damage, Colors.OrangeRed);
         _combo.Cancel();
@@ -201,6 +202,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         if (result == GuardResult.Perfect)
         {
             GameLog.Info(MessageKeys.CombatGuardPerfect);
+            AudioService.Play(SoundIds.GuardPerfect);
             _gameFeel.PlayEffect(_feel.GuardVfx, GlobalPosition + new Vector2(_motor.Facing * _def.Body.Width, -_def.Body.Height / 2), _motor.Facing);
             _gameFeel.Hitstop(guard.PerfectHitstopTicks);
             return;
@@ -209,6 +211,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         var damage = Mathf.Max(1, Mathf.RoundToInt(DamageCalculator.Compute(hit.Attack, hit.Multiplier, _def.Stats.Defense) * guard.DamageScale));
         Health.Damage(damage);
         GameLog.Info(MessageKeys.CombatGuardBlock, damage);
+        AudioService.Play(SoundIds.GuardBlock);
         _gameFeel.ShowDamage(GlobalPosition + new Vector2(0, -_def.Body.Height), damage, Colors.LightGray);
     }
 
@@ -229,6 +232,10 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         if ((input.AttackPressed || input.HeavyPressed) && _stunTicks == 0 && _landingLagTicks == 0)
         {
             _combo.PressAttack(input.HeavyPressed);
+        }
+        else if (_guardHitTicks == 0 && _stunTicks == 0 && _guard.TakeAutoCounter())
+        {
+            _combo.PressAttack(false);
         }
 
         TryStartSkill(input.SkillPressed);
@@ -260,6 +267,8 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         }
 
         _motor.AirJumpUnlocked = GameServices.AirJumpUnlocked;
+        var wasDashing = _motor.IsDashing;
+        var wasRising = _motor.VelocityY < 0;
         _motor.Step(new MotorInput(
             input.MoveX,
             input.JumpPressed,
@@ -272,8 +281,13 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             input.DownHeld,
             attacking is not null && _combo.Phase == AttackPhase.Active ? attacking.PlungeSpeed : 0));
 
+        PlayMoveSounds(wasDashing, wasRising, input.JumpPressed);
         Velocity = new Vector2(_motor.VelocityX, _motor.VelocityY);
         MoveAndSlide();
+        if (!onFloor && IsOnFloor())
+        {
+            AudioService.Play(SoundIds.Land);
+        }
         _onPlatform = StandsOnPlatform();
         PushOutOfBodies();
         if (_combo.Current is { EndsOnLanding: true } landed && IsOnFloor())
@@ -286,6 +300,18 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         StepTimers();
         StepAttack();
         ShowView(attacking);
+    }
+
+    private void PlayMoveSounds(bool wasDashing, bool wasRising, bool jumpPressed)
+    {
+        if (!wasDashing && _motor.IsDashing)
+        {
+            AudioService.Play(SoundIds.Dash);
+        }
+        else if (jumpPressed && !wasRising && _motor.VelocityY < 0)
+        {
+            AudioService.Play(SoundIds.Jump);
+        }
     }
 
     private void TryStartSkill(int slot)
@@ -301,6 +327,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         }
 
         Mp -= skill.MpCost;
+        AudioService.Play(SoundIds.Skill);
         _skillInvulnerableTicks = skill.InvulnerableTicks;
         _combo.StartSkill(skill.Attack);
         _motor.EndRun();
@@ -327,6 +354,8 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         {
             _gameFeel.PlayEffect(_feel.GuardVfx, node.GlobalPosition + new Vector2(0, -70), _motor.Facing);
         }
+
+        AudioService.Play(SoundIds.HitLight);
 
         TotalHits++;
         ComboHits++;
@@ -402,6 +431,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             _vfxSwingId = _combo.SwingId;
             var position = GlobalPosition + new Vector2(starting.VfxX * _motor.Facing, starting.VfxY);
             _gameFeel.PlayEffect(starting.Vfx, position, _motor.Facing);
+            AudioService.Play(starting.GuardBreak ? SoundIds.SwingHeavy : SoundIds.SwingLight);
             if (starting.Projectile is { } shot)
             {
                 LaunchProjectile(shot, starting);
@@ -438,6 +468,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
 
         if (landed.Count > 0)
         {
+            AudioService.Play(attack.GuardBreak ? SoundIds.HitHeavy : SoundIds.HitLight);
             _gameFeel.Hitstop(attack.HitstopTicks);
             _gameFeel.Shake(attack.ShakePixels);
         }

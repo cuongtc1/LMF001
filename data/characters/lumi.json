@@ -46,7 +46,8 @@
     "counter_ticks": 36,
     "push_speed": 260,
     "perfect_hitstop_ticks": 8,
-    "hit_ticks": 14
+    "hit_ticks": 14,
+    "auto_counter": true
   },
   "spine_view": {
     "skeleton": "assets/characters/lumi/spine/lumi_rig_v3.skel",

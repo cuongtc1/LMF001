@@ -497,13 +497,17 @@ public partial class RunStage : Node2D
                 shrine.ChangeSprite(_run.ShrineUsedSprite);
             }
 
-            shrine.Broken += _ => OfferReward(RewardKind.Skills, () =>
+            shrine.Broken += _ =>
             {
-                shrine.ChangeSprite(_run.ShrineUsedSprite);
-                State.Cleared = true;
-                SetOpen(true);
-                ShowMinimap();
-            });
+                AudioService.Play(SoundIds.Shrine);
+                OfferReward(RewardKind.Skills, () =>
+                {
+                    shrine.ChangeSprite(_run.ShrineUsedSprite);
+                    State.Cleared = true;
+                    SetOpen(true);
+                    ShowMinimap();
+                });
+            };
         }
 
         if (_room.ChestX is not null)
@@ -539,6 +543,7 @@ public partial class RunStage : Node2D
         chest.Broken += prop =>
         {
             State.Chests[name] = true;
+            AudioService.Play(SoundIds.ChestOpen);
             prop.ChangeSprite(pickups.ChestOpenSprite);
             OfferReward(RewardKind.Amulets);
         };
@@ -554,6 +559,7 @@ public partial class RunStage : Node2D
     {
         var token = new Pickup();
         RoomNode.AddChild(token);
+        AudioService.Play(SoundIds.CrateBreak);
         token.Setup(_player, _run.Pickups, _random.NextDouble() < _run.Pickups.HpChance, crate.GlobalPosition + new Vector2(0, -TokenLift));
         crate.ChangeSprite(_run.Pickups.CrateBrokenSprite);
         crate.FadeAway(BrokenCrateSeconds);
@@ -563,10 +569,13 @@ public partial class RunStage : Node2D
     private void StartChallenge(HittableProp lever)
     {
         lever.ChangeSprite(_run.Pickups.LeverOnSprite);
+        AudioService.Play(SoundIds.Lever);
         if (_challenge?.Start() != true)
         {
             return;
         }
+
+        AudioService.Play(SoundIds.GateShut);
 
         GameLog.Info(MessageKeys.TrialStarted, _challenge.Def.Kind);
         SetOpen(false);
@@ -633,6 +642,11 @@ public partial class RunStage : Node2D
     {
         State.Cleared = true;
         _stats.RoomCleared();
+        if (!_open)
+        {
+            AudioService.Play(SoundIds.GateOpen);
+        }
+
         SetOpen(true);
         ShowMinimap();
     }
@@ -651,6 +665,7 @@ public partial class RunStage : Node2D
         }
 
         _hud.ShowStatus(GameServices.Messages.Get(MessageKeys.RunRoomHealed));
+        AudioService.Play(SoundIds.RoomHealed);
         if (_room.RewardOnClear && !State.RewardTaken)
         {
             State.RewardTaken = true;
@@ -662,6 +677,7 @@ public partial class RunStage : Node2D
     private void ShowResult(bool cleared)
     {
         var messages = GameServices.Messages;
+        AudioService.Play(cleared ? SoundIds.RunClear : SoundIds.RunDefeat);
         if (!cleared)
         {
             GameLog.Info(MessageKeys.RunDefeated, _map.Current + 1);
