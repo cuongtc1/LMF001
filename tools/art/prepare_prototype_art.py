@@ -58,6 +58,18 @@ def cut_white(a):
     return np.dstack([a, (np.clip(alpha, 0, 1) * 255).astype(np.uint8)])
 
 
+def clear_holes(a, min_area=1500):
+    """cut_white keeps white enclosed by the drawing (inside an arch). Large enclosed white areas are background too;
+    small ones (eye shines, sparkles, highlights) stay."""
+    white = ((a[..., :3].astype(np.int32) >= WHITE_CUTOFF).all(2) & (a[..., 3] > 0)).astype(np.uint8)
+    n, labels, stats, _ = cv2.connectedComponentsWithStats(white)
+    hole = np.isin(labels, [i for i in range(1, n) if stats[i, cv2.CC_STAT_AREA] >= min_area])
+    alpha = a[..., 3].astype(np.float32) / 255 * (1 - cv2.GaussianBlur(hole.astype(np.float32), (0, 0), 0.7))
+    out = a.copy()
+    out[..., 3] = (np.clip(alpha, 0, 1) * 255).astype(np.uint8)
+    return out
+
+
 def crop_alpha(a):
     ys, xs = np.where(a[..., 3] > 8)
     return a[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
@@ -157,8 +169,8 @@ def sky_and_gates():
     save(gate, PROPS + 'gate.png')
     save(gate_off, PROPS + 'gate_off.png')
     shrine, shrine_used = row_items(V + 'P/ver12_P_11.png', 2)
-    save(shrine, PROPS + 'shrine.png')
-    save(shrine_used, PROPS + 'shrine_used.png')
+    save(clear_holes(shrine), PROPS + 'shrine.png')
+    save(clear_holes(shrine_used), PROPS + 'shrine_used.png')
     save(fit_height(rgb(V + 'Q/ver12_Q_10.png')), LABYRINTH + 'sky_back.png')
     small, wide, slab = pieces(V + 'R/ver12_R_1.png', 3)
     for name, piece in (('sky_small', small), ('sky_wide', wide), ('sky_slab', slab)):
