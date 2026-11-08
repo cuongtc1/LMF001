@@ -80,4 +80,29 @@ public class RunLoadoutTests
         Assert.Equal(3, picks.Distinct().Count());
         Assert.Equal(2, RewardDraw.Pick(["a", "b"], 3, new SeededRandom(5)).Count);
     }
+
+    [Fact]
+    public void TargetedEffectsOnlyCountForTheirAttack()
+    {
+        var mods = new RunModifiers();
+        mods.Add(new AmuletDef("sticky", [
+            new AmuletEffectDef(AmuletEffects.AttackSlow, 0.3f, Target: "z3", Ticks: 180),
+            new AmuletEffectDef(AmuletEffects.AttackSlow, 0.3f, Target: "xx", Ticks: 120)]));
+        Assert.Equal(0.3f, mods.TotalFor(AmuletEffects.AttackSlow, "z3"), 3);
+        Assert.Equal(0f, mods.TotalFor(AmuletEffects.AttackSlow, "z1"));
+        Assert.Equal(180, mods.Ticks(AmuletEffects.AttackSlow, "z3"));
+        Assert.Equal(180, mods.Ticks(AmuletEffects.AttackSlow));
+    }
+
+    [Fact]
+    public void RoomUsesRunOutAndResetPerRoom()
+    {
+        var uses = new RoomUses();
+        Assert.True(uses.TryUse(2));
+        Assert.True(uses.TryUse(2));
+        Assert.False(uses.TryUse(2));
+        Assert.Equal(1, uses.Left(3));
+        uses.Reset();
+        Assert.Equal(2, uses.Left(2));
+    }
 }

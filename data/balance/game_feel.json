@@ -10,6 +10,7 @@
   "knockback_decay": 2600,
   "shake_decay": 60,
   "combo_reset_ticks": 120,
+  "mana_target_shares": [1.0, 0.3, 0.1],
   "damage_number_rise": 70,
   "damage_number_ticks": 36,
   "juggle_gravity_scale": 0.55,

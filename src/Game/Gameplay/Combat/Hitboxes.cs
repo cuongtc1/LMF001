@@ -5,7 +5,19 @@ using LumiFeast.Logic.Data;
 namespace LumiFeast.Game.Gameplay.Combat;
 
 /// <summary>What one hit does to its target. Damage is before the target's defense.</summary>
-public readonly record struct HitInfo(int Attack, float Multiplier, int Direction, float KnockbackSpeed, float LaunchSpeed, string SourceId, int StunTicks = 0, bool Knockdown = false, float Stagger = 0, bool GuardBreak = false);
+/// <param name="BackMultiplier">Extra damage scale when the hit lands on the target's back (Wolf Fang).</param>
+/// <param name="Slow">Share of move speed the target loses for <paramref name="SlowTicks"/> (Sticky Finish).</param>
+/// <param name="PullToX">When set, knockback pulls the target toward this x instead of along <paramref name="Direction"/> (Egg Whisk).</param>
+public readonly record struct HitInfo(int Attack, float Multiplier, int Direction, float KnockbackSpeed, float LaunchSpeed, string SourceId, int StunTicks = 0, bool Knockdown = false, float Stagger = 0, bool GuardBreak = false)
+{
+    public float BackMultiplier { get; init; } = 1;
+
+    public float Slow { get; init; }
+
+    public int SlowTicks { get; init; }
+
+    public float? PullToX { get; init; }
+}
 
 public interface IDamageable
 {

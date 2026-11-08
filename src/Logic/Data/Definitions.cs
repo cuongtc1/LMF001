@@ -32,12 +32,20 @@ public sealed record CharacterCombatDef(string AttackSet, float MpPerSecond, int
 
 public sealed record SkillDef(string Id, string Attack, float MpCost, int CooldownTicks, int InvulnerableTicks);
 
-public sealed record ProjectileDef(string Id, string Sprite, float Speed, int Ticks, float Height, float DamageMultiplier, bool Pierce, float Stagger);
+/// <param name="RiseSpeed">Upward launch speed; with <paramref name="Gravity"/> the shot flies in an arc.</param>
+/// <param name="RehitTicks">Above 0: hits the same monsters again every this many ticks.</param>
+/// <param name="Pull">Hits pull monsters toward the shot (Egg Whisk).</param>
+/// <param name="HitSize">Square hit area; 0 keeps the default.</param>
+/// <param name="BurstSize">Above 0: the shot bursts in a square this wide when it lands or ends (Berry Bomb).</param>
+public sealed record ProjectileDef(string Id, string Sprite, float Speed, int Ticks, float Height, float DamageMultiplier, bool Pierce, float Stagger,
+    float Gravity = 0, float RiseSpeed = 0, int RehitTicks = 0, bool Pull = false, float HitSize = 0, float BurstSize = 0);
 
 public sealed record SkillSetDef(string Id, int Slots, IReadOnlyList<SkillDef> Skills, IReadOnlyList<ProjectileDef> Projectiles);
 
 /// <param name="MinHpRatio">The effect works only while HP is at least this share of max HP.</param>
-public sealed record AmuletEffectDef(string Kind, float Value, string? Target = null, string? Projectile = null, float MinHpRatio = 0);
+/// <param name="Target">Attack id the effect is limited to (projectiles, finisher effects); null for all.</param>
+/// <param name="Ticks">How long a timed effect lasts (slows, short buffs).</param>
+public sealed record AmuletEffectDef(string Kind, float Value, string? Target = null, string? Projectile = null, float MinHpRatio = 0, int Ticks = 0);
 
 public sealed record AmuletDef(string Id, IReadOnlyList<AmuletEffectDef> Effects);
 
@@ -253,7 +261,15 @@ public sealed record GameFeelDef(
     int PlayerDownTicks,
     int PlayerGetupTicks,
     MonsterPoseDef MonsterPose,
-    MonsterClimbDef MonsterClimb);
+    MonsterClimbDef MonsterClimb,
+    IReadOnlyList<float> ManaTargetShares);
+
+/// <summary>MP share for the n-th target of one swing; the last share covers every further target.</summary>
+public static class ManaRules
+{
+    public static float Share(IReadOnlyList<float> shares, int targetIndex) =>
+        shares.Count == 0 ? 1 : shares[Math.Min(targetIndex, shares.Count - 1)];
+}
 
 /// <summary>One sound: a random file from <paramref name="Files"/> plays each time, with a small random pitch change.</summary>
 /// <param name="VolumeDb">Loudness change; 0 keeps the file as it is.</param>

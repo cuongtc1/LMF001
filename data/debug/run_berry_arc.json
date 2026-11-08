@@ -1,0 +1,13 @@
+{
+  "god_mode": true,
+  "room": "entrance",
+  "cleared": true,
+  "skills": ["berry_bomb"],
+  "end_tick": 200,
+  "screenshots": [70, 78, 86, 94, 102],
+  "steps": [
+    { "tick": 20, "action": "teleport", "x": 400, "y": 700 },
+    { "tick": 60, "action": "skill_1", "pressed": true },
+    { "tick": 62, "action": "skill_1", "pressed": false }
+  ]
+}

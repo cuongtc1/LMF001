@@ -85,10 +85,94 @@
       "effects": [
         {
           "kind": "auto_counter",
+          "value": 3,
+          "target": null,
+          "projectile": null,
+          "min_hp_ratio": 0
+        }
+      ]
+    },
+    {
+      "id": "wolf_fang",
+      "effects": [
+        {
+          "kind": "back_damage",
+          "value": 0.15,
+          "target": null,
+          "projectile": null,
+          "min_hp_ratio": 0
+        }
+      ]
+    },
+    {
+      "id": "sticky_finish",
+      "effects": [
+        {
+          "kind": "attack_slow",
+          "value": 0.3,
+          "target": "z3",
+          "projectile": null,
+          "min_hp_ratio": 0,
+          "ticks": 180
+        },
+        {
+          "kind": "attack_slow",
+          "value": 0.3,
+          "target": "xx",
+          "projectile": null,
+          "min_hp_ratio": 0,
+          "ticks": 180
+        }
+      ]
+    },
+    {
+      "id": "finisher_fuel",
+      "effects": [
+        {
+          "kind": "attack_mana",
+          "value": 5,
+          "target": "z3",
+          "projectile": null,
+          "min_hp_ratio": 0
+        },
+        {
+          "kind": "attack_mana",
+          "value": 5,
+          "target": "xx",
+          "projectile": null,
+          "min_hp_ratio": 0
+        },
+        {
+          "kind": "perfect_guard_mana",
+          "value": 10,
+          "target": null,
+          "projectile": null,
+          "min_hp_ratio": 0
+        }
+      ]
+    },
+    {
+      "id": "second_helping",
+      "effects": [
+        {
+          "kind": "free_first_skill",
           "value": 1,
           "target": null,
           "projectile": null,
           "min_hp_ratio": 0
+        }
+      ]
+    },
+    {
+      "id": "sugar_rush",
+      "effects": [
+        {
+          "kind": "guard_rush",
+          "value": 0.15,
+          "target": null,
+          "projectile": null,
+          "min_hp_ratio": 0,
+          "ticks": 240
         }
       ]
     }

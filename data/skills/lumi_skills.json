@@ -29,6 +29,20 @@
       "mp_cost": 20,
       "cooldown_ticks": 240,
       "invulnerable_ticks": 44
+    },
+    {
+      "id": "egg_whisk",
+      "attack": "sk_whisk",
+      "mp_cost": 45,
+      "cooldown_ticks": 360,
+      "invulnerable_ticks": 10
+    },
+    {
+      "id": "berry_bomb",
+      "attack": "sk_berry",
+      "mp_cost": 40,
+      "cooldown_ticks": 300,
+      "invulnerable_ticks": 10
     }
   ],
   "projectiles": [
@@ -51,6 +65,32 @@
       "damage_multiplier": 0.8,
       "pierce": true,
       "stagger": 1
+    },
+    {
+      "id": "egg_whisk_swirl",
+      "sprite": "assets/vfx/common/egg_whisk.png",
+      "speed": 260,
+      "ticks": 150,
+      "height": 230,
+      "damage_multiplier": 0.35,
+      "pierce": true,
+      "stagger": 1,
+      "rehit_ticks": 15,
+      "pull": true,
+      "hit_size": 260
+    },
+    {
+      "id": "berry_bomb",
+      "sprite": "assets/vfx/common/berry_bomb.png",
+      "speed": 700,
+      "ticks": 0,
+      "height": 90,
+      "damage_multiplier": 1.2,
+      "pierce": false,
+      "stagger": 3,
+      "gravity": 2400,
+      "rise_speed": 900,
+      "burst_size": 360
     }
   ]
 }

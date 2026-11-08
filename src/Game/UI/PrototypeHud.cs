@@ -1,4 +1,6 @@
 using Godot;
+using LumiFeast.Logic.Run;
+using LumiFeast.Logic.Data;
 using LumiFeast.Game.Common;
 using LumiFeast.Game.Gameplay.Player;
 using LumiFeast.Logic.Combat;
@@ -107,7 +109,29 @@ public partial class PrototypeHud : CanvasLayer
             _skills[i].Modulate = cooldown > 0 || _player.Mp < skill.MpCost ? Colors.Gray : Colors.White;
         }
 
-        _amulets.Text = string.Join("  ", System.Linq.Enumerable.Select(_player.Modifiers.Amulets, amulet => messages.Get(MessageKeys.AmuletPrefix + amulet.Id)));
+        _amulets.Text = string.Join("  ", System.Linq.Enumerable.Select(_player.Modifiers.Amulets, AmuletText));
+    }
+
+    /// <summary>Amulet name; Steam Bath also shows its counters left in this room as filled and empty dots.</summary>
+    private string AmuletText(AmuletDef amulet)
+    {
+        var name = GameServices.Messages.Get(MessageKeys.AmuletPrefix + amulet.Id);
+        var limit = 0f;
+        foreach (var effect in amulet.Effects)
+        {
+            if (effect.Kind == AmuletEffects.AutoCounter)
+            {
+                limit += effect.Value;
+            }
+        }
+
+        if (limit <= 0)
+        {
+            return name;
+        }
+
+        var left = _player.SteamCountersLeft;
+        return name + " " + new string('●', left) + new string('○', Mathf.Max(0, Mathf.RoundToInt(limit) - left));
     }
 
     private static ProgressBar AddBar(Container parent, Color color, double max)

@@ -33,6 +33,7 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
 
     private static readonly Color TelegraphColor = new(1.4f, 1.2f, 1.1f);
     private static readonly Color DizzyColor = new(1.4f, 1.3f, 0.5f);
+    private static readonly Color StickyColor = new(1f, 0.82f, 0.45f);
 
     private MonsterDef _def = null!;
     private MonsterStats _stats = null!;
@@ -68,6 +69,8 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
 
     /// <summary>Flyers have no floor collision; their feet stop here so a swoop touches the ground but never sinks into it.</summary>
     private float _flyerGroundY;
+    private float _slow;
+    private int _slowTicks;
     private int _age;
 
     public event Action<MonsterController>? Healed;
@@ -151,7 +154,9 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         }
 
         var guarded = _brain.GuardsAgainst(hit.Direction, hit.GuardBreak);
-        var scale = _brain.DamageTakenScale * (guarded ? _def.Ai.FrontGuardScale : 1);
+        // a hit travelling the way the monster looks comes from behind it
+        var fromBehind = hit.Direction == _brain.Facing;
+        var scale = _brain.DamageTakenScale * (guarded ? _def.Ai.FrontGuardScale : 1) * (fromBehind ? hit.BackMultiplier : 1);
         var damage = Mathf.Max(1, Mathf.RoundToInt(DamageCalculator.Compute(hit.Attack, hit.Multiplier, _stats.Defense) * scale));
         if (!_def.Immortal)
         {
@@ -173,9 +178,16 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
 
         _flashTicks = 6;
         _pose.Hit();
+        if (hit.SlowTicks > 0)
+        {
+            _slow = hit.Slow;
+            _slowTicks = hit.SlowTicks;
+        }
+
         if (_brain.CanBeMoved && !guarded)
         {
-            _knockback = hit.Direction * hit.KnockbackSpeed * _def.KnockbackScale;
+            var direction = hit.PullToX is { } pullX ? Mathf.Sign(pullX - GlobalPosition.X) : hit.Direction;
+            _knockback = direction * hit.KnockbackSpeed * _def.KnockbackScale;
             if (hit.LaunchSpeed > 0)
             {
                 _velocityY = -hit.LaunchSpeed * _def.KnockbackScale;
@@ -221,7 +233,9 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
 
         StepVertical((float)delta, onFloor);
         _knockback = Mathf.MoveToward(_knockback, 0, _feel.KnockbackDecay * (float)delta);
-        Velocity = new Vector2(_brain.MoveVelocityX + _knockback, _velocityY + _brain.MoveVelocityY);
+        _slowTicks = Mathf.Max(0, _slowTicks - 1);
+        var walk = _brain.MoveVelocityX * (_slowTicks > 0 ? 1 - _slow : 1);
+        Velocity = new Vector2(walk + _knockback, _velocityY + _brain.MoveVelocityY);
         MoveAndSlide();
         if (_flying && GlobalPosition.Y > _flyerGroundY)
         {
@@ -359,7 +373,7 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         _flashTicks = Mathf.Max(0, _flashTicks - 1);
         var telegraph = _brain.State == MonsterState.Windup;
         var dizzy = _brain.State == MonsterState.Dizzy;
-        _sprite.Modulate = _flashTicks > 0 ? Colors.White * FlashStrength : dizzy ? DizzyColor : telegraph ? TelegraphColor : Colors.White;
+        _sprite.Modulate = _flashTicks > 0 ? Colors.White * FlashStrength : dizzy ? DizzyColor : telegraph ? TelegraphColor : _slowTicks > 0 ? StickyColor : Colors.White;
         _age++;
         if (_staggerBar is not null)
         {

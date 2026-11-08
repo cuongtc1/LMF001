@@ -49,6 +49,8 @@ public static class GameDataValidator
             {
                 Require(Run.AmuletEffects.All.Contains(effect.Kind), effect.Kind);
                 Require(effect.Projectile is null || projectiles.Contains(effect.Projectile), effect.Kind);
+                Require(effect.Target is null || attacks.Contains(effect.Target), $"{effect.Kind}.target");
+                Require(effect.Kind != Run.AmuletEffects.AttackSlow || (effect.Ticks > 0 && effect.Value is > 0 and < 1), effect.Kind);
             }
         }
 

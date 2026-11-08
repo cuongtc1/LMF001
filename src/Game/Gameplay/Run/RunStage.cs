@@ -268,6 +268,7 @@ public partial class RunStage : Node2D
     private void EnterRoom(int index, Entry entry)
     {
         _map.Enter(index);
+        _player.EnterRoom();
         _arrivalTicks = ArrivalTicks;
         _monsters.Clear();
         _gates.Clear();

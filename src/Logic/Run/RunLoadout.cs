@@ -69,11 +69,29 @@ public static class AmuletEffects
     public const string SkillCooldown = "skill_cooldown";
     public const string AttackProjectile = "attack_projectile";
 
-    /// <summary>Any value above 0: every guard block counters by itself (Steam Bath).</summary>
+    /// <summary>Guard blocks counter by themselves; value = uses per room (Steam Bath).</summary>
     public const string AutoCounter = "auto_counter";
 
+    /// <summary>Hits on a monster's back deal this much more (Wolf Fang).</summary>
+    public const string BackDamage = "back_damage";
+
+    /// <summary>The target attack slows monsters by this share for Ticks (Sticky Finish).</summary>
+    public const string AttackSlow = "attack_slow";
+
+    /// <summary>Flat MP when the target attack lands, once per swing (Finisher Fuel).</summary>
+    public const string AttackMana = "attack_mana";
+
+    /// <summary>Flat MP for a perfect guard (Finisher Fuel).</summary>
+    public const string PerfectGuardMana = "perfect_guard_mana";
+
+    /// <summary>Above 0: the first skill in each room costs no MP (Second Helping).</summary>
+    public const string FreeFirstSkill = "free_first_skill";
+
+    /// <summary>Speed stat bonus for Ticks after a perfect guard (Sugar Rush); still under the speed cap.</summary>
+    public const string GuardRush = "guard_rush";
+
     public static readonly string[] All =
-        [LightDamage, HeavyDamage, HeavyStagger, Speed, ManaGain, DamageTaken, TokenHeal, SkillCooldown, AttackProjectile, AutoCounter];
+        [LightDamage, HeavyDamage, HeavyStagger, Speed, ManaGain, DamageTaken, TokenHeal, SkillCooldown, AttackProjectile, AutoCounter, BackDamage, AttackSlow, AttackMana, PerfectGuardMana, FreeFirstSkill, GuardRush];
 }
 
 /// <summary>The amulets of one run, read as numbers by whoever needs them.</summary>
@@ -95,12 +113,40 @@ public sealed class RunModifiers
     /// <summary>1 plus every bonus of this kind; a value of -0.15 gives 0.85.</summary>
     public float Scale(string kind, float hpRatio = 1) => Math.Max(0, 1 + Total(kind, hpRatio));
 
+    /// <summary>Sum of the effects of this kind aimed at one attack.</summary>
+    public float TotalFor(string kind, string attackId) => Effects(kind).Where(effect => effect.Target == attackId).Sum(effect => effect.Value);
+
+    /// <summary>Longest duration among the effects of this kind (aimed at one attack when given).</summary>
+    public int Ticks(string kind, string? attackId = null) =>
+        Effects(kind).Where(effect => attackId is null || effect.Target == attackId).Select(effect => effect.Ticks).DefaultIfEmpty(0).Max();
+
     /// <summary>Projectiles that amulets add to this attack.</summary>
     public IEnumerable<string> ProjectilesFor(string attackId) =>
         Effects(AmuletEffects.AttackProjectile).Where(effect => effect.Target == attackId).Select(effect => effect.Projectile!);
 
     private IEnumerable<AmuletEffectDef> Effects(string kind) =>
         _amulets.SelectMany(amulet => amulet.Effects).Where(effect => effect.Kind == kind);
+}
+
+/// <summary>Counts uses of a per-room effect (Steam Bath counters, Second Helping); entering a room resets it.</summary>
+public sealed class RoomUses
+{
+    private int _used;
+
+    public int Left(int limit) => Math.Max(0, limit - _used);
+
+    public bool TryUse(int limit)
+    {
+        if (Left(limit) == 0)
+        {
+            return false;
+        }
+
+        _used++;
+        return true;
+    }
+
+    public void Reset() => _used = 0;
 }
 
 /// <summary>Tokens are taken only when they help, so a full HP bar leaves them on the floor.</summary>

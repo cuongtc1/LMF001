@@ -33,6 +33,10 @@ public partial class PlayerController : CharacterBody2D, IDamageable
     private int _downTicks;
     private int _getupTicks;
     private int _guardHitTicks;
+    private int _rushTicks;
+    private int _manaSwing = -1;
+    private readonly RoomUses _steamUses = new();
+    private readonly RoomUses _freeSkillUses = new();
     private int _vfxSwingId;
     private bool _onPlatform;
     private int _skillInvulnerableTicks;
@@ -120,10 +124,11 @@ public partial class PlayerController : CharacterBody2D, IDamageable
     public void ApplyModifiers()
     {
         var hpRatio = (float)Health.Current / Health.Max;
-        var speed = StatScaler.ForSpeed(_def.Stats.Speed + Modifiers.Total(AmuletEffects.Speed, hpRatio), GameServices.Data.Scaling.Speed);
+        var rush = _rushTicks > 0 ? Modifiers.Total(AmuletEffects.GuardRush) : 0;
+        var speed = StatScaler.ForSpeed(_def.Stats.Speed + Modifiers.Total(AmuletEffects.Speed, hpRatio) + rush, GameServices.Data.Scaling.Speed);
         _motor.Tempo = speed.Move;
         _combo.AttackSpeed = speed.Attack;
-        _guard.AutoCounter = _def.Guard.AutoCounter || Modifiers.Total(AmuletEffects.AutoCounter) > 0;
+        _guard.AutoCounter = _def.Guard.AutoCounter || SteamCountersLeft > 0;
     }
 
     /// <summary>Where Lumi comes back after she falls.</summary>
@@ -146,6 +151,18 @@ public partial class PlayerController : CharacterBody2D, IDamageable
     public void LoseMp(float amount) => Mp = Mathf.Max(0, Mp - amount);
 
     public void GainMp(float amount) => Mp = Mathf.Min(MaxMp, Mp + amount);
+
+    /// <summary>Steam Bath counters left in this room.</summary>
+    public int SteamCountersLeft => _steamUses.Left(SteamLimit);
+
+    private int SteamLimit => Mathf.RoundToInt(Modifiers.Total(AmuletEffects.AutoCounter));
+
+    /// <summary>Per-room amulet uses start again (Steam Bath, Second Helping).</summary>
+    public void EnterRoom()
+    {
+        _steamUses.Reset();
+        _freeSkillUses.Reset();
+    }
 
     public void Heal()
     {
@@ -204,6 +221,8 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         {
             GameLog.Info(MessageKeys.CombatGuardPerfect);
             AudioService.Play(SoundIds.GuardPerfect);
+            GainMp(Modifiers.Total(AmuletEffects.PerfectGuardMana));
+            _rushTicks = Modifiers.Ticks(AmuletEffects.GuardRush);
             _gameFeel.PlayEffect(_feel.GuardVfx, GlobalPosition + new Vector2(_motor.Facing * _def.Body.Width, -_def.Body.Height / 2), _motor.Facing);
             _gameFeel.Hitstop(guard.PerfectHitstopTicks);
             return;
@@ -236,6 +255,11 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         }
         else if (_guardHitTicks == 0 && _stunTicks == 0 && _guard.TakeAutoCounter())
         {
+            if (!_def.Guard.AutoCounter)
+            {
+                _steamUses.TryUse(SteamLimit);
+            }
+
             _combo.PressAttack(false);
         }
 
@@ -322,12 +346,21 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             return;
         }
 
-        if (Loadout.TryUse(slot, Mp, Modifiers.Scale(AmuletEffects.SkillCooldown)) is not { } skill)
+        var freeLimit = Modifiers.Total(AmuletEffects.FreeFirstSkill) > 0 ? 1 : 0;
+        var free = _freeSkillUses.Left(freeLimit) > 0;
+        if (Loadout.TryUse(slot, free ? float.MaxValue : Mp, Modifiers.Scale(AmuletEffects.SkillCooldown)) is not { } skill)
         {
             return;
         }
 
-        Mp -= skill.MpCost;
+        if (free)
+        {
+            _freeSkillUses.TryUse(freeLimit);
+        }
+        else
+        {
+            Mp -= skill.MpCost;
+        }
         AudioService.Play(SoundIds.Skill);
         _skillInvulnerableTicks = skill.InvulnerableTicks;
         _combo.StartSkill(skill.Attack);
@@ -338,12 +371,27 @@ public partial class PlayerController : CharacterBody2D, IDamageable
     private void LaunchProjectile(string id, AttackDef attack)
     {
         var shot = _skills.Projectiles.First(projectile => projectile.Id == id);
-        var hit = new HitInfo(_def.Stats.Attack, shot.DamageMultiplier * DamageScale(attack), _motor.Facing, attack.KnockbackSpeed, 0, _def.Id, attack.StunTicks, false, shot.Stagger, true);
+        var hit = new HitInfo(_def.Stats.Attack, shot.DamageMultiplier * DamageScale(attack), _motor.Facing, attack.KnockbackSpeed, 0, _def.Id, attack.StunTicks, false, shot.Stagger, true)
+        {
+            BackMultiplier = Modifiers.Scale(AmuletEffects.BackDamage),
+        };
         var projectile = new Projectile();
         GetParent().AddChild(projectile);
         projectile.Landed = OnLanded;
+        projectile.RehitTicks = shot.RehitTicks;
+        projectile.Pull = shot.Pull;
+        projectile.HitSize = shot.HitSize;
+        projectile.BurstSize = shot.BurstSize;
+        projectile.Burst = at =>
+        {
+            _gameFeel.PlayEffect(_feel.GuardVfx, at, _motor.Facing);
+            _gameFeel.Shake(attack.ShakePixels);
+            AudioService.Play(SoundIds.HitHeavy);
+        };
+        // arcing shots burst at Lumi's feet level; straight shots fly until their time runs out
+        var floor = shot.Gravity > 0 ? GlobalPosition.Y : ProjectileFloor;
         projectile.Launch(shot.Sprite, shot.Height, GlobalPosition + new Vector2(_motor.Facing * ProjectileForward, -ProjectileHeight),
-            new Vector2(_motor.Facing * shot.Speed, 0), 0, ProjectileFloor, hit, PhysicsLayers.EnemyHurtbox, shot.Pierce, shot.Ticks);
+            new Vector2(_motor.Facing * shot.Speed, -shot.RiseSpeed), shot.Gravity, floor, hit, PhysicsLayers.EnemyHurtbox, shot.Pierce, shot.Ticks);
     }
 
     private float DamageScale(AttackDef attack) =>
@@ -451,17 +499,30 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         }
 
         var stagger = attack.Stagger * (attack.GuardBreak ? Modifiers.Scale(AmuletEffects.HeavyStagger) : 1);
-        var hit = new HitInfo(_def.Stats.Attack, attack.DamageMultiplier * DamageScale(attack), _motor.Facing, attack.KnockbackSpeed, attack.LaunchSpeed, _def.Id, attack.StunTicks, attack.Knockdown, stagger, attack.GuardBreak);
+        var hit = new HitInfo(_def.Stats.Attack, attack.DamageMultiplier * DamageScale(attack), _motor.Facing, attack.KnockbackSpeed, attack.LaunchSpeed, _def.Id, attack.StunTicks, attack.Knockdown, stagger, attack.GuardBreak)
+        {
+            BackMultiplier = Modifiers.Scale(AmuletEffects.BackDamage),
+            Slow = Modifiers.TotalFor(AmuletEffects.AttackSlow, attack.Id),
+            SlowTicks = Modifiers.Ticks(AmuletEffects.AttackSlow, attack.Id),
+        };
         var swing = attack.RehitTicks > 0 ? _combo.SwingId * RehitStride + _combo.Tick / attack.RehitTicks : _combo.SwingId;
         var landed = _hitbox.Sweep(swing, attack.Hitbox, _motor.Facing, hit);
-        foreach (var target in landed)
+        if (landed.Count > 0 && swing != _manaSwing)
         {
-            if (target is Node2D node)
+            // flat bonus once per swing, however many monsters it hits (Finisher Fuel)
+            _manaSwing = swing;
+            GainMp(Modifiers.TotalFor(AmuletEffects.AttackMana, attack.Id));
+        }
+
+        for (var i = 0; i < landed.Count; i++)
+        {
+            if (landed[i] is Node2D node)
             {
                 _gameFeel.PlayEffect(attack.HitVfx, node.GlobalPosition + new Vector2(0, -70), _motor.Facing);
             }
 
-            Mp = Mathf.Min(MaxMp, Mp + attack.Mana * Modifiers.Scale(AmuletEffects.ManaGain));
+            // crowds give less MP per extra target, so packed rooms do not flood the bar
+            GainMp(attack.Mana * Modifiers.Scale(AmuletEffects.ManaGain) * ManaRules.Share(_feel.ManaTargetShares, i));
             ComboHits++;
             TotalHits++;
             _comboResetTicks = _feel.ComboResetTicks;
@@ -481,6 +542,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         _dropTicks = Mathf.Max(0, _dropTicks - 1);
         _landingLagTicks = Mathf.Max(0, _landingLagTicks - 1);
         _guardHitTicks = Mathf.Max(0, _guardHitTicks - 1);
+        _rushTicks = Mathf.Max(0, _rushTicks - 1);
         _skillInvulnerableTicks = Mathf.Max(0, _skillInvulnerableTicks - 1);
         Loadout.Step();
         ApplyModifiers();
