@@ -50,14 +50,15 @@ public class ChallengeRunTests
     }
 
     [Fact]
-    public void ARunHasAtMostOneChallengeRoom()
+    public void ARunHasOneOrTwoChallengeRooms()
     {
         var run = TestData.Game.Run("honey_labyrinth_stage_1");
         var challenges = run.Rooms.Where(room => room.Challenge is not null).Select(room => room.Id).ToHashSet();
         Assert.Equal(2, challenges.Count);
         for (ulong seed = 0; seed < 200; seed++)
         {
-            Assert.True(StageMap.Generate(run, seed).Rooms.Count(challenges.Contains) <= 1);
+            // 15_core_gameplay.md: 1-2 trials in a 12-16 room run
+            Assert.InRange(StageMap.Generate(run, seed).Rooms.Count(challenges.Contains), 1, 2);
         }
     }
 }

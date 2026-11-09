@@ -182,7 +182,11 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats, ulong seed
     /// <param name="deltaX">Target x minus monster x.</param>
     /// <param name="hoverError">Flyers only: pixels below the hover height.</param>
     /// <param name="canReach">False when Lumi is far above or below: ground monsters walk under her instead of swinging.</param>
-    public void Step(float deltaX, bool onFloor, float hoverError = 0, bool canReach = true)
+    /// <summary>Spacing used while waiting for an attack turn; null lets the monster attack whenever it is ready.</summary>
+    public MonsterCrowdDef? Crowd { get; set; }
+
+    /// <param name="mayAttack">False while the room's attack turns are taken: the monster waits close by instead.</param>
+    public void Step(float deltaX, bool onFloor, float hoverError = 0, bool canReach = true, bool mayAttack = true)
     {
         WantsHop = false;
         MoveVelocityX = 0;
@@ -206,7 +210,7 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats, ulong seed
         {
             case MonsterState.Idle:
             case MonsterState.Chase:
-                Think(deltaX, onFloor, canReach);
+                Think(deltaX, onFloor, canReach, mayAttack);
                 break;
             case MonsterState.Windup when _timer == 0:
                 SwingId++;
@@ -256,7 +260,7 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats, ulong seed
         }
     }
 
-    private void Think(float deltaX, bool onFloor, bool canReach)
+    private void Think(float deltaX, bool onFloor, bool canReach, bool mayAttack)
     {
         var distance = Math.Abs(deltaX);
         if (distance > ai.AggroRange)
@@ -276,6 +280,18 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats, ulong seed
         {
             State = MonsterState.Chase;
             MoveVelocityX = distance > UnderTargetDistance ? Facing * stats.Speed : 0;
+            return;
+        }
+
+        if (!mayAttack && Crowd is { } crowd && distance <= ai.AttackRange + crowd.WaitMargin)
+        {
+            // waiting for a turn: hold a spot just outside the attack range, facing Lumi, stepping back if pushed in
+            State = MonsterState.Chase;
+            if (distance < ai.AttackRange + crowd.WaitMargin / 2)
+            {
+                MoveVelocityX = -Facing * stats.Speed * crowd.BackOffSpeedScale;
+            }
+
             return;
         }
 

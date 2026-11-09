@@ -1,3 +1,4 @@
+using System.Linq;
 using Godot;
 using LumiFeast.Logic.Run;
 using LumiFeast.Logic.Data;
@@ -21,8 +22,18 @@ public partial class PrototypeHud : CanvasLayer
     private Label _status = null!;
     private ProgressBar _bossBar = null!;
     private Health? _boss;
+    private const float SkillIconSize = 64;
+    private const float AmuletIconSize = 44;
+
     private readonly System.Collections.Generic.List<Label> _skills = [];
-    private Label _amulets = null!;
+    private readonly System.Collections.Generic.List<TextureRect> _skillIcons = [];
+    private readonly System.Collections.Generic.List<string?> _shownSkills = [];
+    private HBoxContainer _amuletRow = null!;
+    private Label? _steamDots;
+    private int _shownAmulets = -1;
+
+    /// <summary>The run's amulet set, for icons; empty outside a run.</summary>
+    public string AmuletSetId { get; set; } = string.Empty;
 
     public void Setup(PlayerController player)
     {
@@ -37,14 +48,25 @@ public partial class PrototypeHud : CanvasLayer
         column.AddChild(row);
         for (var i = 0; i < player.Loadout.Slots.Count; i++)
         {
-            var label = UiCommon.OutlinedLabel(26);
-            label.CustomMinimumSize = new Vector2(260, 0);
-            row.AddChild(label);
+            var slot = new HBoxContainer { CustomMinimumSize = new Vector2(200, SkillIconSize) };
+            var iconRect = new TextureRect
+            {
+                CustomMinimumSize = Vector2.One * SkillIconSize,
+                ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+                StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
+            };
+            var label = UiCommon.OutlinedLabel(24);
+            label.VerticalAlignment = VerticalAlignment.Center;
+            slot.AddChild(iconRect);
+            slot.AddChild(label);
+            row.AddChild(slot);
             _skills.Add(label);
+            _skillIcons.Add(iconRect);
+            _shownSkills.Add(null);
         }
 
-        _amulets = UiCommon.OutlinedLabel(22);
-        column.AddChild(_amulets);
+        _amuletRow = new HBoxContainer();
+        column.AddChild(_amuletRow);
 
         _combo = UiCommon.OutlinedLabel(48);
         _combo.Position = new Vector2(1600, 300);
@@ -97,7 +119,14 @@ public partial class PrototypeHud : CanvasLayer
         for (var i = 0; i < _skills.Count; i++)
         {
             var key = InputSetup.FirstKey(InputActions.Skills[i]);
-            if (_player.Loadout.Slots[i] is not { } skill)
+            var slotSkill = _player.Loadout.Slots[i];
+            if (_shownSkills[i] != slotSkill?.Id)
+            {
+                _shownSkills[i] = slotSkill?.Id;
+                _skillIcons[i].Texture = slotSkill is null ? null : GameIcons.Skill(_player.SkillSetId, slotSkill.Id);
+            }
+
+            if (slotSkill is not { } skill)
             {
                 _skills[i].Text = messages.Get(MessageKeys.HudSkillEmpty, key);
                 continue;
@@ -105,33 +134,52 @@ public partial class PrototypeHud : CanvasLayer
 
             var cooldown = _player.Loadout.CooldownLeft(i);
             var state = cooldown > 0 ? messages.Get(MessageKeys.HudSkillCooldown, Mathf.CeilToInt(cooldown / GameConstants.TicksPerSecond)) : messages.Get(MessageKeys.HudSkillReady);
-            _skills[i].Text = messages.Get(MessageKeys.HudSkillSlot, key, messages.Get(MessageKeys.SkillPrefix + skill.Id), state);
-            _skills[i].Modulate = cooldown > 0 || _player.Mp < skill.MpCost ? Colors.Gray : Colors.White;
+            _skills[i].Text = messages.Get(MessageKeys.HudSkillSlot, key, string.Empty, state);
+            var dim = cooldown > 0 || _player.Mp < skill.MpCost ? Colors.Gray : Colors.White;
+            _skills[i].Modulate = dim;
+            _skillIcons[i].Modulate = dim;
         }
 
-        _amulets.Text = string.Join("  ", System.Linq.Enumerable.Select(_player.Modifiers.Amulets, AmuletText));
+        ShowAmulets();
     }
 
-    /// <summary>Amulet name; Steam Bath also shows its counters left in this room as filled and empty dots.</summary>
-    private string AmuletText(AmuletDef amulet)
+    /// <summary>One small icon per amulet; Steam Bath also shows its counters left in this room as dots.</summary>
+    private void ShowAmulets()
     {
-        var name = GameServices.Messages.Get(MessageKeys.AmuletPrefix + amulet.Id);
-        var limit = 0f;
-        foreach (var effect in amulet.Effects)
+        var amulets = _player.Modifiers.Amulets;
+        if (amulets.Count != _shownAmulets)
         {
-            if (effect.Kind == AmuletEffects.AutoCounter)
+            _shownAmulets = amulets.Count;
+            foreach (var child in _amuletRow.GetChildren())
             {
-                limit += effect.Value;
+                child.QueueFree();
+            }
+
+            _steamDots = null;
+            foreach (var amulet in amulets)
+            {
+                _amuletRow.AddChild(new TextureRect
+                {
+                    Texture = AmuletSetId.Length > 0 ? GameIcons.Amulet(AmuletSetId, amulet.Id) : null,
+                    CustomMinimumSize = Vector2.One * AmuletIconSize,
+                    ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+                    StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
+                });
+                if (amulet.Effects.Any(effect => effect.Kind == AmuletEffects.AutoCounter))
+                {
+                    _steamDots = UiCommon.OutlinedLabel(22);
+                    _steamDots.VerticalAlignment = VerticalAlignment.Center;
+                    _amuletRow.AddChild(_steamDots);
+                }
             }
         }
 
-        if (limit <= 0)
+        if (_steamDots is not null)
         {
-            return name;
+            var limit = Mathf.RoundToInt(_player.Modifiers.Total(AmuletEffects.AutoCounter));
+            var left = _player.SteamCountersLeft;
+            _steamDots.Text = new string('●', left) + new string('○', Mathf.Max(0, limit - left));
         }
-
-        var left = _player.SteamCountersLeft;
-        return name + " " + new string('●', left) + new string('○', Mathf.Max(0, Mathf.RoundToInt(limit) - left));
     }
 
     private static ProgressBar AddBar(Container parent, Color color, double max)

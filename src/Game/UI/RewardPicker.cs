@@ -9,7 +9,8 @@ namespace LumiFeast.Game.UI;
 public partial class RewardPicker : CanvasLayer
 {
     private const float CardWidth = 420;
-    private const float CardHeight = 260;
+    private const float CardHeight = 380;
+    private const float CardIconSize = 128;
     private const float CardGap = 40;
     private const float CardTop = 360;
 
@@ -29,7 +30,7 @@ public partial class RewardPicker : CanvasLayer
         Visible = false;
     }
 
-    public void Open(IReadOnlyList<(string Title, string Body)> choices, System.Action<int> onPick)
+    public void Open(IReadOnlyList<(string Title, string Body, Texture2D? Icon)> choices, System.Action<int> onPick)
     {
         foreach (var card in _cards)
         {
@@ -44,6 +45,17 @@ public partial class RewardPicker : CanvasLayer
         {
             var card = new PanelContainer { Position = new Vector2(left + i * (CardWidth + CardGap), CardTop), CustomMinimumSize = new Vector2(CardWidth, CardHeight) };
             var text = new VBoxContainer();
+            if (choices[i].Icon is { } picture)
+            {
+                text.AddChild(new TextureRect
+                {
+                    Texture = picture,
+                    CustomMinimumSize = Vector2.One * CardIconSize,
+                    ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+                    StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
+                });
+            }
+
             var title = new Label { Text = choices[i].Title, AutowrapMode = TextServer.AutowrapMode.WordSmart };
             title.AddThemeFontSizeOverride("font_size", 34);
             var body = new Label { Text = choices[i].Body, AutowrapMode = TextServer.AutowrapMode.WordSmart, CustomMinimumSize = new Vector2(CardWidth - 30, 0) };

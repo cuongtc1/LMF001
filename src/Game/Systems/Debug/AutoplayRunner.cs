@@ -32,6 +32,9 @@ public partial class AutoplayRunner : Node, IPlayerInput
     /// <summary>Room id a run script starts in (the boss den, say), or null for the first room.</summary>
     public string? StartRoom { get; private set; }
 
+    /// <summary>False keeps reward screens open (for screenshots of the cards); the default picks the first card.</summary>
+    public static bool PicksRewards { get; private set; } = true;
+
     /// <summary>The start room counts as already healed, to test moving around it.</summary>
     public bool StartCleared { get; private set; }
 
@@ -53,6 +56,7 @@ public partial class AutoplayRunner : Node, IPlayerInput
         }
 
         GameServices.GodMode = document.RootElement.TryGetProperty("god_mode", out var god) && god.GetBoolean();
+        PicksRewards = !document.RootElement.TryGetProperty("pick_rewards", out var picks) || picks.GetBoolean();
         // "hunt": [from, to] lets Lumi walk to the nearest monster and attack, so a test survives room layout changes
         if (document.RootElement.TryGetProperty("hunt", out var hunt))
         {

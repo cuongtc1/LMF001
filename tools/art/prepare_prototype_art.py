@@ -14,6 +14,8 @@ FOREST = 'assets/backgrounds/chapter_01/honey_forest/'
 LABYRINTH = 'assets/backgrounds/chapter_01/honey_labyrinth/'
 MONSTERS = 'assets/monsters/chapter_01/'
 PROPS = 'assets/props/common/'
+ICONS = 'assets/ui/icons/'
+ICON_SIZE = 192
 SKY_KEY_DISTANCE = 40
 WHITE_CUTOFF = 244
 SKY_DISTANCE = 26
@@ -131,6 +133,49 @@ def row_items(path, count):
         i = min(range(len(spans) - 1), key=lambda k: spans[k + 1][0] - spans[k][1])
         spans[i:i + 2] = [[spans[i][0], spans[i + 1][1]]]
     return [crop_alpha(cut_white(a[:, x0:x1])) for x0, x1 in spans]
+
+
+def grid_items(path, rows, cols):
+    """Drawings on a white sheet in a grid: rows split at empty bands (narrowest joined), then row_items per row."""
+    a = rgb(path)
+    used = (a.astype(np.int32) < WHITE_CUTOFF).any(2).any(1)
+    edges = np.flatnonzero(np.diff(np.r_[0, used.astype(np.int8), 0]))
+    spans = [list(span) for span in edges.reshape(-1, 2)]
+    while len(spans) > rows:
+        i = min(range(len(spans) - 1), key=lambda k: spans[k + 1][0] - spans[k][1])
+        spans[i:i + 2] = [[spans[i][0], spans[i + 1][1]]]
+    items = []
+    for y0, y1 in spans:
+        band = a[y0:y1]
+        used_x = (band.astype(np.int32) < WHITE_CUTOFF).any(2).any(0)
+        xs = np.flatnonzero(np.diff(np.r_[0, used_x.astype(np.int8), 0])).reshape(-1, 2).tolist()
+        while len(xs) > cols:
+            i = min(range(len(xs) - 1), key=lambda k: xs[k + 1][0] - xs[k][1])
+            xs[i:i + 2] = [[xs[i][0], xs[i + 1][1]]]
+        items += [crop_alpha(cut_white(band[:, x0:x1])) for x0, x1 in xs]
+    return items
+
+
+def icon(a):
+    """Square icon, ICON_SIZE on its longer side, centered on a transparent canvas."""
+    scale = ICON_SIZE / max(a.shape[:2])
+    small = cv2.resize(a, (round(a.shape[1] * scale), round(a.shape[0] * scale)), interpolation=cv2.INTER_AREA)
+    out = np.zeros((ICON_SIZE, ICON_SIZE, 4), np.uint8)
+    y, x = (ICON_SIZE - small.shape[0]) // 2, (ICON_SIZE - small.shape[1]) // 2
+    out[y:y + small.shape[0], x:x + small.shape[1]] = small
+    return out
+
+
+def icons():
+    """Round 61 picks: S_1 skills, T_30 and U_1 amulets (producer's picks, Claude agrees)."""
+    for name, a in zip(['skewer', 'tenderizer', 'jam_spread', 'dough_roll', 'egg_whisk', 'berry_bomb'],
+                       grid_items(V + 'S/ver12_S_1.png', 2, 3)):
+        save(icon(a), f'{ICONS}skills/{name}.png')
+    amulets = ['honey_edge', 'heavy_spoon', 'star_sprinkle', 'sticky_finish', 'wolf_fang', 'quick_hands',
+               'finisher_fuel', 'second_helping', 'thick_crust', 'sweet_tooth', 'steam_bath', 'sugar_rush']
+    sheets = grid_items(V + 'T/ver12_T_30.png', 2, 3) + grid_items(V + 'U/ver12_U_1.png', 2, 3)
+    for name, a in zip(amulets, sheets):
+        save(icon(a), f'{ICONS}amulets/{name}.png')
 
 
 def props():
@@ -263,6 +308,7 @@ def effects():
 
 
 if __name__ == '__main__':
+    icons()
     background()
     platforms()
     monsters()

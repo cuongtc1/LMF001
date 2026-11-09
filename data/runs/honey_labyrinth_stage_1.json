@@ -52,9 +52,9 @@
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
           "x": 2200,
-          "y": 650,
-          "width": 460,
-          "top_inset": 37
+          "y": 680,
+          "width": 640,
+          "top_inset": 52
         }
       ],
       "waves": [],
@@ -85,23 +85,23 @@
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
           "x": 1250,
-          "y": 650,
-          "width": 300,
-          "top_inset": 5
+          "y": 680,
+          "width": 400,
+          "top_inset": 7
         },
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
           "x": 2100,
-          "y": 650,
-          "width": 460,
-          "top_inset": 37
+          "y": 680,
+          "width": 640,
+          "top_inset": 52
         },
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
           "x": 2700,
-          "y": 430,
-          "width": 300,
-          "top_inset": 5
+          "y": 480,
+          "width": 400,
+          "top_inset": 7
         }
       ],
       "waves": [
@@ -118,7 +118,7 @@
             {
               "monster": "honey_slime",
               "x": 2100,
-              "y": 650
+              "y": 680
             }
           ]
         },
@@ -139,7 +139,7 @@
             {
               "monster": "sprout_mushroom",
               "x": 2700,
-              "y": 430
+              "y": 480
             }
           ]
         },
@@ -160,7 +160,15 @@
             {
               "monster": "honey_slime",
               "x": 2100,
-              "y": 650
+              "y": 680
+            },
+            {
+              "monster": "sprout_mushroom",
+              "x": 2600
+            },
+            {
+              "monster": "honey_slime",
+              "x": 1500
             }
           ]
         }
@@ -191,30 +199,30 @@
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
           "x": 1150,
-          "y": 650,
-          "width": 460,
-          "top_inset": 37
+          "y": 680,
+          "width": 640,
+          "top_inset": 52
         },
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
           "x": 1800,
-          "y": 430,
-          "width": 300,
-          "top_inset": 5
+          "y": 480,
+          "width": 400,
+          "top_inset": 7
         },
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
           "x": 2600,
-          "y": 650,
-          "width": 460,
-          "top_inset": 37
+          "y": 680,
+          "width": 640,
+          "top_inset": 52
         },
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
           "x": 3300,
-          "y": 430,
-          "width": 300,
-          "top_inset": 5
+          "y": 480,
+          "width": 400,
+          "top_inset": 7
         }
       ],
       "waves": [
@@ -231,7 +239,7 @@
             {
               "monster": "honey_slime",
               "x": 2600,
-              "y": 650
+              "y": 680
             }
           ]
         },
@@ -252,7 +260,7 @@
             {
               "monster": "sprout_mushroom",
               "x": 3300,
-              "y": 430
+              "y": 480
             }
           ]
         },
@@ -273,6 +281,16 @@
             {
               "monster": "corrupted_seedling",
               "x": 3400
+            },
+            {
+              "monster": "honey_slime",
+              "x": 2600,
+              "y": 680
+            },
+            {
+              "monster": "sprout_mushroom",
+              "x": 3300,
+              "y": 480
             }
           ]
         }
@@ -303,30 +321,30 @@
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/root.png",
           "x": 800,
-          "y": 650,
-          "width": 400,
-          "top_inset": 44
+          "y": 680,
+          "width": 540,
+          "top_inset": 59
         },
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
           "x": 1500,
-          "y": 650,
-          "width": 300,
-          "top_inset": 5
+          "y": 680,
+          "width": 400,
+          "top_inset": 7
         },
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/root.png",
           "x": 2300,
-          "y": 430,
-          "width": 400,
-          "top_inset": 44
+          "y": 480,
+          "width": 540,
+          "top_inset": 59
         },
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
           "x": 3000,
-          "y": 650,
-          "width": 460,
-          "top_inset": 37
+          "y": 680,
+          "width": 640,
+          "top_inset": 52
         }
       ],
       "waves": [
@@ -343,7 +361,7 @@
             {
               "monster": "honey_slime",
               "x": 3000,
-              "y": 650
+              "y": 680
             }
           ]
         },
@@ -356,7 +374,7 @@
             {
               "monster": "sprout_mushroom",
               "x": 2300,
-              "y": 430
+              "y": 480
             },
             {
               "monster": "sprout_mushroom",
@@ -385,7 +403,16 @@
             {
               "monster": "sprout_mushroom",
               "x": 1500,
-              "y": 650
+              "y": 680
+            },
+            {
+              "monster": "honey_slime",
+              "x": 3000,
+              "y": 680
+            },
+            {
+              "monster": "honey_slime",
+              "x": 1900
             }
           ]
         }
@@ -416,37 +443,37 @@
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
           "x": 1000,
-          "y": 650,
-          "width": 460,
-          "top_inset": 37
+          "y": 680,
+          "width": 640,
+          "top_inset": 52
         },
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
           "x": 1650,
-          "y": 430,
-          "width": 300,
-          "top_inset": 5
+          "y": 480,
+          "width": 400,
+          "top_inset": 7
         },
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
           "x": 2300,
-          "y": 650,
-          "width": 460,
-          "top_inset": 37
+          "y": 680,
+          "width": 640,
+          "top_inset": 52
         },
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
           "x": 3000,
-          "y": 430,
-          "width": 300,
-          "top_inset": 5
+          "y": 480,
+          "width": 400,
+          "top_inset": 7
         },
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
           "x": 3600,
-          "y": 650,
-          "width": 460,
-          "top_inset": 37
+          "y": 680,
+          "width": 640,
+          "top_inset": 52
         }
       ],
       "waves": [
@@ -459,7 +486,7 @@
             {
               "monster": "honey_slime",
               "x": 1000,
-              "y": 650
+              "y": 680
             }
           ]
         },
@@ -480,7 +507,7 @@
             {
               "monster": "honey_slime",
               "x": 3600,
-              "y": 650
+              "y": 680
             }
           ]
         },
@@ -501,7 +528,16 @@
             {
               "monster": "honey_slime",
               "x": 3000,
-              "y": 430
+              "y": 480
+            },
+            {
+              "monster": "honey_slime",
+              "x": 2300,
+              "y": 680
+            },
+            {
+              "monster": "corrupted_seedling",
+              "x": 1200
             }
           ]
         }
@@ -532,23 +568,23 @@
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
           "x": 1200,
-          "y": 650,
-          "width": 300,
-          "top_inset": 5
+          "y": 680,
+          "width": 400,
+          "top_inset": 7
         },
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
           "x": 1900,
-          "y": 430,
-          "width": 460,
-          "top_inset": 37
+          "y": 480,
+          "width": 640,
+          "top_inset": 52
         },
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
           "x": 2700,
-          "y": 650,
-          "width": 300,
-          "top_inset": 5
+          "y": 680,
+          "width": 400,
+          "top_inset": 7
         }
       ],
       "waves": [
@@ -565,7 +601,7 @@
             {
               "monster": "honey_slime",
               "x": 2700,
-              "y": 650
+              "y": 680
             }
           ]
         },
@@ -582,7 +618,7 @@
             {
               "monster": "sprout_mushroom",
               "x": 1900,
-              "y": 430
+              "y": 480
             },
             {
               "monster": "honey_slime",
@@ -607,6 +643,16 @@
             {
               "monster": "fire_beetle",
               "x": 600
+            },
+            {
+              "monster": "honey_slime",
+              "x": 2700,
+              "y": 680
+            },
+            {
+              "monster": "sprout_mushroom",
+              "x": 1900,
+              "y": 480
             }
           ]
         }
@@ -637,9 +683,9 @@
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
           "x": 1200,
-          "y": 650,
-          "width": 300,
-          "top_inset": 5
+          "y": 680,
+          "width": 400,
+          "top_inset": 7
         }
       ],
       "waves": [],
@@ -650,7 +696,7 @@
       "chest_x": 1200,
       "reward_on_clear": false,
       "kind": "treasure",
-      "chest_y": 650
+      "chest_y": 680
     },
     {
       "id": "lair",
@@ -672,16 +718,16 @@
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
           "x": 1000,
-          "y": 650,
-          "width": 460,
-          "top_inset": 37
+          "y": 680,
+          "width": 640,
+          "top_inset": 52
         },
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
           "x": 2000,
-          "y": 650,
-          "width": 460,
-          "top_inset": 37
+          "y": 680,
+          "width": 640,
+          "top_inset": 52
         }
       ],
       "waves": [
@@ -702,7 +748,7 @@
             {
               "monster": "honey_slime",
               "x": 2000,
-              "y": 650
+              "y": 680
             }
           ]
         },
@@ -719,7 +765,7 @@
             {
               "monster": "honey_slime",
               "x": 1000,
-              "y": 650
+              "y": 680
             },
             {
               "monster": "sprout_mushroom",
@@ -744,7 +790,7 @@
             {
               "monster": "honey_slime",
               "x": 2000,
-              "y": 650
+              "y": 680
             },
             {
               "monster": "sprout_mushroom",
@@ -782,9 +828,9 @@
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
           "x": 1440,
-          "y": 650,
-          "width": 300,
-          "top_inset": 5
+          "y": 680,
+          "width": 400,
+          "top_inset": 7
         }
       ],
       "waves": [
@@ -801,7 +847,7 @@
             {
               "monster": "honey_slime",
               "x": 1440,
-              "y": 650
+              "y": 680
             }
           ]
         },
@@ -851,58 +897,65 @@
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
           "x": 600,
-          "y": 1745,
-          "width": 300,
-          "top_inset": 5
+          "y": 1770,
+          "width": 400,
+          "top_inset": 7
         },
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/root.png",
-          "x": 1050,
-          "y": 1525,
-          "width": 400,
-          "top_inset": 44
+          "x": 1000,
+          "y": 1575,
+          "width": 540,
+          "top_inset": 59
         },
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
-          "x": 1500,
-          "y": 1305,
-          "width": 460,
-          "top_inset": 37
+          "x": 1450,
+          "y": 1380,
+          "width": 640,
+          "top_inset": 52
         },
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/root.png",
-          "x": 2000,
-          "y": 1085,
-          "width": 400,
-          "top_inset": 44
+          "x": 1900,
+          "y": 1185,
+          "width": 540,
+          "top_inset": 59
         },
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
-          "x": 2450,
-          "y": 865,
-          "width": 300,
-          "top_inset": 5
+          "x": 2350,
+          "y": 990,
+          "width": 400,
+          "top_inset": 7
         },
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
-          "x": 1950,
-          "y": 645,
-          "width": 460,
-          "top_inset": 37
+          "x": 1900,
+          "y": 795,
+          "width": 640,
+          "top_inset": 52
         },
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
-          "x": 1400,
-          "y": 425,
-          "width": 300,
-          "top_inset": 5
+          "x": 1450,
+          "y": 600,
+          "width": 400,
+          "top_inset": 7
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/root.png",
+          "x": 1000,
+          "y": 405,
+          "width": 540,
+          "top_inset": 59
         },
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
           "x": 900,
-          "y": 205,
-          "width": 460,
-          "top_inset": 37
+          "y": 210,
+          "width": 640,
+          "top_inset": 52
         }
       ],
       "waves": [
@@ -923,7 +976,7 @@
             {
               "monster": "sprout_mushroom",
               "x": 1500,
-              "y": 1305
+              "y": 1380
             }
           ]
         },
@@ -932,17 +985,17 @@
             {
               "monster": "honey_slime",
               "x": 2000,
-              "y": 1085
+              "y": 1185
             },
             {
               "monster": "sprout_mushroom",
               "x": 1400,
-              "y": 425
+              "y": 600
             },
             {
               "monster": "corrupted_seedling",
               "x": 2400,
-              "y": 865
+              "y": 990
             },
             {
               "monster": "honey_slime",
@@ -955,7 +1008,7 @@
       "kind": "fight",
       "up": {
         "x": 900,
-        "width": 460,
+        "width": 640,
         "spawn_x": 900,
         "spawn_y": -20
       },
@@ -981,58 +1034,65 @@
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
           "x": 2300,
-          "y": 1745,
-          "width": 300,
-          "top_inset": 5
+          "y": 1770,
+          "width": 400,
+          "top_inset": 7
         },
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/root.png",
           "x": 1850,
-          "y": 1525,
-          "width": 400,
-          "top_inset": 44
+          "y": 1575,
+          "width": 540,
+          "top_inset": 59
         },
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
           "x": 1400,
-          "y": 1305,
-          "width": 460,
-          "top_inset": 37
+          "y": 1380,
+          "width": 640,
+          "top_inset": 52
         },
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/root.png",
-          "x": 900,
-          "y": 1085,
-          "width": 400,
-          "top_inset": 44
+          "x": 950,
+          "y": 1185,
+          "width": 540,
+          "top_inset": 59
         },
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
-          "x": 450,
-          "y": 865,
-          "width": 300,
-          "top_inset": 5
+          "x": 500,
+          "y": 990,
+          "width": 400,
+          "top_inset": 7
         },
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
-          "x": 900,
-          "y": 645,
-          "width": 460,
-          "top_inset": 37
+          "x": 950,
+          "y": 795,
+          "width": 640,
+          "top_inset": 52
         },
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
-          "x": 1450,
-          "y": 425,
-          "width": 300,
-          "top_inset": 5
+          "x": 1400,
+          "y": 600,
+          "width": 400,
+          "top_inset": 7
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/root.png",
+          "x": 1850,
+          "y": 405,
+          "width": 540,
+          "top_inset": 59
         },
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
           "x": 2000,
-          "y": 205,
-          "width": 460,
-          "top_inset": 37
+          "y": 210,
+          "width": 640,
+          "top_inset": 52
         }
       ],
       "waves": [
@@ -1049,7 +1109,7 @@
             {
               "monster": "honey_slime",
               "x": 1400,
-              "y": 1305
+              "y": 1380
             },
             {
               "monster": "corrupted_seedling",
@@ -1066,12 +1126,12 @@
             {
               "monster": "sprout_mushroom",
               "x": 900,
-              "y": 1085
+              "y": 1185
             },
             {
               "monster": "honey_slime",
               "x": 1450,
-              "y": 425
+              "y": 600
             },
             {
               "monster": "corrupted_seedling",
@@ -1084,7 +1144,7 @@
       "kind": "fight",
       "up": {
         "x": 2000,
-        "width": 460,
+        "width": 640,
         "spawn_x": 2000,
         "spawn_y": -20
       },
@@ -1233,15 +1293,15 @@
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
           "x": 900,
           "y": 625,
-          "width": 300,
-          "top_inset": 5
+          "width": 400,
+          "top_inset": 7
         },
         {
           "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
           "x": 1980,
           "y": 625,
-          "width": 300,
-          "top_inset": 5
+          "width": 400,
+          "top_inset": 7
         }
       ],
       "waves": [
@@ -1256,11 +1316,341 @@
       ],
       "crates": [],
       "kind": "boss"
+    },
+    {
+      "id": "thorns",
+      "width": 3840,
+      "ground_y": 885,
+      "layers": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/back.png",
+          "scroll_scale": 0.3,
+          "z_index": -30
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/wall_c.png",
+          "scroll_scale": 1.0,
+          "z_index": -10
+        }
+      ],
+      "platforms": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/root.png",
+          "x": 900,
+          "y": 680,
+          "width": 540,
+          "top_inset": 59
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
+          "x": 1700,
+          "y": 480,
+          "width": 640,
+          "top_inset": 52
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
+          "x": 2500,
+          "y": 680,
+          "width": 400,
+          "top_inset": 7
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
+          "x": 3200,
+          "y": 480,
+          "width": 640,
+          "top_inset": 52
+        }
+      ],
+      "waves": [
+        {
+          "spawns": [
+            {
+              "monster": "honey_slime",
+              "x": 1500
+            },
+            {
+              "monster": "honey_slime",
+              "x": 1900
+            },
+            {
+              "monster": "sprout_mushroom",
+              "x": 1700,
+              "y": 480
+            }
+          ]
+        },
+        {
+          "spawns": [
+            {
+              "monster": "little_treant",
+              "x": 2600
+            },
+            {
+              "monster": "corrupted_seedling",
+              "x": 1400
+            },
+            {
+              "monster": "honey_slime",
+              "x": 900,
+              "y": 680
+            },
+            {
+              "monster": "sprout_mushroom",
+              "x": 3200,
+              "y": 480
+            }
+          ]
+        },
+        {
+          "spawns": [
+            {
+              "monster": "fire_beetle",
+              "x": 3500
+            },
+            {
+              "monster": "honey_slime",
+              "x": 1200
+            },
+            {
+              "monster": "honey_slime",
+              "x": 2500,
+              "y": 680
+            },
+            {
+              "monster": "corrupted_seedling",
+              "x": 2200
+            },
+            {
+              "monster": "sprout_mushroom",
+              "x": 2900
+            },
+            {
+              "monster": "honey_slime",
+              "x": 1700,
+              "y": 480
+            }
+          ]
+        }
+      ],
+      "crates": [
+        400,
+        2500
+      ],
+      "kind": "fight"
+    },
+    {
+      "id": "bramble_bridge",
+      "width": 3360,
+      "ground_y": 885,
+      "layers": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/back.png",
+          "scroll_scale": 0.3,
+          "z_index": -30
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/wall_b.png",
+          "scroll_scale": 1.0,
+          "z_index": -10
+        }
+      ],
+      "platforms": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
+          "x": 800,
+          "y": 680,
+          "width": 640,
+          "top_inset": 52
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
+          "x": 1700,
+          "y": 680,
+          "width": 640,
+          "top_inset": 52
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
+          "x": 2600,
+          "y": 680,
+          "width": 640,
+          "top_inset": 52
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
+          "x": 1250,
+          "y": 480,
+          "width": 400,
+          "top_inset": 7
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
+          "x": 2150,
+          "y": 480,
+          "width": 400,
+          "top_inset": 7
+        }
+      ],
+      "waves": [
+        {
+          "spawns": [
+            {
+              "monster": "corrupted_seedling",
+              "x": 1600
+            },
+            {
+              "monster": "corrupted_seedling",
+              "x": 2400
+            },
+            {
+              "monster": "honey_slime",
+              "x": 1700,
+              "y": 680
+            }
+          ]
+        },
+        {
+          "spawns": [
+            {
+              "monster": "sprout_mushroom",
+              "x": 1200
+            },
+            {
+              "monster": "sprout_mushroom",
+              "x": 2800
+            },
+            {
+              "monster": "honey_slime",
+              "x": 2600,
+              "y": 680
+            },
+            {
+              "monster": "honey_slime",
+              "x": 800,
+              "y": 680
+            }
+          ]
+        },
+        {
+          "spawns": [
+            {
+              "monster": "little_treant",
+              "x": 1700
+            },
+            {
+              "monster": "fire_beetle",
+              "x": 3000
+            },
+            {
+              "monster": "corrupted_seedling",
+              "x": 2200
+            },
+            {
+              "monster": "honey_slime",
+              "x": 1250,
+              "y": 480
+            },
+            {
+              "monster": "honey_slime",
+              "x": 2150,
+              "y": 480
+            },
+            {
+              "monster": "sprout_mushroom",
+              "x": 600
+            }
+          ]
+        }
+      ],
+      "crates": [
+        1250,
+        3000
+      ],
+      "kind": "fight"
+    },
+    {
+      "id": "trail",
+      "width": 4320,
+      "ground_y": 885,
+      "layers": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/back.png",
+          "scroll_scale": 0.3,
+          "z_index": -30
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/wall_a.png",
+          "scroll_scale": 1.0,
+          "z_index": -10
+        }
+      ],
+      "platforms": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
+          "x": 700,
+          "y": 680,
+          "width": 400,
+          "top_inset": 7
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/root.png",
+          "x": 1200,
+          "y": 480,
+          "width": 540,
+          "top_inset": 59
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
+          "x": 1750,
+          "y": 680,
+          "width": 400,
+          "top_inset": 7
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
+          "x": 2350,
+          "y": 480,
+          "width": 640,
+          "top_inset": 52
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
+          "x": 2950,
+          "y": 680,
+          "width": 400,
+          "top_inset": 7
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/root.png",
+          "x": 3450,
+          "y": 480,
+          "width": 540,
+          "top_inset": 59
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
+          "x": 3950,
+          "y": 280,
+          "width": 640,
+          "top_inset": 52
+        }
+      ],
+      "waves": [],
+      "crates": [
+        1200,
+        2950
+      ],
+      "kind": "treasure",
+      "chest_x": 3950,
+      "chest_y": 280,
+      "reward_on_clear": false
     }
   ],
   "layouts": [
     {
-      "id": "nest_branch",
+      "id": "long_nest",
       "cells": [
         {
           "x": 0,
@@ -1278,14 +1668,9 @@
           "kind": "fight"
         },
         {
-          "x": 2,
-          "y": -1,
-          "kind": "sky"
-        },
-        {
           "x": 3,
           "y": 0,
-          "kind": "treasure"
+          "kind": "trial"
         },
         {
           "x": 4,
@@ -1293,19 +1678,54 @@
           "kind": "fight"
         },
         {
+          "x": 4,
+          "y": -1,
+          "kind": "sky"
+        },
+        {
           "x": 5,
+          "y": 0,
+          "kind": "fight"
+        },
+        {
+          "x": 6,
+          "y": 0,
+          "kind": "treasure"
+        },
+        {
+          "x": 7,
+          "y": 0,
+          "kind": "fight"
+        },
+        {
+          "x": 8,
+          "y": 0,
+          "kind": "fight"
+        },
+        {
+          "x": 9,
           "y": 0,
           "kind": "trial"
         },
         {
-          "x": 6,
+          "x": 10,
+          "y": 0,
+          "kind": "fight"
+        },
+        {
+          "x": 11,
+          "y": 0,
+          "kind": "treasure"
+        },
+        {
+          "x": 12,
           "y": 0,
           "kind": "boss"
         }
       ]
     },
     {
-      "id": "high_road",
+      "id": "long_high_road",
       "cells": [
         {
           "x": 0,
@@ -1349,13 +1769,38 @@
         },
         {
           "x": 6,
+          "y": 0,
+          "kind": "fight"
+        },
+        {
+          "x": 7,
+          "y": 0,
+          "kind": "fight"
+        },
+        {
+          "x": 8,
+          "y": 0,
+          "kind": "trial"
+        },
+        {
+          "x": 9,
+          "y": 0,
+          "kind": "fight"
+        },
+        {
+          "x": 10,
+          "y": 0,
+          "kind": "treasure"
+        },
+        {
+          "x": 11,
           "y": 0,
           "kind": "boss"
         }
       ]
     },
     {
-      "id": "early_climb",
+      "id": "long_climbs",
       "cells": [
         {
           "x": 0,
@@ -1380,20 +1825,50 @@
         {
           "x": 3,
           "y": 0,
-          "kind": "trial"
+          "kind": "treasure"
         },
         {
           "x": 4,
           "y": 0,
-          "kind": "fight"
+          "kind": "trial"
         },
         {
           "x": 5,
           "y": 0,
-          "kind": "treasure"
+          "kind": "fight"
         },
         {
           "x": 6,
+          "y": 0,
+          "kind": "fight"
+        },
+        {
+          "x": 7,
+          "y": 0,
+          "kind": "fight"
+        },
+        {
+          "x": 7,
+          "y": -1,
+          "kind": "sky"
+        },
+        {
+          "x": 8,
+          "y": 0,
+          "kind": "trial"
+        },
+        {
+          "x": 9,
+          "y": 0,
+          "kind": "fight"
+        },
+        {
+          "x": 10,
+          "y": 0,
+          "kind": "treasure"
+        },
+        {
+          "x": 11,
           "y": 0,
           "kind": "boss"
         }

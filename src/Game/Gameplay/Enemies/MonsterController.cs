@@ -77,6 +77,7 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
     private Label _notice = null!;
     private int _noticeTicks;
     private MonsterHealthBar? _healthBar;
+    private AttackTurns? _turns;
 
     private const string MonsterGroup = "monsters";
     private const int NoticeShowExtraTicks = 12;
@@ -195,6 +196,18 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         }
     }
 
+    /// <summary>Joins the room's attack turns (bosses do not: they always attack when ready).</summary>
+    public void ShareTurns(AttackTurns turns)
+    {
+        if (_def.Ai.Moves is not null)
+        {
+            return;
+        }
+
+        _turns = turns;
+        _brain.Crowd = _feel.MonsterCrowd;
+    }
+
     /// <summary>A nearby monster saw Lumi: this one notices her too.</summary>
     public void HearAlert()
     {
@@ -305,7 +318,7 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         var patrol = 0f;
         if (fighting || _brain.State is not (MonsterState.Idle or MonsterState.Chase))
         {
-            _brain.Step(deltaX, onFloor, GlobalPosition.Y - _hoverY, canReach);
+            _brain.Step(deltaX, onFloor, GlobalPosition.Y - _hoverY, canReach, _turns?.MayAttack(this) ?? true);
         }
         else
         {
@@ -316,6 +329,11 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         if (!wasWindup && _brain.State == MonsterState.Windup && !IsHidden)
         {
             AudioService.Play(SoundIds.MonsterAttack);
+            _turns?.Take(this);
+        }
+        else if (_brain.State is not (MonsterState.Windup or MonsterState.Attack or MonsterState.Recover))
+        {
+            _turns?.Release(this);
         }
 
         if (_brain.WantsHop)
@@ -522,6 +540,7 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
     private void BeginHeal()
     {
         _healing = true;
+        _turns?.Release(this);
         AudioService.Play(SoundIds.MonsterHealed);
         _hurtbox.SetDeferred(Area2D.PropertyName.Monitorable, false);
         _sprite.Texture = _healed;

@@ -1,5 +1,6 @@
 {
   "id": "honey_labyrinth",
+  "icon_folder": "assets/ui/icons/amulets",
   "amulets": [
     {
       "id": "honey_edge",

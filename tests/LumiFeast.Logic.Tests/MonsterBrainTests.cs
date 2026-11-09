@@ -350,4 +350,30 @@ public class MonsterBrainTests
         brain.Step(50, true);
         Assert.Equal((MonsterState.Idle, 0f), (brain.State, brain.MoveVelocityX));
     }
+
+    [Fact]
+    public void WaitsForATurnJustOutsideItsRange()
+    {
+        var brain = new MonsterBrain(Ai(), Stats) { Crowd = new MonsterCrowdDef(2, 160, 0.5f) };
+        brain.Step(80, true, mayAttack: false);
+        Assert.NotEqual(MonsterState.Windup, brain.State);
+        Assert.Equal(-100, brain.MoveVelocityX); // steps back, facing Lumi on its right
+        brain.Step(220, true, mayAttack: false);
+        Assert.Equal(0, brain.MoveVelocityX);
+        brain.Step(80, true);
+        Assert.Equal(MonsterState.Windup, brain.State);
+    }
+
+    [Fact]
+    public void AttackTurnsLetOnlyAFewAttackAtOnce()
+    {
+        var turns = new AttackTurns(2);
+        object a = new(), b = new(), c = new();
+        turns.Take(a);
+        turns.Take(b);
+        Assert.False(turns.MayAttack(c));
+        Assert.True(turns.MayAttack(a));
+        turns.Release(a);
+        Assert.True(turns.MayAttack(c));
+    }
 }

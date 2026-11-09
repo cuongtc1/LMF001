@@ -78,6 +78,8 @@ public partial class PlayerController : CharacterBody2D, IDamageable
 
     public SkillLoadout Loadout { get; private set; } = null!;
 
+    public string SkillSetId => _skills.Id;
+
     /// <summary>The amulets of the current run.</summary>
     public RunModifiers Modifiers { get; set; } = new();
 

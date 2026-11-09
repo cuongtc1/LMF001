@@ -11,6 +11,11 @@
   "shake_decay": 60,
   "combo_reset_ticks": 120,
   "mana_target_shares": [1.0, 0.3, 0.1],
+  "monster_crowd": {
+    "max_attackers": 2,
+    "wait_margin": 160,
+    "back_off_speed_scale": 0.45
+  },
   "monster_awareness": {
     "sight_range": 950,
     "sight_height": 300,

@@ -1,5 +1,6 @@
 {
   "id": "lumi_skills",
+  "icon_folder": "assets/ui/icons/skills",
   "slots": 4,
   "skills": [
     {

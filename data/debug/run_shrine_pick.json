@@ -1,0 +1,26 @@
+{
+  "god_mode": true,
+  "end_tick": 200,
+  "screenshots": [
+    120
+  ],
+  "steps": [
+    {
+      "tick": 20,
+      "action": "teleport",
+      "x": 1350,
+      "y": 880
+    },
+    {
+      "tick": 60,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 62,
+      "action": "attack_light",
+      "pressed": false
+    }
+  ],
+  "pick_rewards": false
+}

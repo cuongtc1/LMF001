@@ -8,6 +8,7 @@ using LumiFeast.Game.Gameplay.Player;
 using LumiFeast.Game.Gameplay.World;
 using LumiFeast.Game.Systems.Debug;
 using LumiFeast.Game.UI;
+using LumiFeast.Logic.Enemies;
 using LumiFeast.Logic.Combat;
 using LumiFeast.Logic.Common;
 using LumiFeast.Logic.Data;
@@ -61,6 +62,7 @@ public partial class RunStage : Node2D
 
     private readonly List<MonsterController> _monsters = [];
     private readonly List<Parallax2D> _screenLayers = [];
+    private AttackTurns _turns = new(1);
     private readonly List<Node2D> _gates = [];
     private readonly RunStats _stats = new();
     private RunDef _run = null!;
@@ -132,6 +134,7 @@ public partial class RunStage : Node2D
 
         _hud = new PrototypeHud();
         AddChild(_hud);
+        _hud.AmuletSetId = _run.AmuletSet;
         _hud.Setup(_player);
         _minimap = new Minimap();
         AddChild(_minimap);
@@ -341,6 +344,7 @@ public partial class RunStage : Node2D
         _camera.ResetSmoothing();
 
         _waves = new WaveRunner(_room.Waves.Count, _run.WaveDelayTicks);
+        _turns = new AttackTurns(GameServices.Data.Feel.MonsterCrowd.MaxAttackers);
         _challengeSettled = false;
         _challenge = _room.Challenge is { } trial && !State.Cleared ? new ChallengeRun(trial) : null;
         _shade.Color = Colors.White;
@@ -663,6 +667,7 @@ public partial class RunStage : Node2D
         {
             var monster = MonsterSpawner.Spawn(RoomNode, spawn.Monster, spawn.X, spawn.Y ?? _room.GroundY, _run.Tier + (_challenge?.Def.TierBonus ?? 0), _gameFeel, _player);
             monster.SetRoomFloor(_room.GroundY);
+            monster.ShareTurns(_turns);
             monster.Healed += OnHealed;
             _monsters.Add(monster);
             if (InBossRoom)
@@ -774,9 +779,18 @@ public partial class RunStage : Node2D
         }
 
         var messages = GameServices.Messages;
-        var cards = picks.Select(key => (messages.Get(key), messages.Get(key + MessageKeys.DescriptionSuffix) + "\n" + (key.StartsWith(MessageKeys.SkillPrefix, System.StringComparison.Ordinal)
-            ? messages.Get(MessageKeys.RewardSkill, skills.First(skill => MessageKeys.SkillPrefix + skill.Id == key).MpCost)
-            : messages.Get(MessageKeys.RewardAmulet)))).ToList();
+        var skillSet = data.Character(GameConstants.PlayerCharacterId).Combat.SkillSet;
+        var cards = picks.Select(key =>
+        {
+            var isSkill = key.StartsWith(MessageKeys.SkillPrefix, System.StringComparison.Ordinal);
+            var body = messages.Get(key + MessageKeys.DescriptionSuffix) + "\n" + (isSkill
+                ? messages.Get(MessageKeys.RewardSkill, skills.First(skill => MessageKeys.SkillPrefix + skill.Id == key).MpCost)
+                : messages.Get(MessageKeys.RewardAmulet));
+            var picture = isSkill
+                ? GameIcons.Skill(skillSet, key[MessageKeys.SkillPrefix.Length..])
+                : GameIcons.Amulet(_run.AmuletSet, key[MessageKeys.AmuletPrefix.Length..]);
+            return (messages.Get(key), body, (Texture2D?)picture);
+        }).ToList();
         _rewardPending = true;
         _player.InputPaused = true;
         _picker.Open(cards, index =>
@@ -797,7 +811,7 @@ public partial class RunStage : Node2D
             _player.InputPaused = false;
             onPicked?.Invoke();
         });
-        if (AutoplayRunner.RequestedScript() is not null)
+        if (AutoplayRunner.RequestedScript() is not null && AutoplayRunner.PicksRewards)
         {
             _picker.Choose(0);
         }

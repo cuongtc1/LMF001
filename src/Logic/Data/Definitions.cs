@@ -40,7 +40,8 @@ public sealed record SkillDef(string Id, string Attack, float MpCost, int Cooldo
 public sealed record ProjectileDef(string Id, string Sprite, float Speed, int Ticks, float Height, float DamageMultiplier, bool Pierce, float Stagger,
     float Gravity = 0, float RiseSpeed = 0, int RehitTicks = 0, bool Pull = false, float HitSize = 0, float BurstSize = 0);
 
-public sealed record SkillSetDef(string Id, int Slots, IReadOnlyList<SkillDef> Skills, IReadOnlyList<ProjectileDef> Projectiles);
+/// <param name="IconFolder">Each skill's icon is {IconFolder}/{skill id}.png.</param>
+public sealed record SkillSetDef(string Id, int Slots, IReadOnlyList<SkillDef> Skills, IReadOnlyList<ProjectileDef> Projectiles, string IconFolder = "");
 
 /// <param name="MinHpRatio">The effect works only while HP is at least this share of max HP.</param>
 /// <param name="Target">Attack id the effect is limited to (projectiles, finisher effects); null for all.</param>
@@ -49,7 +50,8 @@ public sealed record AmuletEffectDef(string Kind, float Value, string? Target = 
 
 public sealed record AmuletDef(string Id, IReadOnlyList<AmuletEffectDef> Effects);
 
-public sealed record AmuletSetDef(string Id, IReadOnlyList<AmuletDef> Amulets);
+/// <param name="IconFolder">Each amulet's icon is {IconFolder}/{amulet id}.png.</param>
+public sealed record AmuletSetDef(string Id, IReadOnlyList<AmuletDef> Amulets, string IconFolder = "");
 
 /// <param name="DefaultAttack">Clip for attacks that have no animation of their own yet.</param>
 public sealed record SpineViewDef(
@@ -263,7 +265,13 @@ public sealed record GameFeelDef(
     MonsterPoseDef MonsterPose,
     MonsterClimbDef MonsterClimb,
     IReadOnlyList<float> ManaTargetShares,
-    MonsterAwarenessDef MonsterAwareness);
+    MonsterAwarenessDef MonsterAwareness,
+    MonsterCrowdDef MonsterCrowd);
+
+/// <param name="MaxAttackers">Monsters of one room that may attack at the same moment.</param>
+/// <param name="WaitMargin">Monsters waiting for a turn hold about this far outside their attack range.</param>
+/// <param name="BackOffSpeedScale">Share of speed when a waiting monster steps back to its spot.</param>
+public sealed record MonsterCrowdDef(int MaxAttackers, float WaitMargin, float BackOffSpeedScale);
 
 /// <param name="SightRange">How far ahead a monster sees Lumi.</param>
 /// <param name="SightHeight">How far above or below its feet it sees her.</param>
