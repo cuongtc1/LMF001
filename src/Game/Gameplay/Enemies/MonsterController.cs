@@ -93,6 +93,8 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
     /// <summary>Flyers swoop only at Lumi below them, down to about their hover height plus this.</summary>
     private const float FlyerReachBelow = 140;
     private const float FlyerReachAbove = 40;
+    /// <summary>Flank leaps only when Lumi stands on the same floor or ledge.</summary>
+    private const float FlankSameLevel = 30;
     private int _age;
 
     public event Action<MonsterController>? Healed;
@@ -103,7 +105,8 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
 
     private bool IsHidden => _brain.CurrentMove is { Kind: MonsterMoveKinds.Ambush } && _brain.State == MonsterState.Windup;
 
-    public bool BlocksBody => !_healing && !_flying;
+    /// <summary>A monster leaping over Lumi passes through her instead of shoving her along (round 64 bug).</summary>
+    public bool BlocksBody => !_healing && !_flying && _leapVelocityX == 0 && _appearTicks == 0;
 
     /// <summary>Still in the fight: not being healed and not hiding (off-screen arrows point only at these).</summary>
     public bool IsActive => !_healing && !IsHidden && _appearTicks == 0;
@@ -427,6 +430,11 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         }
 
         _flankTimer = crowd.FlankCheckTicks;
+        if (!_player.OnGround || Mathf.Abs(_player.GlobalPosition.Y - GlobalPosition.Y) > FlankSameLevel)
+        {
+            return;
+        }
+
         var side = deltaX > 0 ? -1 : 1;
         var (left, right) = (0, 0);
         foreach (var node in GetTree().GetNodesInGroup(MonsterGroup))

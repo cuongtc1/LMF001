@@ -2,7 +2,7 @@
   "id": "sprout_mushroom",
   "stats": {
     "max_hp": 110,
-    "attack": 40,
+    "attack": 30,
     "defense": 0.1,
     "speed": 130
   },

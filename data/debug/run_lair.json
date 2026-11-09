@@ -4,7 +4,7 @@
   "skills": [
     "jam_spread"
   ],
-  "end_tick": 4200,
+  "end_tick": 6000,
   "screenshots": [
     400,
     1500
@@ -29,6 +29,6 @@
   ],
   "hunt": [
     100,
-    4200
+    6000
   ]
 }

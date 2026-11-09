@@ -2,7 +2,7 @@
   "id": "little_treant",
   "stats": {
     "max_hp": 140,
-    "attack": 40,
+    "attack": 30,
     "defense": 0,
     "speed": 110
   },

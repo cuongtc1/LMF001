@@ -2,7 +2,7 @@
   "id": "honey_king",
   "stats": {
     "max_hp": 420,
-    "attack": 45,
+    "attack": 36,
     "defense": 0,
     "speed": 230
   },

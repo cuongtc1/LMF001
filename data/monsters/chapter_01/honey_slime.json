@@ -2,7 +2,7 @@
   "id": "honey_slime",
   "stats": {
     "max_hp": 60,
-    "attack": 30,
+    "attack": 22,
     "defense": 0,
     "speed": 190
   },

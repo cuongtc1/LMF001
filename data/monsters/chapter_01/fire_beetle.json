@@ -2,7 +2,7 @@
   "id": "fire_beetle",
   "stats": {
     "max_hp": 70,
-    "attack": 35,
+    "attack": 26,
     "defense": 0,
     "speed": 140
   },
