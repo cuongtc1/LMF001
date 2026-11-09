@@ -270,8 +270,22 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats, ulong seed
         }
 
         Facing = deltaX < 0 ? -1 : 1;
+        if (ai.KeepDistance > 0 && distance < ai.KeepDistance && (_cooldown > 0 || !mayAttack))
+        {
+            // ranged monsters back away while they reload or wait for a turn
+            State = MonsterState.Chase;
+            MoveVelocityX = -Facing * stats.Speed;
+            return;
+        }
+
         if (ai.Moves is { Count: > 0 } moves)
         {
+            if (!mayAttack)
+            {
+                State = MonsterState.Chase;
+                return;
+            }
+
             ThinkBoss(moves, distance);
             return;
         }

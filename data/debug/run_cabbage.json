@@ -1,26 +1,46 @@
 {
   "god_mode": true,
-  "room": "hedge",
+  "room": "bramble_bridge",
   "skills": [
     "jam_spread"
   ],
-  "end_tick": 520,
+  "end_tick": 560,
   "screenshots": [
-    120,
-    160,
+    150,
     190,
     210,
     230,
     250,
-    270,
-    300
+    330,
+    420,
+    500
   ],
   "steps": [
     {
-      "tick": 30,
+      "tick": 20,
       "action": "teleport",
-      "x": 1250,
-      "y": 700
+      "x": 1050,
+      "y": 880
+    },
+    {
+      "tick": 24,
+      "action": "move_right",
+      "pressed": true
+    },
+    {
+      "tick": 26,
+      "action": "move_right",
+      "pressed": false
+    },
+    {
+      "tick": 300,
+      "action": "move_right",
+      "pressed": true
+    },
+    {
+      "tick": 360,
+      "action": "move_right",
+      "pressed": false
     }
   ]
 }

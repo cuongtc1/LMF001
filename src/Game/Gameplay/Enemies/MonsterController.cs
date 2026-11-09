@@ -26,7 +26,8 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
     private const int PosePhaseSpread = 97;
     private const float LedgeMargin = 20;
     private const float ThrowForward = 80;
-    private const float ThrowHeight = 180;
+    /// <summary>Throws leave the hands at this share of the art height.</summary>
+    private const float ThrowHeightShare = 0.6f;
     private const float ThrowAimHeight = 100;
     private const float MarkerLift = 30;
     private const int MarkerEveryTicks = 10;
@@ -168,7 +169,7 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         _hitbox.Setup(PhysicsLayers.PlayerHurtbox);
 
         // bosses fight from the start and show their health on the HUD
-        var boss = def.Ai.Moves is not null;
+        var boss = def.Ai.Boss;
         _homeX = position.X;
         _awareness = boss ? null : new MonsterAwareness(feel.MonsterAwareness, player.GlobalPosition.X < position.X ? -1 : 1);
         AddToGroup(MonsterGroup);
@@ -199,7 +200,7 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
     /// <summary>Joins the room's attack turns (bosses do not: they always attack when ready).</summary>
     public void ShareTurns(AttackTurns turns)
     {
-        if (_def.Ai.Moves is not null)
+        if (_def.Ai.Boss)
         {
             return;
         }
@@ -453,7 +454,7 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
 
     private void ThrowProjectile(MonsterMoveDef move)
     {
-        var from = GlobalPosition + new Vector2(_brain.Facing * ThrowForward, -ThrowHeight);
+        var from = GlobalPosition + new Vector2(_brain.Facing * ThrowForward, -_def.Art.Height * ThrowHeightShare);
         var seconds = move.ProjectileTicks / GameConstants.TicksPerSecond;
         var target = _player.GlobalPosition + new Vector2(0, -ThrowAimHeight);
         var velocity = new Vector2((target.X - from.X) / seconds, (target.Y - from.Y) / seconds - move.ProjectileGravity * seconds / 2);

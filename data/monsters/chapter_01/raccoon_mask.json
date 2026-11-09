@@ -135,7 +135,8 @@
         "marker_ticks": 34
       }
     ],
-    "climbs": true
+    "climbs": true,
+    "boss": true
   },
   "attack": {
     "damage_multiplier": 1.0,
