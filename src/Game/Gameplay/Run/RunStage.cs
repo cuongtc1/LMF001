@@ -64,6 +64,9 @@ public partial class RunStage : Node2D
     private readonly List<MonsterController> _monsters = [];
     private readonly List<Parallax2D> _screenLayers = [];
     private AttackTurns _turns = new(1);
+
+    /// <summary>Keys carried in this run (Little Noah keeps them per run too).</summary>
+    private int _keys;
     private readonly List<Node2D> _gates = [];
     private readonly RunStats _stats = new();
     private RunDef _run = null!;
@@ -136,6 +139,8 @@ public partial class RunStage : Node2D
         _hud = new PrototypeHud();
         AddChild(_hud);
         _hud.AmuletSetId = _run.AmuletSet;
+        _hud.KeySprite = _run.Pickups.KeySprite;
+        _hud.Keys = () => _keys;
         _hud.Setup(_player);
         _minimap = new Minimap();
         AddChild(_minimap);
@@ -175,6 +180,7 @@ public partial class RunStage : Node2D
             var autoplay = new AutoplayRunner();
             AddChild(autoplay);
             autoplay.Setup(script, _player);
+            _keys = autoplay.StartKeys;
             if (autoplay.StartRoom is { } room)
             {
                 JumpTo(room, autoplay.StartCleared);
@@ -565,6 +571,16 @@ public partial class RunStage : Node2D
         {
             SpawnChest(name);
         }
+
+        for (var i = 0; i < (_room.Keys?.Count ?? 0); i++)
+        {
+            SpawnKey(i, new Vector2(_room.Keys![i].X, _room.Keys[i].Y));
+        }
+
+        if (_room.KeyOnClear && State.Cleared)
+        {
+            SpawnKey(RoomState.ClearKey, new Vector2(_room.Width / 2, _room.GroundY));
+        }
     }
 
     private void SpawnChest(string name)
@@ -578,12 +594,20 @@ public partial class RunStage : Node2D
         };
         var feet = name == RoomChest ? _room.ChestY ?? _room.GroundY : _room.GroundY;
         var opened = State.Chests[name];
+        var locked = name == RoomChest && _room.ChestLocked;
         var chest = new HittableProp();
         RoomNode.AddChild(chest);
-        chest.Setup(pickups.ChestSprite, height, new Vector2(x, feet), opened ? 0 : 1);
+        chest.Setup(locked ? pickups.LockedChestSprite : pickups.ChestSprite, height, new Vector2(x, feet), opened ? 0 : 1);
         if (opened)
         {
             chest.ChangeSprite(pickups.ChestOpenSprite);
+        }
+
+        if (locked)
+        {
+            // a locked chest takes one key and gives a skill or an amulet
+            chest.CanOpen = () => _keys > 0;
+            chest.Refused += () => _hud.ShowStatus(GameServices.Messages.Get(MessageKeys.RunChestLocked));
         }
 
         chest.Broken += prop =>
@@ -591,7 +615,34 @@ public partial class RunStage : Node2D
             State.Chests[name] = true;
             AudioService.Play(SoundIds.ChestOpen);
             prop.ChangeSprite(pickups.ChestOpenSprite);
-            OfferReward(RewardKind.Amulets);
+            if (locked)
+            {
+                _keys--;
+                GameLog.Info(MessageKeys.RunKeyUsed, _keys);
+            }
+
+            OfferReward(locked ? RewardKind.Any : RewardKind.Amulets);
+        };
+    }
+
+    /// <summary>A key lying in the room (or dropped on clear); taking it adds to the run's keys.</summary>
+    private void SpawnKey(int index, Vector2 feet)
+    {
+        if (State.TakenKeys.Contains(index))
+        {
+            return;
+        }
+
+        var key = new Pickup();
+        RoomNode.AddChild(key);
+        key.Setup(_player, _run.Pickups, TokenKind.Key, feet + new Vector2(0, -TokenLift));
+        var state = State;
+        key.Taken = () =>
+        {
+            state.TakenKeys.Add(index);
+            _keys++;
+            GameLog.Info(MessageKeys.RunKeyFound, _keys);
+            _hud.ShowStatus(GameServices.Messages.Get(MessageKeys.RunKeyFound, _keys));
         };
     }
 
@@ -606,7 +657,7 @@ public partial class RunStage : Node2D
         var token = new Pickup();
         RoomNode.AddChild(token);
         AudioService.Play(SoundIds.CrateBreak);
-        token.Setup(_player, _run.Pickups, _random.NextDouble() < _run.Pickups.HpChance, crate.GlobalPosition + new Vector2(0, -TokenLift));
+        token.Setup(_player, _run.Pickups, _random.NextDouble() < _run.Pickups.HpChance ? TokenKind.Hp : TokenKind.Mp, crate.GlobalPosition + new Vector2(0, -TokenLift));
         crate.ChangeSprite(_run.Pickups.CrateBrokenSprite);
         crate.FadeAway(BrokenCrateSeconds);
     }
@@ -714,6 +765,10 @@ public partial class RunStage : Node2D
         }
 
         _hud.ShowStatus(GameServices.Messages.Get(MessageKeys.RunRoomHealed));
+        if (_room.KeyOnClear)
+        {
+            SpawnKey(RoomState.ClearKey, new Vector2(_player.GlobalPosition.X, _room.GroundY));
+        }
         AudioService.Play(SoundIds.RoomHealed);
         if (_room.RewardOnClear && !State.RewardTaken)
         {

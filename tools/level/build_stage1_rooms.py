@@ -177,6 +177,15 @@ room("honey_court", "elite", 2880, "wall_c",
      waves=[wave(s("honey_king", 1800), s("honey_slime", 700, LOW), s("honey_slime", 2180, LOW))])
 
 
+# round 67: keys on high ledges reward exploring; elite rooms drop one; sky rooms (side paths) hold locked chests
+rooms["hedge"]["keys"] = [{"x": 3300, "y": HIGH}]
+rooms["thorns"]["keys"] = [{"x": 3200, "y": HIGH}]
+rooms["mixed"]["keys"] = [{"x": 1900, "y": HIGH}]
+rooms["honey_court"]["key_on_clear"] = True
+rooms["sky_nest"]["chest_locked"] = True
+rooms["sky_bridge"].update(chest_x=1360, chest_y=660, chest_locked=True)
+
+
 def cells(*items):
     return [{"x": x, "y": y, "kind": kind} for x, y, kind in items]
 

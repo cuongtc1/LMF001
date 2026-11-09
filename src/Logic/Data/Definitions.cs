@@ -355,6 +355,9 @@ public sealed record StageDef(
 /// <param name="Down">An open bottom (sky rooms): Lumi falls out, or arrives from the room below.</param>
 /// <param name="ChestY">Feet of the chest when it stands on a ledge; the ground otherwise.</param>
 /// <param name="HasFloor">Sky rooms have no ground, only ledges.</param>
+/// <param name="Keys">Keys lying in the room (often on a high ledge: exploring pays).</param>
+/// <param name="ChestLocked">The room chest needs a key (Little Noah's locked chests, 23:15).</param>
+/// <param name="KeyOnClear">Healing the room drops a key (elite rooms).</param>
 public sealed record RoomDef(
     string Id,
     float Width,
@@ -371,6 +374,9 @@ public sealed record RoomDef(
     VerticalExitDef? Up = null,
     VerticalExitDef? Down = null,
     float? ChestY = null,
+    IReadOnlyList<SpotDef>? Keys = null,
+    bool ChestLocked = false,
+    bool KeyOnClear = false,
     bool HasFloor = true,
     float Height = RoomDef.ScreenHeight)
 {
@@ -416,7 +422,13 @@ public sealed record PickupDef(
     string LeverSprite,
     string LeverOnSprite,
     float LeverHeight,
-    float BigChestHeight);
+    float BigChestHeight,
+    string KeySprite,
+    float KeyHeight,
+    string LockedChestSprite);
+
+/// <summary>A spot in a room: x and the feet height.</summary>
+public sealed record SpotDef(float X, float Y);
 
 /// <param name="ExitZone">Standing this close to an open edge walks Lumi into the next room.</param>
 /// <param name="EdgeSpawnInset">Where Lumi appears in the next room, measured from the edge she came through.</param>

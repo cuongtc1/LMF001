@@ -32,6 +32,11 @@ public sealed class RoomState
 
     public HashSet<int> BrokenCrates { get; } = [];
 
+    /// <summary>Keys already taken, by their index in the room data; <see cref="ClearKey"/> is the key dropped on clear.</summary>
+    public HashSet<int> TakenKeys { get; } = [];
+
+    public const int ClearKey = -1;
+
     /// <summary>Chests by name ("room", "lair", "bonus"); true once opened.</summary>
     public Dictionary<string, bool> Chests { get; } = [];
 }

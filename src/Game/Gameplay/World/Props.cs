@@ -22,6 +22,12 @@ public partial class HittableProp : Node2D, IDamageable
 
     public event Action<HittableProp>? Broken;
 
+    /// <summary>Asked before the last hit: false keeps the prop shut (a locked chest without a key).</summary>
+    public Func<bool>? CanOpen { get; set; }
+
+    /// <summary>The last hit was refused by <see cref="CanOpen"/>.</summary>
+    public event Action? Refused;
+
     public void Setup(string sprite, float height, Vector2 feet, int hits)
     {
         var texture = GameServices.Texture(sprite);
@@ -57,8 +63,14 @@ public partial class HittableProp : Node2D, IDamageable
             return false;
         }
 
-        _hitsLeft--;
         _flash = FlashTicks;
+        if (_hitsLeft == 1 && CanOpen is { } canOpen && !canOpen())
+        {
+            Refused?.Invoke();
+            return true;
+        }
+
+        _hitsLeft--;
         AudioService.Play(SoundIds.CrateHit);
         if (_hitsLeft == 0)
         {
@@ -76,7 +88,14 @@ public partial class HittableProp : Node2D, IDamageable
     }
 }
 
-/// <summary>An HP or MP token. Lumi takes it by touch, but only when it would help.</summary>
+public enum TokenKind
+{
+    Hp,
+    Mp,
+    Key,
+}
+
+/// <summary>A token Lumi takes by touch: HP and MP only when they would help, keys always.</summary>
 public partial class Pickup : Node2D
 {
     private const float TakeDistance = 90;
@@ -86,16 +105,25 @@ public partial class Pickup : Node2D
 
     private PlayerController _player = null!;
     private PickupDef _def = null!;
-    private bool _hp;
+    private TokenKind _kind;
     private float _age;
 
-    public void Setup(PlayerController player, PickupDef def, bool hp, Vector2 position)
+    /// <summary>Called when Lumi takes it.</summary>
+    public Action? Taken { get; set; }
+
+    public void Setup(PlayerController player, PickupDef def, TokenKind kind, Vector2 position)
     {
         _player = player;
         _def = def;
-        _hp = hp;
-        var texture = GameServices.Texture(hp ? def.HpTokenSprite : def.MpTokenSprite);
-        AddChild(new Sprite2D { Texture = texture, Scale = Vector2.One * Height / texture.GetHeight() });
+        _kind = kind;
+        var (sprite, height) = kind switch
+        {
+            TokenKind.Hp => (def.HpTokenSprite, Height),
+            TokenKind.Mp => (def.MpTokenSprite, Height),
+            _ => (def.KeySprite, def.KeyHeight),
+        };
+        var texture = GameServices.Texture(sprite);
+        AddChild(new Sprite2D { Texture = texture, Scale = Vector2.One * height / texture.GetHeight() });
         GlobalPosition = position;
         ZIndex = 5;
     }
@@ -110,17 +138,22 @@ public partial class Pickup : Node2D
         }
 
         var health = _player.Health;
-        if (_hp && PickupRules.Helps(health.Current, health.Max))
+        switch (_kind)
         {
-            health.Heal(Mathf.RoundToInt(health.Max * _def.HpHeal * _player.Modifiers.Scale(AmuletEffects.TokenHeal)));
-            AudioService.Play(SoundIds.TokenPickup);
-            QueueFree();
+            case TokenKind.Hp when PickupRules.Helps(health.Current, health.Max):
+                health.Heal(Mathf.RoundToInt(health.Max * _def.HpHeal * _player.Modifiers.Scale(AmuletEffects.TokenHeal)));
+                break;
+            case TokenKind.Mp when PickupRules.Helps(_player.Mp, _player.MaxMp):
+                _player.GainMp(_def.MpGain);
+                break;
+            case TokenKind.Key:
+                break;
+            default:
+                return;
         }
-        else if (!_hp && PickupRules.Helps(_player.Mp, _player.MaxMp))
-        {
-            _player.GainMp(_def.MpGain);
-            AudioService.Play(SoundIds.TokenPickup);
-            QueueFree();
-        }
+
+        AudioService.Play(SoundIds.TokenPickup);
+        Taken?.Invoke();
+        QueueFree();
     }
 }

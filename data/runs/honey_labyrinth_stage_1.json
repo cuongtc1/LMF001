@@ -27,7 +27,10 @@
     "lever_sprite": "assets/props/common/lever.png",
     "lever_on_sprite": "assets/props/common/lever_on.png",
     "lever_height": 150,
-    "big_chest_height": 180
+    "big_chest_height": 180,
+    "key_sprite": "assets/props/common/key.png",
+    "key_height": 70,
+    "locked_chest_sprite": "assets/props/common/chest_locked.png"
   },
   "amulet_set": "honey_labyrinth",
   "reward_choices": 3,
@@ -266,7 +269,13 @@
         1150,
         3500
       ],
-      "kind": "fight"
+      "kind": "fight",
+      "keys": [
+        {
+          "x": 3300,
+          "y": 480
+        }
+      ]
     },
     {
       "id": "roots",
@@ -598,7 +607,13 @@
         700,
         3200
       ],
-      "kind": "fight"
+      "kind": "fight",
+      "keys": [
+        {
+          "x": 1900,
+          "y": 480
+        }
+      ]
     },
     {
       "id": "treasure",
@@ -1147,7 +1162,8 @@
         "spawn_y": 895
       },
       "chest_x": 1250,
-      "chest_y": 430
+      "chest_y": 430,
+      "chest_locked": true
     },
     {
       "id": "sky_bridge",
@@ -1207,7 +1223,10 @@
         "width": 1920,
         "spawn_x": 960,
         "spawn_y": 895
-      }
+      },
+      "chest_x": 1360,
+      "chest_y": 660,
+      "chest_locked": true
     },
     {
       "id": "den",
@@ -1375,7 +1394,13 @@
         400,
         2500
       ],
-      "kind": "fight"
+      "kind": "fight",
+      "keys": [
+        {
+          "x": 3200,
+          "y": 480
+        }
+      ]
     },
     {
       "id": "bramble_bridge",
@@ -1640,7 +1665,8 @@
         300,
         2600
       ],
-      "kind": "elite"
+      "kind": "elite",
+      "key_on_clear": true
     }
   ],
   "layouts": [

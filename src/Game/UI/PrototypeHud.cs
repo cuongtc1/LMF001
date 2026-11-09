@@ -32,6 +32,13 @@ public partial class PrototypeHud : CanvasLayer
     private Label? _steamDots;
     private int _shownAmulets = -1;
 
+    /// <summary>Keys carried, shown next to a key icon; null hides the counter (outside a run).</summary>
+    public System.Func<int>? Keys { get; set; }
+
+    public string KeySprite { get; set; } = string.Empty;
+
+    private Label? _keyCount;
+
     /// <summary>The run's amulet set, for icons; empty outside a run.</summary>
     public string AmuletSetId { get; set; } = string.Empty;
 
@@ -63,6 +70,22 @@ public partial class PrototypeHud : CanvasLayer
             _skills.Add(label);
             _skillIcons.Add(iconRect);
             _shownSkills.Add(null);
+        }
+
+        if (Keys is not null)
+        {
+            var keyRow = new HBoxContainer();
+            keyRow.AddChild(new TextureRect
+            {
+                Texture = GameServices.Texture(KeySprite),
+                CustomMinimumSize = Vector2.One * AmuletIconSize,
+                ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+                StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
+            });
+            _keyCount = UiCommon.OutlinedLabel(28);
+            _keyCount.VerticalAlignment = VerticalAlignment.Center;
+            keyRow.AddChild(_keyCount);
+            column.AddChild(keyRow);
         }
 
         _amuletRow = new HBoxContainer();
@@ -106,6 +129,10 @@ public partial class PrototypeHud : CanvasLayer
     public override void _Process(double delta)
     {
         _hp.MaxValue = _player.Health.Max;
+        if (_keyCount is not null && Keys is not null)
+        {
+            _keyCount.Text = "x" + Keys();
+        }
         _hp.Value = _player.Health.Current;
         _mp.Value = _player.Mp;
         _bossBar.Value = _boss?.Current ?? 0;

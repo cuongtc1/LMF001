@@ -1,0 +1,30 @@
+{
+  "god_mode": true,
+  "skills": [
+    "jam_spread"
+  ],
+  "end_tick": 260,
+  "screenshots": [
+    200
+  ],
+  "pick_rewards": false,
+  "room": "sky_nest",
+  "steps": [
+    {
+      "tick": 20,
+      "action": "teleport",
+      "x": 1150,
+      "y": 420
+    },
+    {
+      "tick": 60,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 62,
+      "action": "attack_light",
+      "pressed": false
+    }
+  ]
+}
