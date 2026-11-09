@@ -1,6 +1,6 @@
 {
   "id": "prototype_honey_forest",
-  "tier": 1,
+  "level": 1,
   "width": 5760,
   "ground_y": 918,
   "player_spawn_x": 260,

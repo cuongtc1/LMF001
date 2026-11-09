@@ -14,8 +14,8 @@ public static class GameDataValidator
             Require(mode.EnemyHp > 0 && mode.EnemyDamage > 0 && mode.EnemySpeed > 0 && mode.EnemyCooldown > 0, mode.Id);
         }
 
-        Require(data.Scaling.HpGrowthPerTier > 0 && data.Scaling.DamageGrowthPerTier > 0, "scaling");
-        Require(data.Scaling.MinTier >= 1 && data.Scaling.MaxTier >= data.Scaling.MinTier, "scaling.tier");
+        Require(data.Scaling.HpGrowthPerLevel >= 1 && data.Scaling.DamageGrowthPerLevel >= 1 && data.Scaling.PlayerHpGrowthPerLevel >= 1 && data.Scaling.PlayerAttackGrowthPerLevel >= 1 && data.Scaling.LevelLeadCap >= 0, "scaling");
+        Require(data.Scaling.MinLevel >= 1 && data.Scaling.MaxLevel >= data.Scaling.MinLevel, "scaling.level");
         Require(data.Scaling.Speed.AttackWeight >= 0 && data.Scaling.Speed.MoveWeight >= 0, "scaling.speed");
         Require(data.Scaling.Speed.MaxSpeed >= 1, "scaling.speed.max_speed");
 
@@ -106,7 +106,7 @@ public static class GameDataValidator
             {
                 var challenge = room.Challenge!;
                 Require(Run.ChallengeKinds.All.Contains(challenge.Kind), $"{room.Id}.challenge.kind");
-                Require(room.Waves.Count > 0 && challenge.TierBonus >= 0 && run.Tier + challenge.TierBonus <= data.Scaling.MaxTier, $"{room.Id}.challenge");
+                Require(room.Waves.Count > 0 && challenge.LevelBonus >= 0 && run.Level + challenge.LevelBonus <= data.Scaling.MaxLevel, $"{room.Id}.challenge");
             }
 
             foreach (var spawn in run.Rooms.SelectMany(room => room.Waves).SelectMany(wave => wave.Spawns))
@@ -117,7 +117,7 @@ public static class GameDataValidator
 
         foreach (var stage in data.Stages.Values)
         {
-            Require(stage.Tier >= data.Scaling.MinTier && stage.Tier <= data.Scaling.MaxTier, $"{stage.Id}.tier");
+            Require(stage.Level >= data.Scaling.MinLevel && stage.Level <= data.Scaling.MaxLevel, $"{stage.Id}.level");
             Require(stage.Width > 0, $"{stage.Id}.width");
             var waves = stage.Arena?.Waves.SelectMany(wave => wave.Spawns) ?? [];
             foreach (var spawn in stage.Spawns.Concat(waves))

@@ -1,0 +1,17 @@
+{
+  "god_mode": true,
+  "room": "honey_court",
+  "skills": [
+    "jam_spread"
+  ],
+  "end_tick": 2400,
+  "screenshots": [
+    300,
+    900
+  ],
+  "steps": [],
+  "hunt": [
+    60,
+    2400
+  ]
+}

@@ -105,6 +105,7 @@ public partial class PrototypeHud : CanvasLayer
 
     public override void _Process(double delta)
     {
+        _hp.MaxValue = _player.Health.Max;
         _hp.Value = _player.Health.Current;
         _mp.Value = _player.Mp;
         _bossBar.Value = _boss?.Current ?? 0;

@@ -14,6 +14,10 @@ public partial class DebugPanel : CanvasLayer
     private PanelContainer _panel = null!;
     private Button _difficulty = null!;
     private Button _tier = null!;
+    private Button _level = null!;
+
+    /// <summary>Quick steps for the level buttons (1 to 99 one by one is too slow).</summary>
+    private static readonly int[] LevelSteps = [1, 2, 3, 5, 8, 10, 15, 20, 30, 40, 60, 80, 99];
     private Button _god = null!;
     private Button _airJump = null!;
     private int _stageTier;
@@ -34,6 +38,7 @@ public partial class DebugPanel : CanvasLayer
         column.AddChild(new Label { Text = messages.Get(MessageKeys.DebugTitle) });
         _difficulty = AddButton(column, string.Empty, NextDifficulty);
         _tier = AddButton(column, string.Empty, NextTier);
+        _level = AddButton(column, string.Empty, NextPlayerLevel);
         _god = AddButton(column, string.Empty, ToggleGod);
         _airJump = AddButton(column, string.Empty, ToggleAirJump);
         AddButton(column, messages.Get(MessageKeys.DebugHeal), _player.Heal);
@@ -64,7 +69,7 @@ public partial class DebugPanel : CanvasLayer
         return button;
     }
 
-    private int CurrentTier => GameServices.TierOverride ?? _stageTier;
+    private int CurrentTier => GameServices.LevelOverride ?? _stageTier;
 
     private void NextDifficulty()
     {
@@ -84,11 +89,19 @@ public partial class DebugPanel : CanvasLayer
 
     private void NextTier()
     {
-        var scaling = GameServices.Data.Scaling;
-        GameServices.TierOverride = CurrentTier >= scaling.MaxTier ? scaling.MinTier : CurrentTier + 1;
+        GameServices.LevelOverride = NextStep(CurrentTier);
         Refresh();
         _respawn();
     }
+
+    private void NextPlayerLevel()
+    {
+        GameServices.PlayerLevel = NextStep(GameServices.PlayerLevel);
+        Refresh();
+        _respawn();
+    }
+
+    private static int NextStep(int level) => System.Array.Find(LevelSteps, step => step > level) is var next && next > 0 ? next : LevelSteps[0];
 
     private void ToggleGod()
     {
@@ -107,6 +120,7 @@ public partial class DebugPanel : CanvasLayer
         var messages = GameServices.Messages;
         _difficulty.Text = messages.Get(MessageKeys.DebugDifficulty, GameServices.DifficultyId);
         _tier.Text = messages.Get(MessageKeys.DebugTier, CurrentTier);
+        _level.Text = messages.Get(MessageKeys.DebugPlayerLevel, GameServices.PlayerLevel, _player.Level);
         _god.Text = messages.Get(MessageKeys.DebugGodMode, GameServices.GodMode);
         _airJump.Text = messages.Get(MessageKeys.DebugAirJump, GameServices.AirJumpUnlocked);
     }

@@ -15,7 +15,11 @@ public static class GameServices
 
     public static string DifficultyId { get; set; } = string.Empty;
 
-    public static int? TierOverride { get; set; }
+    /// <summary>Debug: monsters at this level instead of the stage level.</summary>
+    public static int? LevelOverride { get; set; }
+
+    /// <summary>Lumi's level (no saves yet: set from the debug panel or autoplay).</summary>
+    public static int PlayerLevel { get; set; } = 1;
 
     public static bool GodMode { get; set; }
 

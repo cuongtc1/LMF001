@@ -1,0 +1,15 @@
+{
+  "god_mode": false,
+  "room": "gate",
+  "level": 1,
+  "skills": [
+    "jam_spread"
+  ],
+  "end_tick": 1500,
+  "screenshots": [],
+  "steps": [],
+  "hunt": [
+    30,
+    1500
+  ]
+}

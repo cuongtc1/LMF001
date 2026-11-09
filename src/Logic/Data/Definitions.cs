@@ -246,7 +246,21 @@ public sealed record DifficultySetDef(string Default, IReadOnlyList<DifficultyDe
 /// <summary>How much of the speed stat reaches attacks and movement, and its ceiling.</summary>
 public sealed record SpeedRuleDef(float AttackWeight, float MoveWeight, float MaxSpeed);
 
-public sealed record ScalingDef(float HpGrowthPerTier, float DamageGrowthPerTier, int MinTier, int MaxTier, SpeedRuleDef Speed);
+/// <summary>Level scaling shared by Lumi and monsters (16_level_and_power.md). Equal levels keep the same balance.</summary>
+/// <param name="HpGrowthPerLevel">Monster HP grows by this factor per level above 1.</param>
+/// <param name="DamageGrowthPerLevel">Monster attack grows by this factor per level above 1.</param>
+/// <param name="PlayerHpGrowthPerLevel">Lumi's max HP grows by this factor per level.</param>
+/// <param name="PlayerAttackGrowthPerLevel">Lumi's attack grows by this factor per level.</param>
+/// <param name="LevelLeadCap">Inside a dungeon Lumi counts as at most this many levels above the stage level.</param>
+public sealed record ScalingDef(
+    float HpGrowthPerLevel,
+    float DamageGrowthPerLevel,
+    float PlayerHpGrowthPerLevel,
+    float PlayerAttackGrowthPerLevel,
+    int LevelLeadCap,
+    int MinLevel,
+    int MaxLevel,
+    SpeedRuleDef Speed);
 
 public sealed record GameFeelDef(
     int HurtStunTicks,
@@ -333,7 +347,7 @@ public sealed record ArenaDef(float TriggerX, float LeftX, float RightX, int Wav
 
 public sealed record StageDef(
     string Id,
-    int Tier,
+    int Level,
     float Width,
     float GroundY,
     float PlayerSpawnX,
@@ -388,9 +402,9 @@ public sealed record LayoutCellDef(int X, int Y, string Kind);
 /// <summary>A room trial in the style of Little Noah's Monster Lairs and no-hit rooms.</summary>
 /// <param name="Kind">One of <c>ChallengeKinds</c>.</param>
 /// <param name="LeverX">Where the lair lever stands; unused by no_hit.</param>
-/// <param name="TierBonus">Added to the run tier for the trial's monsters.</param>
+/// <param name="LevelBonus">Added to the stage level for the trial's monsters.</param>
 /// <param name="ChestX">Where the reward chest appears on a win.</param>
-public sealed record ChallengeDef(string Kind, float LeverX, int TierBonus, float ChestX);
+public sealed record ChallengeDef(string Kind, float LeverX, int LevelBonus, float ChestX);
 
 /// <param name="HpChance">Share of crates that drop an HP token; the rest drop MP.</param>
 /// <param name="CrateBrokenSprite">Drawn at the same scale as the crate, so both come from one sheet.</param>
@@ -416,7 +430,7 @@ public sealed record PickupDef(
 /// <param name="EdgeSpawnInset">Where Lumi appears in the next room, measured from the edge she came through.</param>
 public sealed record RunDef(
     string Id,
-    int Tier,
+    int Level,
     int WaveDelayTicks,
     float PlayerSpawnX,
     string GateSprite,

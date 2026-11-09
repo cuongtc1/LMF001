@@ -11,10 +11,13 @@ public static class RoomKinds
     public const string Trial = "trial";
     public const string Boss = "boss";
 
+    /// <summary>A mini boss with a few helpers: a calmer, single big fight between the crowded rooms.</summary>
+    public const string Elite = "elite";
+
     /// <summary>Ledges over open sky, no monsters; reached by climbing out of the room below.</summary>
     public const string Sky = "sky";
 
-    public static readonly string[] All = [Entrance, Fight, Treasure, Trial, Boss, Sky];
+    public static readonly string[] All = [Entrance, Fight, Treasure, Trial, Boss, Sky, Elite];
 }
 
 /// <summary>What a room looks like when Lumi comes back to it.</summary>

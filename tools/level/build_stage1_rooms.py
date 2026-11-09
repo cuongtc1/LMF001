@@ -38,11 +38,10 @@ rooms["entrance"].update(width=2880, shrine_x=1500, crates=[900, 2300],
 rooms["gate"].update(
     width=3360,
     platforms=[plat("ledge_short", 1250, LOW), plat("ledge_wide", 2100, LOW), plat("ledge_short", 2700, HIGH)],
-    crates=[600, 2900],
+    crates=[600, 2100, 2900],
     waves=[
-        wave(s("honey_slime", 1300), s("honey_slime", 1700), s("honey_slime", 2100, LOW)),
-        wave(s("sprout_mushroom", 1500), s("honey_slime", 2400), s("honey_slime", 2800), s("sprout_mushroom", 2700, HIGH)),
-        wave(s("honey_slime", 900), s("sprout_mushroom", 2000), s("honey_slime", 3000), s("honey_slime", 2100, LOW), s("sprout_mushroom", 2600), s("honey_slime", 1500)),
+        wave(s("honey_slime", 1300), s("honey_slime", 1900), s("sprout_mushroom", 2700, HIGH)),
+        wave(s("sprout_mushroom", 1500), s("honey_slime", 2400), s("corrupted_seedling", 2900)),
     ])
 
 rooms["hedge"].update(
@@ -61,8 +60,7 @@ rooms["roots"].update(
     crates=[300, 2300],
     waves=[
         wave(s("little_treant", 1600), s("honey_slime", 2000), s("honey_slime", 3000, LOW)),
-        wave(s("little_treant", 900), s("sprout_mushroom", 2300, HIGH), s("sprout_mushroom", 2700), s("honey_slime", 3200)),
-        wave(s("little_treant", 2400), s("honey_slime", 1200), s("corrupted_seedling", 3000), s("sprout_mushroom", 1500, LOW), s("honey_slime", 3000, LOW), s("honey_slime", 1900)),
+        wave(s("little_treant", 2400), s("sprout_mushroom", 1500, LOW), s("honey_slime", 3200), s("corrupted_seedling", 900)),
     ])
 
 rooms["beetle_run"].update(
@@ -172,17 +170,24 @@ room("trail", "treasure", 4320, "wall_a",
      crates=[1200, 2950], chest_x=3950, chest_y=280, reward_on_clear=False)
 
 
+# round 65: a mini boss room, one big calm fight between the crowded rooms
+room("honey_court", "elite", 2880, "wall_c",
+     platforms=[plat("ledge_short", 700, LOW), plat("ledge_short", 2180, LOW)],
+     crates=[300, 2600],
+     waves=[wave(s("honey_king", 1800), s("honey_slime", 700, LOW), s("honey_slime", 2180, LOW))])
+
+
 def cells(*items):
     return [{"x": x, "y": y, "kind": kind} for x, y, kind in items]
 
 
-E, F, T, R, S, B = "entrance", "fight", "trial", "treasure", "sky", "boss"
+E, F, T, R, S, B, M = "entrance", "fight", "trial", "treasure", "sky", "boss", "elite"
 data["layouts"] = [
     {"id": "long_nest", "cells": cells((0, 0, E), (1, 0, F), (2, 0, F), (3, 0, T), (4, 0, F), (4, -1, S), (5, 0, F), (6, 0, R),
-                                       (7, 0, F), (8, 0, F), (9, 0, T), (10, 0, F), (11, 0, R), (12, 0, B))},
+                                       (7, 0, M), (8, 0, F), (9, 0, T), (10, 0, F), (11, 0, R), (12, 0, B))},
     {"id": "long_high_road", "cells": cells((0, 0, E), (1, 0, F), (2, 0, T), (3, 0, F), (3, -1, S), (4, -1, S), (4, 0, F), (5, 0, R),
-                                            (6, 0, F), (7, 0, F), (8, 0, T), (9, 0, F), (10, 0, R), (11, 0, B))},
-    {"id": "long_climbs", "cells": cells((0, 0, E), (1, 0, F), (1, -1, S), (2, 0, F), (3, 0, R), (4, 0, T), (5, 0, F), (6, 0, F),
+                                            (6, 0, F), (7, 0, M), (8, 0, T), (9, 0, F), (10, 0, R), (11, 0, B))},
+    {"id": "long_climbs", "cells": cells((0, 0, E), (1, 0, F), (1, -1, S), (2, 0, F), (3, 0, R), (4, 0, T), (5, 0, F), (6, 0, M),
                                          (7, 0, F), (7, -1, S), (8, 0, T), (9, 0, F), (10, 0, R), (11, 0, B))},
 ]
 data["rooms"] = list(rooms.values())

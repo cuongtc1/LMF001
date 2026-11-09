@@ -1,6 +1,6 @@
 {
   "id": "honey_labyrinth_stage_1",
-  "tier": 1,
+  "level": 1,
   "wave_delay_ticks": 60,
   "player_spawn_x": 200,
   "gate_sprite": "assets/props/common/gate.png",
@@ -113,12 +113,12 @@
             },
             {
               "monster": "honey_slime",
-              "x": 1700
+              "x": 1900
             },
             {
-              "monster": "honey_slime",
-              "x": 2100,
-              "y": 680
+              "monster": "sprout_mushroom",
+              "x": 2700,
+              "y": 480
             }
           ]
         },
@@ -133,48 +133,15 @@
               "x": 2400
             },
             {
-              "monster": "honey_slime",
-              "x": 2800
-            },
-            {
-              "monster": "sprout_mushroom",
-              "x": 2700,
-              "y": 480
-            }
-          ]
-        },
-        {
-          "spawns": [
-            {
-              "monster": "honey_slime",
-              "x": 900
-            },
-            {
-              "monster": "sprout_mushroom",
-              "x": 2000
-            },
-            {
-              "monster": "honey_slime",
-              "x": 3000
-            },
-            {
-              "monster": "honey_slime",
-              "x": 2100,
-              "y": 680
-            },
-            {
-              "monster": "sprout_mushroom",
-              "x": 2600
-            },
-            {
-              "monster": "honey_slime",
-              "x": 1500
+              "monster": "corrupted_seedling",
+              "x": 2900
             }
           ]
         }
       ],
       "crates": [
         600,
+        2100,
         2900
       ],
       "kind": "fight"
@@ -369,36 +336,7 @@
           "spawns": [
             {
               "monster": "little_treant",
-              "x": 900
-            },
-            {
-              "monster": "sprout_mushroom",
-              "x": 2300,
-              "y": 480
-            },
-            {
-              "monster": "sprout_mushroom",
-              "x": 2700
-            },
-            {
-              "monster": "honey_slime",
-              "x": 3200
-            }
-          ]
-        },
-        {
-          "spawns": [
-            {
-              "monster": "little_treant",
               "x": 2400
-            },
-            {
-              "monster": "honey_slime",
-              "x": 1200
-            },
-            {
-              "monster": "corrupted_seedling",
-              "x": 3000
             },
             {
               "monster": "sprout_mushroom",
@@ -407,12 +345,11 @@
             },
             {
               "monster": "honey_slime",
-              "x": 3000,
-              "y": 680
+              "x": 3200
             },
             {
-              "monster": "honey_slime",
-              "x": 1900
+              "monster": "corrupted_seedling",
+              "x": 900
             }
           ]
         }
@@ -803,8 +740,8 @@
       "challenge": {
         "kind": "lair",
         "lever_x": 520,
-        "tier_bonus": 1,
-        "chest_x": 1440
+        "chest_x": 1440,
+        "level_bonus": 4
       },
       "kind": "trial"
     },
@@ -872,8 +809,8 @@
       "challenge": {
         "kind": "no_hit",
         "lever_x": 0,
-        "tier_bonus": 0,
-        "chest_x": 1440
+        "chest_x": 1440,
+        "level_bonus": 0
       },
       "kind": "trial"
     },
@@ -1646,6 +1583,64 @@
       "chest_x": 3950,
       "chest_y": 280,
       "reward_on_clear": false
+    },
+    {
+      "id": "honey_court",
+      "width": 2880,
+      "ground_y": 885,
+      "layers": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/back.png",
+          "scroll_scale": 0.3,
+          "z_index": -30
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/wall_c.png",
+          "scroll_scale": 1.0,
+          "z_index": -10
+        }
+      ],
+      "platforms": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
+          "x": 700,
+          "y": 680,
+          "width": 400,
+          "top_inset": 7
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_short.png",
+          "x": 2180,
+          "y": 680,
+          "width": 400,
+          "top_inset": 7
+        }
+      ],
+      "waves": [
+        {
+          "spawns": [
+            {
+              "monster": "honey_king",
+              "x": 1800
+            },
+            {
+              "monster": "honey_slime",
+              "x": 700,
+              "y": 680
+            },
+            {
+              "monster": "honey_slime",
+              "x": 2180,
+              "y": 680
+            }
+          ]
+        }
+      ],
+      "crates": [
+        300,
+        2600
+      ],
+      "kind": "elite"
     }
   ],
   "layouts": [
@@ -1695,7 +1690,7 @@
         {
           "x": 7,
           "y": 0,
-          "kind": "fight"
+          "kind": "elite"
         },
         {
           "x": 8,
@@ -1775,7 +1770,7 @@
         {
           "x": 7,
           "y": 0,
-          "kind": "fight"
+          "kind": "elite"
         },
         {
           "x": 8,
@@ -1840,7 +1835,7 @@
         {
           "x": 6,
           "y": 0,
-          "kind": "fight"
+          "kind": "elite"
         },
         {
           "x": 7,

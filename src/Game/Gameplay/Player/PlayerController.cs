@@ -64,6 +64,12 @@ public partial class PlayerController : CharacterBody2D, IDamageable
 
     public Health Health { get; private set; } = null!;
 
+    /// <summary>Attack at the level Lumi counts as in this stage.</summary>
+    public int Attack { get; private set; }
+
+    /// <summary>The level Lumi counts as in this stage (her level, capped a few above the stage level).</summary>
+    public int Level { get; private set; } = 1;
+
     public bool OnGround => IsOnFloor();
 
     /// <summary>Left/right held this tick, -1 to 1. Room exits need it, so a lunge never carries Lumi out.</summary>
@@ -98,6 +104,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         _skills = GameServices.Data.SkillSet(def.Combat.SkillSet);
         Loadout = new SkillLoadout(_skills.Slots);
         Health = new Health(def.Stats.MaxHp);
+        Attack = def.Stats.Attack;
         _guard = new GuardState(def.Guard);
         ApplyModifiers();
         GlobalPosition = spawn;
@@ -153,6 +160,16 @@ public partial class PlayerController : CharacterBody2D, IDamageable
     public void LoseMp(float amount) => Mp = Mathf.Max(0, Mp - amount);
 
     public void GainMp(float amount) => Mp = Mathf.Min(MaxMp, Mp + amount);
+
+    /// <summary>Applies Lumi's level for a stage: the lead over the stage level is capped (16_level_and_power.md).</summary>
+    public void ApplyLevel(int playerLevel, int stageLevel)
+    {
+        var scaling = GameServices.Data.Scaling;
+        Level = StatScaler.EffectiveLevel(playerLevel, stageLevel, scaling);
+        var (maxHp, attack) = StatScaler.ForPlayer(_def.Stats, Level, scaling);
+        Health.Resize(maxHp);
+        Attack = attack;
+    }
 
     /// <summary>Steam Bath counters left in this room.</summary>
     public int SteamCountersLeft => _steamUses.Left(SteamLimit);
@@ -373,7 +390,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
     private void LaunchProjectile(string id, AttackDef attack)
     {
         var shot = _skills.Projectiles.First(projectile => projectile.Id == id);
-        var hit = new HitInfo(_def.Stats.Attack, shot.DamageMultiplier * DamageScale(attack), _motor.Facing, attack.KnockbackSpeed, 0, _def.Id, attack.StunTicks, false, shot.Stagger, true)
+        var hit = new HitInfo(Attack, shot.DamageMultiplier * DamageScale(attack), _motor.Facing, attack.KnockbackSpeed, 0, _def.Id, attack.StunTicks, false, shot.Stagger, true)
         {
             BackMultiplier = Modifiers.Scale(AmuletEffects.BackDamage),
         };
@@ -501,7 +518,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         }
 
         var stagger = attack.Stagger * (attack.GuardBreak ? Modifiers.Scale(AmuletEffects.HeavyStagger) : 1);
-        var hit = new HitInfo(_def.Stats.Attack, attack.DamageMultiplier * DamageScale(attack), _motor.Facing, attack.KnockbackSpeed, attack.LaunchSpeed, _def.Id, attack.StunTicks, attack.Knockdown, stagger, attack.GuardBreak)
+        var hit = new HitInfo(Attack, attack.DamageMultiplier * DamageScale(attack), _motor.Facing, attack.KnockbackSpeed, attack.LaunchSpeed, _def.Id, attack.StunTicks, attack.Knockdown, stagger, attack.GuardBreak)
         {
             BackMultiplier = Modifiers.Scale(AmuletEffects.BackDamage),
             Slow = Modifiers.TotalFor(AmuletEffects.AttackSlow, attack.Id),

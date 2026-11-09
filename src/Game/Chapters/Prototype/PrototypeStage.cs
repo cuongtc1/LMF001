@@ -85,7 +85,7 @@ public partial class PrototypeStage : Node2D
 
         var debug = new DebugPanel();
         AddChild(debug);
-        debug.Setup(_player, _stage.Tier, RespawnAll, GoToArena);
+        debug.Setup(_player, _stage.Level, RespawnAll, GoToArena);
 
         if (AutoplayRunner.RequestedScript() is { } script)
         {
@@ -130,7 +130,7 @@ public partial class PrototypeStage : Node2D
         }
     }
 
-    private int CurrentTier => GameServices.TierOverride ?? _stage.Tier;
+    private int CurrentTier => GameServices.LevelOverride ?? _stage.Level;
 
     private void BuildArena()
     {

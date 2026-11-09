@@ -56,6 +56,7 @@ public partial class RunStage : Node2D
 
     private static readonly Color BossColor = new("e2506a");
     private static readonly Color LairColor = new("a86ee0");
+    private static readonly Color EliteColor = new("f28c3b");
     private static readonly Color ChestColor = new("ffcf5a");
     private static readonly Color ShrineColor = new("7fc4ff");
     private static readonly Color TrialColor = new("ff9a4d");
@@ -124,6 +125,7 @@ public partial class RunStage : Node2D
         _player = new PlayerController();
         AddChild(_player);
         _player.Setup(lumi, data.AttackSet(lumi.Combat.AttackSet), data.Feel, _gameFeel, Vector2.Zero);
+        _player.ApplyLevel(GameServices.PlayerLevel, _run.Level);
         _player.Blockers = _monsters;
         _player.AutoRespawn = false;
         _player.Fell += () => ShowResult(false);
@@ -165,7 +167,7 @@ public partial class RunStage : Node2D
 
         var debug = new DebugPanel();
         AddChild(debug);
-        debug.Setup(_player, _run.Tier, StartRun, () => GoTo(_map.Neighbor(_map.Current, 1), 1, 0));
+        debug.Setup(_player, _run.Level, () => { _player.ApplyLevel(GameServices.PlayerLevel, _run.Level); StartRun(); }, () => GoTo(_map.Neighbor(_map.Current, 1), 1, 0));
 
         var script = AutoplayRunner.RequestedScript();
         StartRun();
@@ -174,6 +176,8 @@ public partial class RunStage : Node2D
             var autoplay = new AutoplayRunner();
             AddChild(autoplay);
             autoplay.Setup(script, _player);
+            _player.ApplyLevel(GameServices.PlayerLevel, _run.Level); // the script may set Lumi's level
+            _player.Heal();
             if (autoplay.StartRoom is { } room)
             {
                 JumpTo(room, autoplay.StartCleared);
@@ -452,6 +456,7 @@ public partial class RunStage : Node2D
             (messages.Get(MessageKeys.MapTreasure), ChestColor),
             (messages.Get(MessageKeys.MapLair), LairColor),
             (messages.Get(MessageKeys.MapTrial), TrialColor),
+            (messages.Get(MessageKeys.MapElite), EliteColor),
             (messages.Get(MessageKeys.MapBoss), BossColor),
         };
         _mapScreen.Open(_map, messages.Get(MessageKeys.RunArea), messages.Get(MessageKeys.MapHint), Accents(), legend, Warp);
@@ -481,6 +486,7 @@ public partial class RunStage : Node2D
         {
             var room = _run.Rooms.First(item => item.Id == _map.Rooms[i]);
             Color? accent = room.Kind == RoomKinds.Boss ? BossColor
+                : room.Kind == RoomKinds.Elite ? EliteColor
                 : room.Challenge?.Kind == ChallengeKinds.Lair ? LairColor
                 : room.Challenge is not null ? TrialColor
                 : room.ChestX is not null ? ChestColor
@@ -665,12 +671,13 @@ public partial class RunStage : Node2D
     {
         foreach (var spawn in _room.Waves[_waves.Wave].Spawns)
         {
-            var monster = MonsterSpawner.Spawn(RoomNode, spawn.Monster, spawn.X, spawn.Y ?? _room.GroundY, _run.Tier + (_challenge?.Def.TierBonus ?? 0), _gameFeel, _player);
+            var monster = MonsterSpawner.Spawn(RoomNode, spawn.Monster, spawn.X, spawn.Y ?? _room.GroundY, _run.Level + (_challenge?.Def.LevelBonus ?? 0), _gameFeel, _player);
             monster.SetRoomFloor(_room.GroundY);
             monster.ShareTurns(_turns);
             monster.Healed += OnHealed;
             _monsters.Add(monster);
-            if (InBossRoom)
+            // the mini boss is the first monster of an elite room; it shows on the big bar like a boss
+            if (InBossRoom || (_room.Kind == RoomKinds.Elite && monster == _monsters[0]))
             {
                 _hud.TrackBoss(monster.Health);
             }
