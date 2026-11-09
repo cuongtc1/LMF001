@@ -18,6 +18,7 @@ public static class MessageKeys
     public const string CombatMonsterHealed = "combat.monster_healed";
     public const string CombatStoic = "combat.stoic";
     public const string CombatDizzy = "combat.dizzy";
+    public const string CombatFlank = "combat.flank";
     public const string CombatPhaseTwo = "combat.phase_two";
     public const string CombatGuardBlock = "combat.guard_block";
     public const string CombatGuardPerfect = "combat.guard_perfect";
@@ -86,7 +87,7 @@ public static class MessageKeys
     [
         DataFileMissing, DataFileInvalid, DataUnknownId, DataDuplicateId, DataBadValue, DataLoaded, DataReloaded,
         GameBooted, StageLoaded, AssetMissing, CombatPlayerHit, CombatMonsterHit, CombatMonsterHealed,
-        AutoplayStarted, AutoplayFinished, DebugTitle, DebugDifficulty, DebugTier, DebugGodMode, DebugAirJump, DebugHeal, DebugArena, CombatStoic, CombatDizzy, CombatPhaseTwo, CombatGuardBlock, CombatGuardPerfect, HudBoss, RunArea, RunShrinePrompt, RunRoomHealed, RunMoved, MapHere, MapShrine, MapTreasure, MapLair, MapTrial, MapBoss, MapHint, RunStarted, RunCleared, RewardPicked, DebugPrototype, RewardSkill, RewardAmulet, HudSkillSlot, HudSkillReady, HudSkillCooldown, HudSkillEmpty, HudWave, HudClear, ArenaWave, ArenaCleared,
+        AutoplayStarted, AutoplayFinished, DebugTitle, DebugDifficulty, DebugTier, DebugGodMode, DebugAirJump, DebugHeal, DebugArena, CombatStoic, CombatDizzy, CombatFlank, CombatPhaseTwo, CombatGuardBlock, CombatGuardPerfect, HudBoss, RunArea, RunShrinePrompt, RunRoomHealed, RunMoved, MapHere, MapShrine, MapTreasure, MapLair, MapTrial, MapBoss, MapHint, RunStarted, RunCleared, RewardPicked, DebugPrototype, RewardSkill, RewardAmulet, HudSkillSlot, HudSkillReady, HudSkillCooldown, HudSkillEmpty, HudWave, HudClear, ArenaWave, ArenaCleared,
         DebugRespawn, DebugReload, DebugHelp, HudCombo,
         ResultDefeatTitle, ResultDefeatLine, ResultClearTitle, ResultClearLine, ResultTime, ResultRooms, ResultHealed, ResultCombo, ResultLoadout, ResultRetry, ResultAgain, RunDefeated,
         TrialOffer, TrialStarted, TrialLair, TrialNoHit, TrialWon, TrialBonusLost,

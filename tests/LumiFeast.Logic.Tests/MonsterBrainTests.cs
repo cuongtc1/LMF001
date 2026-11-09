@@ -354,7 +354,7 @@ public class MonsterBrainTests
     [Fact]
     public void WaitsForATurnJustOutsideItsRange()
     {
-        var brain = new MonsterBrain(Ai(), Stats) { Crowd = new MonsterCrowdDef(2, 160, 0.5f) };
+        var brain = new MonsterBrain(Ai(), Stats) { Crowd = new MonsterCrowdDef(2, 160, 0.5f, 0, 60, 2, 1000, 200) };
         brain.Step(80, true, mayAttack: false);
         Assert.NotEqual(MonsterState.Windup, brain.State);
         Assert.Equal(-100, brain.MoveVelocityX); // steps back, facing Lumi on its right
@@ -375,5 +375,14 @@ public class MonsterBrainTests
         Assert.True(turns.MayAttack(a));
         turns.Release(a);
         Assert.True(turns.MayAttack(c));
+    }
+
+    [Fact]
+    public void WaitingMonstersLeapToTheEmptierSide()
+    {
+        Assert.True(FlankRule.ShouldLeap(-1, 4, 1, 2));
+        Assert.False(FlankRule.ShouldLeap(-1, 2, 1, 2));
+        Assert.False(FlankRule.ShouldLeap(1, 4, 1, 2));
+        Assert.True(FlankRule.ShouldLeap(1, 0, 3, 2));
     }
 }

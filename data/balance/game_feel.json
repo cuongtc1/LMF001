@@ -14,7 +14,12 @@
   "monster_crowd": {
     "max_attackers": 2,
     "wait_margin": 160,
-    "back_off_speed_scale": 0.45
+    "back_off_speed_scale": 0.45,
+    "appear_ticks": 40,
+    "flank_check_ticks": 75,
+    "flank_crowd_gap": 2,
+    "flank_leap_velocity": 1150,
+    "flank_land_beyond": 240
   },
   "monster_awareness": {
     "sight_range": 950,

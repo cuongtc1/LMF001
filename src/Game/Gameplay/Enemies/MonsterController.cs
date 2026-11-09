@@ -79,6 +79,11 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
     private int _noticeTicks;
     private MonsterHealthBar? _healthBar;
     private AttackTurns? _turns;
+    private int _appearTicks;
+    private int _flankTimer;
+    private float _leapVelocityX;
+
+    private static readonly Color Silhouette = new(0.35f, 0.15f, 0.55f, 0f);
 
     private const string MonsterGroup = "monsters";
     private const int NoticeShowExtraTicks = 12;
@@ -101,7 +106,7 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
     public bool BlocksBody => !_healing && !_flying;
 
     /// <summary>Still in the fight: not being healed and not hiding (off-screen arrows point only at these).</summary>
-    public bool IsActive => !_healing && !IsHidden;
+    public bool IsActive => !_healing && !IsHidden && _appearTicks == 0;
 
     /// <summary>Middle of the body, for markers.</summary>
     public Vector2 BodyCenter => GlobalPosition + new Vector2(0, -_def.Art.Height / 2);
@@ -163,6 +168,15 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         _hurtbox = new Hurtbox();
         AddChild(_hurtbox);
         _hurtbox.Setup(this, size, PhysicsLayers.EnemyHurtbox);
+        // rises out of a light column first (bosses make their own entrance)
+        if (!def.Ai.Boss && feel.MonsterCrowd.AppearTicks > 0)
+        {
+            _appearTicks = feel.MonsterCrowd.AppearTicks;
+            _hurtbox.Monitorable = false;
+            var portal = new SpawnPortal();
+            AddChild(portal);
+            portal.Setup(_appearTicks);
+        }
 
         _hitbox = new AttackHitbox();
         AddChild(_hitbox);
@@ -173,6 +187,9 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         _homeX = position.X;
         _awareness = boss ? null : new MonsterAwareness(feel.MonsterAwareness, player.GlobalPosition.X < position.X ? -1 : 1);
         AddToGroup(MonsterGroup);
+        // the first frames (rising out of the light column) are drawn before ShowState sets the size
+        var facing = _awareness?.Facing ?? _brain.Facing;
+        _sprite.Scale = new Vector2(_spriteScale * (facing == (def.Art.FacesLeft ? -1 : 1) ? 1 : -1), _spriteScale);
         _notice = UiCommon.OutlinedLabel(64, "!");
         _notice.AddThemeColorOverride("font_color", new Color("ff4d4d"));
         _notice.Position = new Vector2(-14, -def.Art.Height - NoticeLift - 40);
@@ -308,6 +325,12 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
             return;
         }
 
+        if (_appearTicks > 0)
+        {
+            StepAppear();
+            return;
+        }
+
         var onFloor = _flying || IsOnFloor();
         var deltaX = _player.GlobalPosition.X - GlobalPosition.X;
         var deltaY = _player.GlobalPosition.Y - GlobalPosition.Y;
@@ -347,10 +370,12 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
             StepClimb(deltaX, deltaY, onFloor);
         }
 
+        StepFlank(deltaX, onFloor, fighting);
+
         StepVertical((float)delta, onFloor);
         _knockback = Mathf.MoveToward(_knockback, 0, _feel.KnockbackDecay * (float)delta);
         _slowTicks = Mathf.Max(0, _slowTicks - 1);
-        var walk = (_brain.MoveVelocityX + patrol) * (_slowTicks > 0 ? 1 - _slow : 1);
+        var walk = _leapVelocityX != 0 ? _leapVelocityX : (_brain.MoveVelocityX + patrol) * (_slowTicks > 0 ? 1 - _slow : 1);
         Velocity = new Vector2(walk + _knockback, _velocityY + _brain.MoveVelocityY);
         MoveAndSlide();
         if (_flying && GlobalPosition.Y > _flyerGroundY)
@@ -366,6 +391,69 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
 
         StepStrike();
         ShowState();
+    }
+
+    /// <summary>A dark shape fades into the monster; then it can be hit and starts to look around.</summary>
+    private void StepAppear()
+    {
+        _appearTicks--;
+        var shown = 1 - (float)_appearTicks / _feel.MonsterCrowd.AppearTicks;
+        _sprite.Modulate = _appearTicks > 0 ? Silhouette.Lerp(Colors.White, shown * shown) with { A = shown } : Colors.White;
+        if (_appearTicks == 0)
+        {
+            _hurtbox.SetDeferred(Area2D.PropertyName.Monitorable, true);
+        }
+    }
+
+    /// <summary>
+    /// Agile monsters waiting for a turn leap over Lumi when her other side is emptier, so crowds come from both sides.
+    /// </summary>
+    private void StepFlank(float deltaX, bool onFloor, bool fighting)
+    {
+        if (_leapVelocityX != 0)
+        {
+            if (onFloor && _velocityY >= 0)
+            {
+                _leapVelocityX = 0;
+            }
+
+            return;
+        }
+
+        var crowd = _feel.MonsterCrowd;
+        if (!fighting || !_def.Ai.Climbs || _turns is null || _turns.MayAttack(this) || !onFloor || --_flankTimer > 0)
+        {
+            return;
+        }
+
+        _flankTimer = crowd.FlankCheckTicks;
+        var side = deltaX > 0 ? -1 : 1;
+        var (left, right) = (0, 0);
+        foreach (var node in GetTree().GetNodesInGroup(MonsterGroup))
+        {
+            if (node is MonsterController { IsActive: true } other && other._awareness?.IsFighting != false)
+            {
+                if (other.GlobalPosition.X < _player.GlobalPosition.X)
+                {
+                    left++;
+                }
+                else
+                {
+                    right++;
+                }
+            }
+        }
+
+        if (!FlankRule.ShouldLeap(side, left, right, crowd.FlankCrowdGap))
+        {
+            return;
+        }
+
+        // a jump that lands a little past Lumi on her other side
+        GameLog.Info(MessageKeys.CombatFlank, _def.Id);
+        var airTime = 2 * crowd.FlankLeapVelocity / _feel.EnemyGravity;
+        _velocityY = -crowd.FlankLeapVelocity;
+        _leapVelocityX = (deltaX + Mathf.Sign(deltaX) * crowd.FlankLandBeyond) / airTime;
     }
 
     /// <summary>True while the monster fights; before that it patrols, then shows "!" when it notices Lumi.</summary>

@@ -275,7 +275,20 @@ public sealed record GameFeelDef(
 /// <param name="MaxAttackers">Monsters of one room that may attack at the same moment.</param>
 /// <param name="WaitMargin">Monsters waiting for a turn hold about this far outside their attack range.</param>
 /// <param name="BackOffSpeedScale">Share of speed when a waiting monster steps back to its spot.</param>
-public sealed record MonsterCrowdDef(int MaxAttackers, float WaitMargin, float BackOffSpeedScale);
+/// <param name="AppearTicks">A new monster rises out of a light column for this long before it can act or be hit.</param>
+/// <param name="FlankCheckTicks">How often an agile waiting monster checks whether to leap to Lumi's other side.</param>
+/// <param name="FlankCrowdGap">It leaps when its side has at least this many more fighting monsters than the other.</param>
+/// <param name="FlankLeapVelocity">Upward speed of the leap over Lumi.</param>
+/// <param name="FlankLandBeyond">How far past Lumi it lands.</param>
+public sealed record MonsterCrowdDef(int MaxAttackers, float WaitMargin, float BackOffSpeedScale, int AppearTicks, int FlankCheckTicks, int FlankCrowdGap, float FlankLeapVelocity, float FlankLandBeyond);
+
+/// <summary>Whether a waiting monster should leap over Lumi to her emptier side (15_core_gameplay.md, rule 4).</summary>
+public static class FlankRule
+{
+    /// <param name="side">-1 when the monster is left of Lumi, 1 when right.</param>
+    public static bool ShouldLeap(int side, int left, int right, int crowdGap) =>
+        side < 0 ? left - right >= crowdGap : right - left >= crowdGap;
+}
 
 /// <param name="SightRange">How far ahead a monster sees Lumi.</param>
 /// <param name="SightHeight">How far above or below its feet it sees her.</param>

@@ -1,0 +1,36 @@
+{
+  "god_mode": true,
+  "room": "mixed",
+  "skills": [
+    "jam_spread"
+  ],
+  "end_tick": 1200,
+  "screenshots": [
+    35,
+    400,
+    520,
+    640,
+    760,
+    880,
+    1000,
+    1150
+  ],
+  "steps": [
+    {
+      "tick": 5,
+      "action": "teleport",
+      "x": 700,
+      "y": 880
+    },
+    {
+      "tick": 8,
+      "action": "move_right",
+      "pressed": true
+    },
+    {
+      "tick": 10,
+      "action": "move_right",
+      "pressed": false
+    }
+  ]
+}
