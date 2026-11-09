@@ -125,7 +125,6 @@ public partial class RunStage : Node2D
         _player = new PlayerController();
         AddChild(_player);
         _player.Setup(lumi, data.AttackSet(lumi.Combat.AttackSet), data.Feel, _gameFeel, Vector2.Zero);
-        _player.ApplyLevel(GameServices.PlayerLevel, _run.Level);
         _player.Blockers = _monsters;
         _player.AutoRespawn = false;
         _player.Fell += () => ShowResult(false);
@@ -167,7 +166,7 @@ public partial class RunStage : Node2D
 
         var debug = new DebugPanel();
         AddChild(debug);
-        debug.Setup(_player, _run.Level, () => { _player.ApplyLevel(GameServices.PlayerLevel, _run.Level); StartRun(); }, () => GoTo(_map.Neighbor(_map.Current, 1), 1, 0));
+        debug.Setup(_player, _run.Level, StartRun, () => GoTo(_map.Neighbor(_map.Current, 1), 1, 0));
 
         var script = AutoplayRunner.RequestedScript();
         StartRun();
@@ -176,8 +175,6 @@ public partial class RunStage : Node2D
             var autoplay = new AutoplayRunner();
             AddChild(autoplay);
             autoplay.Setup(script, _player);
-            _player.ApplyLevel(GameServices.PlayerLevel, _run.Level); // the script may set Lumi's level
-            _player.Heal();
             if (autoplay.StartRoom is { } room)
             {
                 JumpTo(room, autoplay.StartCleared);

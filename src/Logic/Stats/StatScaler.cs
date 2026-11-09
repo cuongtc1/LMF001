@@ -29,16 +29,4 @@ public static class StatScaler
             monster.Stats.Speed * difficulty.EnemySpeed,
             difficulty.EnemyCooldown);
     }
-
-    /// <summary>The level Lumi counts as inside a stage: her own, but at most <see cref="ScalingDef.LevelLeadCap"/> above it.</summary>
-    public static int EffectiveLevel(int playerLevel, int stageLevel, ScalingDef scaling) =>
-        Math.Clamp(Math.Min(playerLevel, stageLevel + scaling.LevelLeadCap), scaling.MinLevel, scaling.MaxLevel);
-
-    /// <summary>Lumi's max HP and attack at a level (level 1 = the character data).</summary>
-    public static (int MaxHp, int Attack) ForPlayer(CharacterStatsDef stats, int level, ScalingDef scaling)
-    {
-        var steps = level - 1;
-        return ((int)MathF.Round(stats.MaxHp * MathF.Pow(scaling.PlayerHpGrowthPerLevel, steps)),
-                (int)MathF.Round(stats.Attack * MathF.Pow(scaling.PlayerAttackGrowthPerLevel, steps)));
-    }
 }

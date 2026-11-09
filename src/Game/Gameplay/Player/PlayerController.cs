@@ -64,11 +64,8 @@ public partial class PlayerController : CharacterBody2D, IDamageable
 
     public Health Health { get; private set; } = null!;
 
-    /// <summary>Attack at the level Lumi counts as in this stage.</summary>
+    /// <summary>Lumi's attack (base stats now; skill tree stat nodes will add to it).</summary>
     public int Attack { get; private set; }
-
-    /// <summary>The level Lumi counts as in this stage (her level, capped a few above the stage level).</summary>
-    public int Level { get; private set; } = 1;
 
     public bool OnGround => IsOnFloor();
 
@@ -160,16 +157,6 @@ public partial class PlayerController : CharacterBody2D, IDamageable
     public void LoseMp(float amount) => Mp = Mathf.Max(0, Mp - amount);
 
     public void GainMp(float amount) => Mp = Mathf.Min(MaxMp, Mp + amount);
-
-    /// <summary>Applies Lumi's level for a stage: the lead over the stage level is capped (16_level_and_power.md).</summary>
-    public void ApplyLevel(int playerLevel, int stageLevel)
-    {
-        var scaling = GameServices.Data.Scaling;
-        Level = StatScaler.EffectiveLevel(playerLevel, stageLevel, scaling);
-        var (maxHp, attack) = StatScaler.ForPlayer(_def.Stats, Level, scaling);
-        Health.Resize(maxHp);
-        Attack = attack;
-    }
 
     /// <summary>Steam Bath counters left in this room.</summary>
     public int SteamCountersLeft => _steamUses.Left(SteamLimit);

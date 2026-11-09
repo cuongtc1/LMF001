@@ -14,7 +14,7 @@ public static class GameDataValidator
             Require(mode.EnemyHp > 0 && mode.EnemyDamage > 0 && mode.EnemySpeed > 0 && mode.EnemyCooldown > 0, mode.Id);
         }
 
-        Require(data.Scaling.HpGrowthPerLevel >= 1 && data.Scaling.DamageGrowthPerLevel >= 1 && data.Scaling.PlayerHpGrowthPerLevel >= 1 && data.Scaling.PlayerAttackGrowthPerLevel >= 1 && data.Scaling.LevelLeadCap >= 0, "scaling");
+        Require(data.Scaling.HpGrowthPerLevel >= 1 && data.Scaling.DamageGrowthPerLevel >= 1, "scaling");
         Require(data.Scaling.MinLevel >= 1 && data.Scaling.MaxLevel >= data.Scaling.MinLevel, "scaling.level");
         Require(data.Scaling.Speed.AttackWeight >= 0 && data.Scaling.Speed.MoveWeight >= 0, "scaling.speed");
         Require(data.Scaling.Speed.MaxSpeed >= 1, "scaling.speed.max_speed");

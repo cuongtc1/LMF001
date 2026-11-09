@@ -1,9 +1,6 @@
 {
   "hp_growth_per_level": 1.05,
   "damage_growth_per_level": 1.05,
-  "player_hp_growth_per_level": 1.05,
-  "player_attack_growth_per_level": 1.05,
-  "level_lead_cap": 4,
   "min_level": 1,
   "max_level": 99,
   "speed": {

@@ -56,10 +56,6 @@ public partial class AutoplayRunner : Node, IPlayerInput
         }
 
         GameServices.GodMode = document.RootElement.TryGetProperty("god_mode", out var god) && god.GetBoolean();
-        if (document.RootElement.TryGetProperty("level", out var level))
-        {
-            GameServices.PlayerLevel = level.GetInt32();
-        }
         PicksRewards = !document.RootElement.TryGetProperty("pick_rewards", out var picks) || picks.GetBoolean();
         // "hunt": [from, to] lets Lumi walk to the nearest monster and attack, so a test survives room layout changes
         if (document.RootElement.TryGetProperty("hunt", out var hunt))

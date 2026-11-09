@@ -246,21 +246,13 @@ public sealed record DifficultySetDef(string Default, IReadOnlyList<DifficultyDe
 /// <summary>How much of the speed stat reaches attacks and movement, and its ceiling.</summary>
 public sealed record SpeedRuleDef(float AttackWeight, float MoveWeight, float MaxSpeed);
 
-/// <summary>Level scaling shared by Lumi and monsters (16_level_and_power.md). Equal levels keep the same balance.</summary>
-/// <param name="HpGrowthPerLevel">Monster HP grows by this factor per level above 1.</param>
-/// <param name="DamageGrowthPerLevel">Monster attack grows by this factor per level above 1.</param>
-/// <param name="PlayerHpGrowthPerLevel">Lumi's max HP grows by this factor per level.</param>
-/// <param name="PlayerAttackGrowthPerLevel">Lumi's attack grows by this factor per level.</param>
-/// <param name="LevelLeadCap">Inside a dungeon Lumi counts as at most this many levels above the stage level.</param>
-public sealed record ScalingDef(
-    float HpGrowthPerLevel,
-    float DamageGrowthPerLevel,
-    float PlayerHpGrowthPerLevel,
-    float PlayerAttackGrowthPerLevel,
-    int LevelLeadCap,
-    int MinLevel,
-    int MaxLevel,
-    SpeedRuleDef Speed);
+/// <summary>
+/// Monster scaling by stage level (16_level_and_power.md). Lumi has no level: her stats grow through skill tree nodes,
+/// unlocked chapter by chapter, so each chapter's stage levels are balanced against what that chapter's tree allows.
+/// </summary>
+/// <param name="HpGrowthPerLevel">Monster HP grows by this factor per stage level above 1.</param>
+/// <param name="DamageGrowthPerLevel">Monster attack grows by this factor per stage level above 1.</param>
+public sealed record ScalingDef(float HpGrowthPerLevel, float DamageGrowthPerLevel, int MinLevel, int MaxLevel, SpeedRuleDef Speed);
 
 public sealed record GameFeelDef(
     int HurtStunTicks,

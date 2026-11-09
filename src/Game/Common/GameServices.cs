@@ -18,9 +18,6 @@ public static class GameServices
     /// <summary>Debug: monsters at this level instead of the stage level.</summary>
     public static int? LevelOverride { get; set; }
 
-    /// <summary>Lumi's level (no saves yet: set from the debug panel or autoplay).</summary>
-    public static int PlayerLevel { get; set; } = 1;
-
     public static bool GodMode { get; set; }
 
     public static bool AirJumpUnlocked { get; set; }
