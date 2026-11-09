@@ -298,7 +298,8 @@ public sealed record LayerDef(string Sprite, float ScrollScale, int ZIndex);
 
 public sealed record PlatformDef(string Sprite, float X, float Y, float Width, float TopInset);
 
-public sealed record SpawnDef(string Monster, float X);
+/// <param name="Y">Feet height when the monster starts on a ledge; null starts it on the room floor.</param>
+public sealed record SpawnDef(string Monster, float X, float? Y = null);
 
 public sealed record WaveDef(IReadOnlyList<SpawnDef> Spawns);
 
@@ -339,7 +340,12 @@ public sealed record RoomDef(
     VerticalExitDef? Up = null,
     VerticalExitDef? Down = null,
     float? ChestY = null,
-    bool HasFloor = true);
+    bool HasFloor = true,
+    float Height = RoomDef.ScreenHeight)
+{
+    /// <summary>One screen; taller rooms scroll up and down with the camera.</summary>
+    public const float ScreenHeight = 1080;
+}
 
 /// <summary>A gap in the top or bottom edge of a room.</summary>
 /// <param name="X">Center of the gap.</param>

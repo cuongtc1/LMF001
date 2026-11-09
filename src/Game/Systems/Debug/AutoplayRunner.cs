@@ -18,6 +18,16 @@ public partial class AutoplayRunner : Node, IPlayerInput
     private int _tick;
     private int _endTick;
     private readonly HashSet<int> _shotTicks = [];
+    private int _huntFrom = -1;
+    private int _huntTo = -1;
+
+    private const float HuntReach = 170;
+    private const float HuntJumpHeight = 160;
+    private const int HuntSwingTicks = 16;
+    private const int HuntMenuTicks = 30;
+    private const int HuntStuckTicks = 180;
+    private const int HuntReportTicks = 600;
+    private int _stuckTicks;
 
     /// <summary>Room id a run script starts in (the boss den, say), or null for the first room.</summary>
     public string? StartRoom { get; private set; }
@@ -43,6 +53,13 @@ public partial class AutoplayRunner : Node, IPlayerInput
         }
 
         GameServices.GodMode = document.RootElement.TryGetProperty("god_mode", out var god) && god.GetBoolean();
+        // "hunt": [from, to] lets Lumi walk to the nearest monster and attack, so a test survives room layout changes
+        if (document.RootElement.TryGetProperty("hunt", out var hunt))
+        {
+            _huntFrom = hunt[0].GetInt32();
+            _huntTo = hunt[1].GetInt32();
+        }
+
         if (document.RootElement.TryGetProperty("room", out var room))
         {
             StartRoom = room.GetString();
@@ -125,6 +142,15 @@ public partial class AutoplayRunner : Node, IPlayerInput
             }
         }
 
+        if (_tick >= _huntFrom && _tick < _huntTo)
+        {
+            Hunt();
+            if (_tick % HuntReportTicks == 0)
+            {
+                GD.Print($"[autoplay] {_tick / 60}s x={(int)_player.GlobalPosition.X} hits={_player.TotalHits}");
+            }
+        }
+
         if (_shotTicks.Contains(_tick))
         {
             // user:// is %APPDATA%/Godot/app_userdata/<project name>
@@ -143,6 +169,76 @@ public partial class AutoplayRunner : Node, IPlayerInput
                 _player.TotalHits,
                 (int)_player.GlobalPosition.Y);
             GetTree().Quit();
+        }
+    }
+
+    /// <summary>
+    /// A simple bot: walks to the nearest monster and swings; with no monster left it walks right and keeps swinging
+    /// (that opens shrines, crates, chests and levers), and it picks the first card of any reward screen.
+    /// Good enough to play a whole run and time it.
+    /// </summary>
+    private void Hunt()
+    {
+        _held.Remove(InputActions.MoveLeft);
+        _held.Remove(InputActions.MoveRight);
+        if (GetTree().Paused)
+        {
+            if (_tick % HuntMenuTicks == 0)
+            {
+                Input.ActionPress(InputActions.AttackLight);
+            }
+            else if (_tick % HuntMenuTicks == 2)
+            {
+                Input.ActionRelease(InputActions.AttackLight);
+            }
+
+            return;
+        }
+
+        var target = GetTree().GetNodesInGroup("monsters").OfType<Gameplay.Enemies.MonsterController>()
+            .Where(monster => monster.IsActive)
+            .OrderBy(monster => monster.BodyCenter.DistanceSquaredTo(_player.GlobalPosition))
+            .FirstOrDefault();
+        if (target is null)
+        {
+            _held.Add(InputActions.MoveRight);
+            if (_tick % HuntSwingTicks == 0)
+            {
+                _pressedNow.Add(InputActions.AttackLight);
+            }
+
+            return;
+        }
+
+        var delta = target.GlobalPosition - _player.GlobalPosition;
+        // the bot cannot plan a climb: after a few seconds out of reach it hops onto the monster's level (timing only)
+        _stuckTicks = Mathf.Abs(delta.Y) > HuntJumpHeight ? _stuckTicks + 1 : 0;
+        if (_stuckTicks > HuntStuckTicks)
+        {
+            _stuckTicks = 0;
+            _player.MoveTo(target.GlobalPosition + new Vector2(-HuntReach * Mathf.Sign(delta.X == 0 ? 1 : delta.X), -10));
+            return;
+        }
+
+        var toward = delta.X < 0 ? InputActions.MoveLeft : InputActions.MoveRight;
+        if (Mathf.Abs(delta.X) > HuntReach)
+        {
+            _held.Add(toward);
+        }
+        else if (_tick % HuntSwingTicks == 0)
+        {
+            _held.Add(toward); // a held direction on the swing tick turns Lumi to face it
+            _pressedNow.Add(InputActions.AttackLight);
+        }
+
+        if (delta.Y < -HuntJumpHeight && _tick % 40 == 0)
+        {
+            _pressedNow.Add(InputActions.Jump);
+            _held.Add(InputActions.Jump);
+        }
+        else if (_tick % 40 == 20)
+        {
+            _held.Remove(InputActions.Jump);
         }
     }
 

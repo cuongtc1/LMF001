@@ -5,88 +5,59 @@
   "skills": [
     "jam_spread"
   ],
-  "end_tick": 640,
+  "end_tick": 700,
   "screenshots": [
-    60,
-    150,
+    40,
+    130,
+    230,
     330,
-    500,
-    620
+    420,
+    520,
+    600,
+    680
   ],
   "steps": [
     {
-      "tick": 30,
+      "tick": 100,
       "action": "teleport",
-      "x": 1380,
-      "y": 245
-    },
-    {
-      "tick": 70,
-      "action": "jump",
-      "pressed": true
-    },
-    {
-      "tick": 90,
-      "action": "jump",
-      "pressed": false
+      "x": 2000,
+      "y": 1080
     },
     {
       "tick": 200,
+      "action": "teleport",
+      "x": 900,
+      "y": 200
+    },
+    {
+      "tick": 300,
+      "action": "jump",
+      "pressed": true
+    },
+    {
+      "tick": 318,
+      "action": "jump",
+      "pressed": false
+    },
+    {
+      "tick": 400,
+      "action": "move_down",
+      "pressed": true
+    },
+    {
+      "tick": 404,
+      "action": "move_down",
+      "pressed": false
+    },
+    {
+      "tick": 500,
       "action": "move_right",
       "pressed": true
     },
     {
-      "tick": 240,
+      "tick": 560,
       "action": "move_right",
       "pressed": false
-    },
-    {
-      "tick": 420,
-      "action": "map",
-      "pressed": true,
-      "global": true
-    },
-    {
-      "tick": 424,
-      "action": "map",
-      "pressed": false,
-      "global": true
-    },
-    {
-      "tick": 460,
-      "action": "move_left",
-      "pressed": true,
-      "global": true
-    },
-    {
-      "tick": 464,
-      "action": "move_left",
-      "pressed": false,
-      "global": true
-    },
-    {
-      "tick": 480,
-      "action": "move_left",
-      "pressed": true,
-      "global": true
-    },
-    {
-      "tick": 484,
-      "action": "move_left",
-      "pressed": false,
-      "global": true
-    },
-    {
-      "tick": 520,
-      "action": "attack_light",
-      "pressed": true,
-      "global": true
-    },
-    {
-      "tick": 524,
-      "action": "attack_light",
-      "pressed": false,
-      "global": true
     }
   ]
 }

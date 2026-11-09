@@ -11,20 +11,32 @@ public static class StageBuilder
     private const float GroundThickness = 400;
     private const float PlatformThickness = 16;
     private const int PlatformZIndex = -5;
-    private const int ParallaxRepeats = 4;
+    private const int ParallaxRepeats = 6;
+    /// <summary>The prototype far layers end in a strip of plain sky that the floor art normally hides; in tall rooms
+    /// they are drawn a bit larger so that strip falls below the screen. Final far layers should be painted to the bottom.</summary>
+    private const float TallFarLayerScale = 1.14f;
 
-    public static void AddLayer(Node parent, LayerDef layer)
+    /// <param name="roomHeight">In rooms taller than one screen, far layers (scroll below 1) stay on screen as the
+    /// camera climbs, and play layers (scroll 1) sit at the bottom of the room, around the floor.</param>
+    /// <returns>The layer; for tall-room far layers the caller feeds <see cref="Parallax2D.ScreenOffset"/> each frame.</returns>
+    public static Parallax2D AddLayer(Node parent, LayerDef layer, float roomHeight = RoomDef.ScreenHeight)
     {
         var texture = GameServices.Texture(layer.Sprite);
+        var tall = roomHeight > RoomDef.ScreenHeight;
+        var far = layer.ScrollScale < 1;
+        var scale = tall && far ? TallFarLayerScale : 1;
         var parallax = new Parallax2D
         {
-            ScrollScale = new Vector2(layer.ScrollScale, 1),
-            RepeatSize = new Vector2(texture.GetWidth(), 0),
+            ScrollScale = new Vector2(layer.ScrollScale, tall && far ? 0 : 1),
+            RepeatSize = new Vector2(texture.GetWidth() * scale, 0),
             RepeatTimes = ParallaxRepeats,
             ZIndex = layer.ZIndex,
+            IgnoreCameraScroll = tall && far,
         };
-        parallax.AddChild(new Sprite2D { Texture = texture, Centered = false });
+        var top = tall && !far ? roomHeight - RoomDef.ScreenHeight : 0;
+        parallax.AddChild(new Sprite2D { Texture = texture, Centered = false, Position = new Vector2(0, top), Scale = Vector2.One * scale });
         parent.AddChild(parallax);
+        return parallax;
     }
 
     /// <param name="floor">False for sky rooms, whose open bottom leads to the room below.</param>

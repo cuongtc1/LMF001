@@ -31,6 +31,9 @@ public partial class RunStage : Node2D
 {
     private const float FloorClearance = 4;
     private const float CameraHeight = 160;
+    private const float CameraDragTop = 0.35f;
+    private const float CameraDragBottom = 0.15f;
+    private const float CeilingHeadroom = 320;
     private const float TokenLift = 60;
     private const float BrokenCrateSeconds = 1.2f;
     private const float GateInset = 70;
@@ -57,6 +60,7 @@ public partial class RunStage : Node2D
     private static readonly Color TrialColor = new("ff9a4d");
 
     private readonly List<MonsterController> _monsters = [];
+    private readonly List<Parallax2D> _screenLayers = [];
     private readonly List<Node2D> _gates = [];
     private readonly RunStats _stats = new();
     private RunDef _run = null!;
@@ -98,7 +102,18 @@ public partial class RunStage : Node2D
 
         var data = GameServices.Data!;
         _run = data.Run(GameConstants.FirstRunId);
-        _camera = new Camera2D { LimitLeft = 0, LimitTop = 0, LimitBottom = 1080, PositionSmoothingEnabled = true, PositionSmoothingSpeed = 9 };
+        // small jumps do not move the camera up and down; climbing to another level does (Little Noah's tall rooms)
+        _camera = new Camera2D
+        {
+            LimitLeft = 0,
+            LimitTop = 0,
+            LimitBottom = (int)RoomDef.ScreenHeight,
+            PositionSmoothingEnabled = true,
+            PositionSmoothingSpeed = 9,
+            DragVerticalEnabled = true,
+            DragTopMargin = CameraDragTop,
+            DragBottomMargin = CameraDragBottom,
+        };
         _gameFeel = new GameFeel();
         AddChild(_gameFeel);
         _gameFeel.Setup(data.Feel, _camera);
@@ -127,6 +142,11 @@ public partial class RunStage : Node2D
         AddChild(_picker);
         _shade = new CanvasModulate { Color = Colors.White };
         AddChild(_shade);
+        var markers = new OffscreenMarkers
+        {
+            Targets = () => _monsters.Where(monster => IsInstanceValid(monster) && monster.IsActive).Select(monster => monster.BodyCenter),
+        };
+        AddChild(markers);
         _result = new RunResultScreen();
         AddChild(_result);
         var fadeLayer = new CanvasLayer { Layer = 20 };
@@ -155,6 +175,16 @@ public partial class RunStage : Node2D
             {
                 JumpTo(room, autoplay.StartCleared);
             }
+        }
+    }
+
+    /// <summary>Far layers of tall rooms follow the camera exactly, so the screen is always covered.</summary>
+    public override void _Process(double delta)
+    {
+        var topLeft = _camera.GetScreenCenterPosition() - new Vector2(UiCommon.ScreenWidth, UiCommon.ScreenHeight) / 2;
+        foreach (var layer in _screenLayers)
+        {
+            layer.ScreenOffset = topLeft;
         }
     }
 
@@ -274,12 +304,17 @@ public partial class RunStage : Node2D
         _gates.Clear();
         _hud.TrackBoss(null);
         _roomNode?.QueueFree();
+        _screenLayers.Clear();
         _room = _run.Rooms.First(room => room.Id == _map.CurrentRoom);
         _roomNode = new Node2D();
         AddChild(_roomNode);
         foreach (var layer in _room.Layers)
         {
-            StageBuilder.AddLayer(RoomNode, layer);
+            var added = StageBuilder.AddLayer(RoomNode, layer, _room.Height);
+            if (added.IgnoreCameraScroll)
+            {
+                _screenLayers.Add(added);
+            }
         }
 
         StageBuilder.AddBounds(RoomNode, _room.Width, _room.GroundY, _room.HasFloor);
@@ -289,6 +324,9 @@ public partial class RunStage : Node2D
         }
 
         _camera.LimitRight = (int)_room.Width;
+        _camera.LimitBottom = (int)_room.Height;
+        // with a way up, the camera may look above the ceiling so Lumi on the top ledge is not under the HUD
+        _camera.LimitTop = _room.Up is null ? 0 : -(int)CeilingHeadroom;
         var ground = _room.GroundY - FloorClearance;
         var spawn = entry switch
         {
@@ -374,7 +412,7 @@ public partial class RunStage : Node2D
     private void StepExits()
     {
         var (x, y) = (_player.GlobalPosition.X, _player.GlobalPosition.Y);
-        if (y > UiCommon.ScreenHeight + _run.VerticalExitMargin && (!_open || _room.Down is null || _map.Neighbor(_map.Current, 0, 1) < 0))
+        if (y > _room.Height + _run.VerticalExitMargin && (!_open || _room.Down is null || _map.Neighbor(_map.Current, 0, 1) < 0))
         {
             _player.MoveTo(_player.RespawnPoint); // fell where no room is: back to where she came in
             return;
@@ -394,7 +432,7 @@ public partial class RunStage : Node2D
         {
             GoTo(_map.Neighbor(_map.Current, 0, -1), 0, -1);
         }
-        else if (y > UiCommon.ScreenHeight + _run.VerticalExitMargin && _room.Down is not null)
+        else if (y > _room.Height + _run.VerticalExitMargin && _room.Down is not null)
         {
             GoTo(_map.Neighbor(_map.Current, 0, 1), 0, 1);
         }
@@ -623,7 +661,8 @@ public partial class RunStage : Node2D
     {
         foreach (var spawn in _room.Waves[_waves.Wave].Spawns)
         {
-            var monster = MonsterSpawner.Spawn(RoomNode, spawn.Monster, spawn.X, _room.GroundY, _run.Tier + (_challenge?.Def.TierBonus ?? 0), _gameFeel, _player);
+            var monster = MonsterSpawner.Spawn(RoomNode, spawn.Monster, spawn.X, spawn.Y ?? _room.GroundY, _run.Tier + (_challenge?.Def.TierBonus ?? 0), _gameFeel, _player);
+            monster.SetRoomFloor(_room.GroundY);
             monster.Healed += OnHealed;
             _monsters.Add(monster);
             if (InBossRoom)

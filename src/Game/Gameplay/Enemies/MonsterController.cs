@@ -98,6 +98,12 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
 
     public bool BlocksBody => !_healing && !_flying;
 
+    /// <summary>Still in the fight: not being healed and not hiding (off-screen arrows point only at these).</summary>
+    public bool IsActive => !_healing && !IsHidden;
+
+    /// <summary>Middle of the body, for markers.</summary>
+    public Vector2 BodyCenter => GlobalPosition + new Vector2(0, -_def.Art.Height / 2);
+
     public Vector2 FeetPosition => GlobalPosition;
 
     public Vector2 BodySize => new(_def.Body.Width, _def.Body.Height);
@@ -177,6 +183,15 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
             AddChild(_healthBar);
             _healthBar.Setup(Health, Mathf.Max(HealthBarMinWidth, def.Body.Width), HealthBarGap);
             _healthBar.Refresh();
+        }
+    }
+
+    /// <summary>The room floor, when the monster starts on a ledge above it (climbers use it to know they stand on a ledge).</summary>
+    public void SetRoomFloor(float groundY)
+    {
+        if (!_flying)
+        {
+            _floorY = groundY;
         }
     }
 
