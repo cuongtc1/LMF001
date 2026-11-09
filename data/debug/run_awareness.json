@@ -1,0 +1,45 @@
+{
+  "god_mode": true,
+  "room": "climb_a",
+  "skills": [
+    "jam_spread"
+  ],
+  "end_tick": 540,
+  "screenshots": [
+    60,
+    250,
+    330,
+    400,
+    430,
+    460,
+    500
+  ],
+  "steps": [
+    {
+      "tick": 2,
+      "action": "teleport",
+      "x": 1380,
+      "y": 200
+    },
+    {
+      "tick": 240,
+      "action": "move_left",
+      "pressed": true
+    },
+    {
+      "tick": 300,
+      "action": "move_left",
+      "pressed": false
+    },
+    {
+      "tick": 330,
+      "action": "move_down",
+      "pressed": true
+    },
+    {
+      "tick": 334,
+      "action": "move_down",
+      "pressed": false
+    }
+  ]
+}

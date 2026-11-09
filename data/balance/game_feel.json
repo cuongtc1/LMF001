@@ -11,6 +11,18 @@
   "shake_decay": 60,
   "combo_reset_ticks": 120,
   "mana_target_shares": [1.0, 0.3, 0.1],
+  "monster_awareness": {
+    "sight_range": 950,
+    "sight_height": 300,
+    "back_sense": 180,
+    "notice_ticks": 24,
+    "alert_radius": 650,
+    "lose_range": 1500,
+    "forget_ticks": 300,
+    "patrol_distance": 140,
+    "patrol_speed_scale": 0.35,
+    "patrol_pause_ticks": 80
+  },
   "damage_number_rise": 70,
   "damage_number_ticks": 36,
   "juggle_gravity_scale": 0.55,

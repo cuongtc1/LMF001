@@ -262,7 +262,19 @@ public sealed record GameFeelDef(
     int PlayerGetupTicks,
     MonsterPoseDef MonsterPose,
     MonsterClimbDef MonsterClimb,
-    IReadOnlyList<float> ManaTargetShares);
+    IReadOnlyList<float> ManaTargetShares,
+    MonsterAwarenessDef MonsterAwareness);
+
+/// <param name="SightRange">How far ahead a monster sees Lumi.</param>
+/// <param name="SightHeight">How far above or below its feet it sees her.</param>
+/// <param name="BackSense">Lumi this close behind is noticed too.</param>
+/// <param name="NoticeTicks">The "!" pause before the fight starts.</param>
+/// <param name="AlertRadius">Monsters this close to one that notices Lumi notice her too.</param>
+/// <param name="LoseRange">Farther than this, the monster starts to forget Lumi.</param>
+/// <param name="ForgetTicks">Time beyond the lose range before it gives up.</param>
+/// <param name="PatrolDistance">How far from its spawn point it walks while unaware.</param>
+/// <param name="PatrolSpeedScale">Share of its speed while patrolling.</param>
+public sealed record MonsterAwarenessDef(float SightRange, float SightHeight, float BackSense, int NoticeTicks, float AlertRadius, float LoseRange, int ForgetTicks, float PatrolDistance, float PatrolSpeedScale, int PatrolPauseTicks);
 
 /// <summary>MP share for the n-th target of one swing; the last share covers every further target.</summary>
 public static class ManaRules

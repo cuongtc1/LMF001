@@ -3,6 +3,7 @@ using Godot;
 using LumiFeast.Game.Common;
 using LumiFeast.Game.Gameplay.Combat;
 using LumiFeast.Game.Gameplay.Player;
+using LumiFeast.Game.UI;
 using LumiFeast.Logic.Combat;
 using LumiFeast.Logic.Common;
 using LumiFeast.Logic.Data;
@@ -71,6 +72,20 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
     private float _flyerGroundY;
     private float _slow;
     private int _slowTicks;
+    private MonsterAwareness? _awareness;
+    private float _homeX;
+    private Label _notice = null!;
+    private int _noticeTicks;
+    private MonsterHealthBar? _healthBar;
+
+    private const string MonsterGroup = "monsters";
+    private const int NoticeShowExtraTicks = 12;
+    private const float NoticeLift = 70;
+    private const float HealthBarMinWidth = 90;
+    private const float HealthBarGap = 10;
+    /// <summary>Flyers swoop only at Lumi below them, down to about their hover height plus this.</summary>
+    private const float FlyerReachBelow = 140;
+    private const float FlyerReachAbove = 40;
     private int _age;
 
     public event Action<MonsterController>? Healed;
@@ -144,6 +159,52 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         _hitbox = new AttackHitbox();
         AddChild(_hitbox);
         _hitbox.Setup(PhysicsLayers.PlayerHurtbox);
+
+        // bosses fight from the start and show their health on the HUD
+        var boss = def.Ai.Moves is not null;
+        _homeX = position.X;
+        _awareness = boss ? null : new MonsterAwareness(feel.MonsterAwareness, player.GlobalPosition.X < position.X ? -1 : 1);
+        AddToGroup(MonsterGroup);
+        _notice = UiCommon.OutlinedLabel(64, "!");
+        _notice.AddThemeColorOverride("font_color", new Color("ff4d4d"));
+        _notice.Position = new Vector2(-14, -def.Art.Height - NoticeLift - 40);
+        _notice.Visible = false;
+        _notice.ZIndex = 20;
+        AddChild(_notice);
+        if (!boss)
+        {
+            _healthBar = new MonsterHealthBar();
+            AddChild(_healthBar);
+            _healthBar.Setup(Health, Mathf.Max(HealthBarMinWidth, def.Body.Width), HealthBarGap);
+            _healthBar.Refresh();
+        }
+    }
+
+    /// <summary>A nearby monster saw Lumi: this one notices her too.</summary>
+    public void HearAlert()
+    {
+        if (_awareness is { State: AwarenessState.Unaware } eyes)
+        {
+            eyes.Alert(_player.GlobalPosition.X - GlobalPosition.X);
+            OnNoticed(callOthers: false);
+        }
+    }
+
+    private void OnNoticed(bool callOthers)
+    {
+        _noticeTicks = _feel.MonsterAwareness.NoticeTicks + NoticeShowExtraTicks;
+        if (!callOthers)
+        {
+            return;
+        }
+
+        foreach (var node in GetTree().GetNodesInGroup(MonsterGroup))
+        {
+            if (node is MonsterController other && other != this && other.GlobalPosition.DistanceTo(GlobalPosition) <= _feel.MonsterAwareness.AlertRadius)
+            {
+                other.HearAlert();
+            }
+        }
     }
 
     public bool TakeHit(in HitInfo hit)
@@ -164,6 +225,12 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         }
 
         GameLog.Info(MessageKeys.CombatMonsterHit, _def.Id, damage, hit.SourceId, Health.Current, Health.Max);
+        _healthBar?.Refresh();
+        if (_awareness is { State: AwarenessState.Unaware } eyes)
+        {
+            eyes.Alert(_player.GlobalPosition.X - GlobalPosition.X);
+            OnNoticed(callOthers: true);
+        }
         var wasPhaseOne = !_brain.InPhaseTwo;
         if (_brain.RegisterHit((float)Health.Current / Health.Max))
         {
@@ -215,10 +282,22 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         var onFloor = _flying || IsOnFloor();
         var deltaX = _player.GlobalPosition.X - GlobalPosition.X;
         var deltaY = _player.GlobalPosition.Y - GlobalPosition.Y;
-        // bosses and flyers have their own reach (thrown pots, hovering); ground monsters do not swing at the air
-        var canReach = _flying || _def.Ai.Moves is not null || Mathf.Abs(deltaY) <= _feel.MonsterClimb.ReachHeight;
+        // bosses throw; flyers swoop only at Lumi below them; ground monsters do not swing at the air
+        var canReach = _def.Ai.Moves is not null
+            || (_flying ? deltaY >= -FlyerReachAbove && deltaY <= _def.Ai.HoverHeight + FlyerReachBelow : Mathf.Abs(deltaY) <= _feel.MonsterClimb.ReachHeight);
+        var fighting = StepAwareness(deltaX, deltaY);
         var wasWindup = _brain.State == MonsterState.Windup;
-        _brain.Step(deltaX, onFloor, GlobalPosition.Y - _hoverY, canReach);
+        var patrol = 0f;
+        if (fighting || _brain.State is not (MonsterState.Idle or MonsterState.Chase))
+        {
+            _brain.Step(deltaX, onFloor, GlobalPosition.Y - _hoverY, canReach);
+        }
+        else
+        {
+            _brain.Wait(_awareness!.Facing, GlobalPosition.Y - _hoverY);
+            patrol = _awareness.PatrolMove * _stats.Speed;
+        }
+
         if (!wasWindup && _brain.State == MonsterState.Windup && !IsHidden)
         {
             AudioService.Play(SoundIds.MonsterAttack);
@@ -229,12 +308,15 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
             _velocityY = -_def.Ai.HopVelocity;
         }
 
-        StepClimb(deltaX, deltaY, onFloor);
+        if (fighting)
+        {
+            StepClimb(deltaX, deltaY, onFloor);
+        }
 
         StepVertical((float)delta, onFloor);
         _knockback = Mathf.MoveToward(_knockback, 0, _feel.KnockbackDecay * (float)delta);
         _slowTicks = Mathf.Max(0, _slowTicks - 1);
-        var walk = _brain.MoveVelocityX * (_slowTicks > 0 ? 1 - _slow : 1);
+        var walk = (_brain.MoveVelocityX + patrol) * (_slowTicks > 0 ? 1 - _slow : 1);
         Velocity = new Vector2(walk + _knockback, _velocityY + _brain.MoveVelocityY);
         MoveAndSlide();
         if (_flying && GlobalPosition.Y > _flyerGroundY)
@@ -250,6 +332,25 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
 
         StepStrike();
         ShowState();
+    }
+
+    /// <summary>True while the monster fights; before that it patrols, then shows "!" when it notices Lumi.</summary>
+    private bool StepAwareness(float deltaX, float deltaY)
+    {
+        _noticeTicks = Mathf.Max(0, _noticeTicks - 1);
+        _notice.Visible = _noticeTicks > 0;
+        if (_awareness is not { } eyes)
+        {
+            return true;
+        }
+
+        eyes.Step(deltaX, deltaY, GlobalPosition.X - _homeX);
+        if (eyes.JustNoticed)
+        {
+            OnNoticed(callOthers: true);
+        }
+
+        return eyes.IsFighting;
     }
 
     /// <summary>Climbers follow Lumi onto ledges and drop back down after her.</summary>

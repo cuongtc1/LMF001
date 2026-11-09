@@ -165,6 +165,20 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats, ulong seed
         Set(MonsterState.Stunned, (int)MathF.Round(ticks * ai.StunScale));
     }
 
+    /// <summary>Stands by without fighting (the monster has not noticed Lumi yet): looks one way, flyers keep their height.</summary>
+    public void Wait(int facing, float hoverError = 0)
+    {
+        WantsHop = false;
+        MoveVelocityX = 0;
+        MoveVelocityY = 0;
+        State = MonsterState.Idle;
+        Facing = facing;
+        if (ai.Behavior == MonsterBehaviors.Flyer)
+        {
+            Fly(hoverError);
+        }
+    }
+
     /// <param name="deltaX">Target x minus monster x.</param>
     /// <param name="hoverError">Flyers only: pixels below the hover height.</param>
     /// <param name="canReach">False when Lumi is far above or below: ground monsters walk under her instead of swinging.</param>
