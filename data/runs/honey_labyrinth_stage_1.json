@@ -1975,10 +1975,21 @@
     "heal_price": 90,
     "key_price": 120,
     "heal_share": 0.35,
-    "merchant_sprite": "assets/monsters/chapter_01/raccoon_mask/healed.png",
-    "merchant_height": 200,
-    "stand_sprite": "assets/props/common/shrine_used.png",
-    "stand_height": 130,
-    "heal_sprite": "assets/props/common/hp_token.png"
+    "merchant_sprite": "assets/props/shop/merchant_idle.png",
+    "merchant_wave_sprite": "assets/props/shop/merchant_wave.png",
+    "merchant_coin_sprite": "assets/props/shop/merchant_coin.png",
+    "merchant_height": 170,
+    "cart_sprite": "assets/props/shop/cart.png",
+    "cart_height": 280,
+    "cart_offset": 230,
+    "stand_sprite": "assets/props/shop/stand.png",
+    "sold_stand_sprite": "assets/props/shop/stand_sold.png",
+    "stand_height": 115,
+    "heal_sprite": "assets/props/common/hp_token.png",
+    "coin_sprites": ["assets/props/common/coin.png", "assets/props/common/coin_half.png", "assets/props/common/coin_edge.png"],
+    "coin_pile_sprite": "assets/props/common/coin_pile.png",
+    "coin_height": 40,
+    "coin_value": 4,
+    "max_coins": 8
   }
 }

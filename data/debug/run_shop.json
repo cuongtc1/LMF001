@@ -7,10 +7,11 @@
     "jam_spread"
   ],
   "pick_rewards": false,
-  "end_tick": 400,
+  "end_tick": 360,
   "screenshots": [
     60,
     130,
+    230,
     330
   ],
   "steps": [
@@ -53,6 +54,12 @@
       "action": "attack_light",
       "pressed": false,
       "global": true
+    },
+    {
+      "tick": 250,
+      "action": "teleport",
+      "x": 1450,
+      "y": 880
     }
   ]
 }

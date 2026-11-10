@@ -5,7 +5,7 @@ import os
 
 import cv2
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw
 
 PICS = '.documents/sample_pictures/'
 V = PICS + 'ver12/'
@@ -14,6 +14,7 @@ FOREST = 'assets/backgrounds/chapter_01/honey_forest/'
 LABYRINTH = 'assets/backgrounds/chapter_01/honey_labyrinth/'
 MONSTERS = 'assets/monsters/chapter_01/'
 PROPS = 'assets/props/common/'
+SHOP = 'assets/props/shop/'
 ICONS = 'assets/ui/icons/'
 ICON_SIZE = 192
 SKY_KEY_DISTANCE = 40
@@ -125,7 +126,7 @@ def pieces(path, count):
 def row_items(path, count):
     """The drawings in one row on a white sheet. Columns split at empty bands; the narrowest bands
     are joined until `count` remain, so the loose planks of a broken crate stay one drawing."""
-    a = rgb(path)
+    a = rgb(path) if isinstance(path, str) else path
     used = (a.astype(np.int32) < WHITE_CUTOFF).any(2).any(0)
     edges = np.flatnonzero(np.diff(np.r_[0, used.astype(np.int8), 0]))
     spans = [list(span) for span in edges.reshape(-1, 2)]
@@ -205,6 +206,49 @@ def inside_outline(a, dark=95, close=5):
     outside = np.isin(labels, edge[edge > 0])
     alpha = cv2.GaussianBlur((~outside).astype(np.float32), (0, 0), 0.8)
     return np.dstack([rgb_part, (np.clip(alpha, 0, 1) * 255).astype(np.uint8)])
+
+
+def drop_border_bits(a):
+    """A piece's box can catch a bit of its neighbor (the idle pose's tail beside the wave pose): drop every opaque
+    part that touches the left or right edge, except the largest part (the drawing itself)."""
+    solid = (a[..., 3] > 20).astype(np.uint8)
+    n, labels, stats, _ = cv2.connectedComponentsWithStats(solid)
+    main = 1 + int(np.argmax(stats[1:, cv2.CC_STAT_AREA]))
+    edge = set(labels[:, 0]) | set(labels[:, -1])
+    out = a.copy()
+    out[..., 3][np.isin(labels, [i for i in edge if i not in (0, main)])] = 0
+    return crop_alpha(out)
+
+
+def drop_ground_line(a, coverage=0.8, depth=40):
+    """W2 props stand on a drawn ground line wider than the prop: cut from the first bottom row that is mostly line."""
+    rows = (a[..., 3] > 20).mean(1)[-depth:]
+    line = np.flatnonzero(rows > coverage)
+    return crop_alpha(a[:a.shape[0] - depth + line.min()]) if line.size else a
+
+
+def stall_and_coins():
+    """Round 72, prompts W and X. Merchant W1_1 (producer's pick: idle, wave, coin poses). Cart W2_7 (producer liked
+    it but the lantern hung from the cloth awning: an iron arm from the right pole now holds it). Stands W2_20
+    (producer's favorite stand; its sold stand has a crossed sign). Coins X_8 (cleanest rim; producer liked X_8, X_9)."""
+    # pieces, not row_items: the sparkles beside the coin pose would make the narrowest gap join idle and wave
+    for pose, a in zip(['idle', 'wave', 'coin'], pieces(V + 'W/W1/ver12_W1_1.png', 3)):
+        save(drop_border_bits(a), SHOP + f'merchant_{pose}.png')
+    sheet = Image.fromarray(rgb(V + 'W/W2/ver12_W2_7.png'))
+    draw = ImageDraw.Draw(sheet)
+    arm_y = 419  # just under the awning, through the lantern ring, into the right pole
+    draw.line([(504, arm_y), (560, arm_y)], fill=(74, 42, 30), width=10)
+    draw.line([(507, arm_y), (556, arm_y)], fill=(100, 90, 88), width=4)
+    draw.ellipse((498, arm_y - 6, 510, arm_y + 6), fill=(74, 42, 30))
+    draw.ellipse((501, arm_y - 3, 507, arm_y + 3), fill=(100, 90, 88))
+    cart = row_items(np.asarray(sheet), 3)[0]
+    # the white between the poles under the awning is background, not cloth
+    save(drop_ground_line(clear_holes(cart, 3000)), SHOP + 'cart.png')
+    _, stand, sold = row_items(V + 'W/W2/ver12_W2_20.png', 3)
+    save(drop_ground_line(stand), SHOP + 'stand.png')
+    save(drop_ground_line(crop_alpha(inside_outline(sold))), SHOP + 'stand_sold.png')
+    for name, a in zip(['coin', 'coin_half', 'coin_edge', 'coin_pile'], row_items(V + 'X/ver12_X_8.png', 4)):
+        save(crop_alpha(inside_outline(a)), PROPS + name + '.png')
 
 
 def props():
@@ -339,6 +383,7 @@ def effects():
 if __name__ == '__main__':
     icons()
     key_and_locked_chest()
+    stall_and_coins()
     background()
     platforms()
     monsters()

@@ -42,6 +42,9 @@ public partial class PrototypeHud : CanvasLayer
 
     private Label? _goldCount;
 
+    /// <summary>Coin drawn before the gold count.</summary>
+    public string GoldSprite { get; set; } = string.Empty;
+
     private Label? _keyCount;
 
     /// <summary>The run's amulet set, for icons; empty outside a run.</summary>
@@ -94,6 +97,17 @@ public partial class PrototypeHud : CanvasLayer
             _goldCount.VerticalAlignment = VerticalAlignment.Center;
             _goldCount.AddThemeColorOverride("font_color", new Color("ffd34d"));
             keyRow.AddChild(new Control { CustomMinimumSize = new Vector2(24, 0) });
+            if (GoldSprite.Length > 0)
+            {
+                keyRow.AddChild(new TextureRect
+                {
+                    Texture = GameServices.Texture(GoldSprite),
+                    CustomMinimumSize = Vector2.One * AmuletIconSize * 0.8f,
+                    ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+                    StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
+                });
+            }
+
             keyRow.AddChild(_goldCount);
             column.AddChild(keyRow);
         }

@@ -70,6 +70,18 @@ public partial class RunStage : Node2D
 
     /// <summary>Gold carried in this run; lost on a defeat (Little Noah: "all gold will be lost").</summary>
     private RunWallet _wallet = new();
+
+    /// <summary>Gold of coins still flying to Lumi; the HUD counts a coin when it arrives.</summary>
+    private int _goldInFlight;
+    private const float CoinSpreadX = 380;
+    private const float CoinPopY = 900;
+    private const float CoinPileScale = 1.7f;
+
+    private Sprite2D? _merchant;
+    private bool _merchantGreeted;
+    private int _merchantPoseTicks;
+    private const float MerchantGreetDistance = 700;
+    private const int MerchantPoseTicks = 90;
     private const float ShopIconHeight = 96;
     private const float ShopIconLift = 70;
     private const float ShopPriceLift = 40;
@@ -150,7 +162,8 @@ public partial class RunStage : Node2D
         _hud.AmuletSetId = _run.AmuletSet;
         _hud.KeySprite = _run.Pickups.KeyIconSprite;
         _hud.Keys = () => _keys;
-        _hud.Gold = () => _wallet.Gold;
+        _hud.Gold = () => _wallet.Gold - _goldInFlight;
+        _hud.GoldSprite = _run.Shop.CoinSprites[0];
         _hud.Setup(_player);
         _minimap = new Minimap();
         AddChild(_minimap);
@@ -242,6 +255,7 @@ public partial class RunStage : Node2D
 
         StepChallenge();
         StepExits();
+        StepMerchant();
     }
 
     private void StartRun()
@@ -372,6 +386,7 @@ public partial class RunStage : Node2D
             State.Cleared = true; // nothing to heal here
         }
 
+        _goldInFlight = 0; // coins of the last room were freed with it; the wallet already has their gold
         BuildProps();
         BuildShop();
         var messages = GameServices.Messages;
@@ -646,6 +661,7 @@ public partial class RunStage : Node2D
     /// </summary>
     private void BuildShop()
     {
+        _merchant = null;
         if (_room.Kind != RoomKinds.Shop)
         {
             return;
@@ -664,14 +680,25 @@ public partial class RunStage : Node2D
             ShopStock.Refresh(State.Stock, State.Sold, skills, amulets, _random);
         }
 
-        var merchant = GameServices.Texture(shop.MerchantSprite);
+        var cart = GameServices.Texture(shop.CartSprite);
         RoomNode.AddChild(new Sprite2D
         {
+            Texture = cart,
+            Scale = Vector2.One * shop.CartHeight / cart.GetHeight(),
+            Position = new Vector2(_room.MerchantX!.Value + shop.CartOffset, _room.GroundY - shop.CartHeight / 2),
+            ZIndex = -4,
+        });
+        var merchant = GameServices.Texture(shop.MerchantSprite);
+        _merchant = new Sprite2D
+        {
             Texture = merchant,
-            Scale = new Vector2(-1, 1) * shop.MerchantHeight / merchant.GetHeight(),
+            Scale = Vector2.One * shop.MerchantHeight / merchant.GetHeight(),
             Position = new Vector2(_room.MerchantX!.Value, _room.GroundY - shop.MerchantHeight / 2),
             ZIndex = -3,
-        });
+        };
+        RoomNode.AddChild(_merchant);
+        _merchantGreeted = false;
+        _merchantPoseTicks = 0;
         for (var i = 0; i < State.Stock.Count && i < _room.Stands!.Count; i++)
         {
             AddStand(i, State.Stock[i], _room.Stands[i]);
@@ -687,6 +714,11 @@ public partial class RunStage : Node2D
         var stand = new HittableProp();
         RoomNode.AddChild(stand);
         stand.Setup(shop.StandSprite, shop.StandHeight, new Vector2(x, _room.GroundY), sold ? 0 : 1);
+        if (sold)
+        {
+            stand.ChangeSprite(shop.SoldStandSprite);
+        }
+
         var top = _room.GroundY - shop.StandHeight;
         var icon = GameServices.Texture(ItemSprite(item));
         var picture = new Sprite2D
@@ -710,9 +742,63 @@ public partial class RunStage : Node2D
         };
         stand.Broken += _ =>
         {
+            stand.ChangeSprite(shop.SoldStandSprite);
             picture.Visible = false;
             price.Text = GameServices.Messages.Get(MessageKeys.ShopSoldOut);
         };
+    }
+
+    /// <summary>The Raccoon waves when Lumi first comes near and holds up a coin after each sale, then stands idle.</summary>
+    private void StepMerchant()
+    {
+        if (_merchant is null)
+        {
+            return;
+        }
+
+        if (!_merchantGreeted && Mathf.Abs(_player.GlobalPosition.X - _merchant.GlobalPosition.X) < MerchantGreetDistance)
+        {
+            _merchantGreeted = true;
+            SetMerchantPose(_run.Shop.MerchantWaveSprite);
+        }
+
+        if (_merchantPoseTicks > 0 && --_merchantPoseTicks == 0)
+        {
+            _merchant.Texture = GameServices.Texture(_run.Shop.MerchantSprite);
+        }
+    }
+
+    private void SetMerchantPose(string sprite)
+    {
+        if (_merchant is null)
+        {
+            return;
+        }
+
+        _merchant.Texture = GameServices.Texture(sprite);
+        _merchantPoseTicks = MerchantPoseTicks;
+    }
+
+    /// <summary>
+    /// Gold pops out as coins that fly to Lumi. The wallet gets it at once (leaving the room loses nothing); the HUD
+    /// counts each coin as it arrives.
+    /// </summary>
+    private void DropGold(Vector2 position, int gold, bool pile)
+    {
+        _wallet.Earn(gold);
+        var shop = _run.Shop;
+        var count = Mathf.Clamp(Mathf.CeilToInt(gold / (float)shop.CoinValue), 1, shop.MaxCoins);
+        for (var i = 0; i < count; i++)
+        {
+            var amount = gold / count + (i < gold % count ? 1 : 0);
+            var big = pile && i == 0;
+            var coin = new GoldCoin();
+            RoomNode.AddChild(coin);
+            var velocity = new Vector2((GD.Randf() * 2 - 1) * CoinSpreadX, -CoinPopY * (0.7f + 0.3f * GD.Randf()));
+            coin.Setup(_player, big ? [shop.CoinPileSprite] : shop.CoinSprites, big ? shop.CoinHeight * CoinPileScale : shop.CoinHeight, amount, position, velocity);
+            _goldInFlight += amount;
+            coin.Arrived = arrived => _goldInFlight -= arrived;
+        }
     }
 
     private string ItemSprite(ShopItem item) => item.Kind switch
@@ -798,6 +884,7 @@ public partial class RunStage : Node2D
         }
 
         State.Sold.Add(index);
+        SetMerchantPose(_run.Shop.MerchantCoinSprite);
         AudioService.Play(SoundIds.UiConfirm);
         GameLog.Info(MessageKeys.ShopBought, ItemName(item), _wallet.Gold);
         _hud.ShowStatus(messages.Get(MessageKeys.ShopBought, ItemName(item), _wallet.Gold));
@@ -836,7 +923,7 @@ public partial class RunStage : Node2D
         var token = new Pickup();
         RoomNode.AddChild(token);
         AudioService.Play(SoundIds.CrateBreak);
-        _wallet.Earn(_run.Shop.CrateGold);
+        DropGold(crate.GlobalPosition + new Vector2(0, -TokenLift), _run.Shop.CrateGold, false);
         token.Setup(_player, _run.Pickups, _random.NextDouble() < _run.Pickups.HpChance ? TokenKind.Hp : TokenKind.Mp, crate.GlobalPosition + new Vector2(0, -TokenLift));
         crate.ChangeSprite(_run.Pickups.CrateBrokenSprite);
         crate.FadeAway(BrokenCrateSeconds);
@@ -917,8 +1004,7 @@ public partial class RunStage : Node2D
         _monsters.Remove(monster);
         _stats.Healed();
         var gold = monster.IsElite ? _run.Shop.GoldPerElite : _run.Shop.GoldPerMonster;
-        _wallet.Earn(gold);
-        _gameFeel.ShowDamage(monster.BodyCenter, gold, GoldColor);
+        DropGold(monster.BodyCenter, gold, monster.IsElite);
     }
 
     private void MarkCleared()

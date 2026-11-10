@@ -20,6 +20,7 @@ public static class SoundIds
     public const string CrateBreak = "crate_break";
     public const string ChestOpen = "chest_open";
     public const string TokenPickup = "token_pickup";
+    public const string Coin = "coin";
     public const string Lever = "lever";
     public const string GateShut = "gate_shut";
     public const string GateOpen = "gate_open";
@@ -35,7 +36,7 @@ public static class SoundIds
     public static readonly IReadOnlyList<string> All =
     [
         SwingLight, SwingHeavy, HitLight, HitHeavy, Jump, Land, Dash, GuardBlock, GuardPerfect, Hurt, Skill,
-        MonsterAttack, MonsterHealed, CrateHit, CrateBreak, ChestOpen, TokenPickup, Lever, GateShut, GateOpen, Shrine,
+        MonsterAttack, MonsterHealed, CrateHit, CrateBreak, ChestOpen, TokenPickup, Coin, Lever, GateShut, GateOpen, Shrine,
         UiMove, UiConfirm, UiBack, MapOpen, RoomHealed, RunClear, RunDefeat,
     ];
 }

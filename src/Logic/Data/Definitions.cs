@@ -474,10 +474,21 @@ public sealed record ShopDef(
     int KeyPrice,
     float HealShare,
     string MerchantSprite,
+    string MerchantWaveSprite,
+    string MerchantCoinSprite,
     float MerchantHeight,
+    string CartSprite,
+    float CartHeight,
+    float CartOffset,
     string StandSprite,
+    string SoldStandSprite,
     float StandHeight,
-    string HealSprite);
+    string HealSprite,
+    IReadOnlyList<string> CoinSprites,
+    string CoinPileSprite,
+    float CoinHeight,
+    int CoinValue,
+    int MaxCoins);
 
 public sealed record InputActionDef(string Action, IReadOnlyList<string> Keys, IReadOnlyList<int> PadButtons, IReadOnlyList<int> PadAxes);
 

@@ -18,6 +18,7 @@
     { "id": "crate_break", "files": ["kenney/doorClose_2.ogg"], "volume_db": -4, "pitch_spread": 0.05 },
     { "id": "chest_open", "files": ["kenney/doorOpen_1.ogg"], "volume_db": -3 },
     { "id": "token_pickup", "files": ["kenney/pluck_001.ogg"], "volume_db": -4, "pitch_spread": 0.05 },
+    { "id": "coin", "files": ["own/coin.ogg"], "volume_db": -9, "pitch_spread": 0.08 },
     { "id": "lever", "files": ["kenney/switch_002.ogg"], "volume_db": -4 },
     { "id": "gate_shut", "files": ["kenney/doorClose_4.ogg"], "volume_db": -2 },
     { "id": "gate_open", "files": ["kenney/doorOpen_2.ogg"], "volume_db": -3 },
