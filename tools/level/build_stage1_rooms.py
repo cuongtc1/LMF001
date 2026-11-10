@@ -186,17 +186,23 @@ rooms["sky_nest"]["chest_locked"] = True
 rooms["sky_bridge"].update(chest_x=1360, chest_y=660, chest_locked=True)
 
 
+# round 69: the Raccoon's stall (after he is healed once) and a third treasure room for runs before that
+room("raccoon_stall", "shop", 2400, "wall_a", merchant_x=1950, stands=[600, 850, 1100, 1350, 1600], reward_on_clear=False)
+room("pantry", "treasure", 2400, "wall_b", platforms=[plat("ledge_wide", 1200, LOW)], crates=[400, 800, 1600, 2000],
+     chest_x=1200, chest_y=LOW, reward_on_clear=False)
+
+
 def cells(*items):
     return [{"x": x, "y": y, "kind": kind} for x, y, kind in items]
 
 
-E, F, T, R, S, B, M = "entrance", "fight", "trial", "treasure", "sky", "boss", "elite"
+E, F, T, R, S, B, M, H = "entrance", "fight", "trial", "treasure", "sky", "boss", "elite", "shop"
 data["layouts"] = [
-    {"id": "long_nest", "cells": cells((0, 0, E), (1, 0, F), (2, 0, F), (3, 0, T), (4, 0, F), (4, -1, S), (5, 0, F), (6, 0, R),
+    {"id": "long_nest", "cells": cells((0, 0, E), (1, 0, F), (2, 0, F), (3, 0, T), (4, 0, F), (4, -1, S), (5, 0, F), (6, 0, H),
                                        (7, 0, M), (8, 0, F), (9, 0, T), (10, 0, F), (11, 0, R), (12, 0, B))},
-    {"id": "long_high_road", "cells": cells((0, 0, E), (1, 0, F), (2, 0, T), (3, 0, F), (3, -1, S), (4, -1, S), (4, 0, F), (5, 0, R),
+    {"id": "long_high_road", "cells": cells((0, 0, E), (1, 0, F), (2, 0, T), (3, 0, F), (3, -1, S), (4, -1, S), (4, 0, F), (5, 0, H),
                                             (6, 0, F), (7, 0, M), (8, 0, T), (9, 0, F), (10, 0, R), (11, 0, B))},
-    {"id": "long_climbs", "cells": cells((0, 0, E), (1, 0, F), (1, -1, S), (2, 0, F), (3, 0, R), (4, 0, T), (5, 0, F), (6, 0, M),
+    {"id": "long_climbs", "cells": cells((0, 0, E), (1, 0, F), (1, -1, S), (2, 0, F), (3, 0, H), (4, 0, T), (5, 0, F), (6, 0, M),
                                          (7, 0, F), (7, -1, S), (8, 0, T), (9, 0, F), (10, 0, R), (11, 0, B))},
 ]
 data["rooms"] = list(rooms.values())

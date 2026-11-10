@@ -30,7 +30,8 @@ public partial class RewardPicker : CanvasLayer
         Visible = false;
     }
 
-    public void Open(IReadOnlyList<(string Title, string Body, Texture2D? Icon)> choices, System.Action<int> onPick)
+    /// <param name="selected">The card selected at first (a shop's "Leave it" so a mashed attack never buys).</param>
+    public void Open(IReadOnlyList<(string Title, string Body, Texture2D? Icon)> choices, System.Action<int> onPick, int selected = 0)
     {
         foreach (var card in _cards)
         {
@@ -39,7 +40,7 @@ public partial class RewardPicker : CanvasLayer
 
         _cards.Clear();
         _onPick = onPick;
-        _selected = 0;
+        _selected = selected;
         var left = (UiCommon.ScreenWidth - choices.Count * CardWidth - (choices.Count - 1) * CardGap) / 2;
         for (var i = 0; i < choices.Count; i++)
         {

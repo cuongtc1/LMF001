@@ -89,8 +89,11 @@ public static class GameDataValidator
             Require(rooms.Count == run.Rooms.Count, $"{run.Id}.rooms");
             Require(run.Rooms.All(room => Stages.RoomKinds.All.Contains(room.Kind)), $"{run.Id}.rooms.kind");
             Require(run.Rooms.All(room => room.HasFloor || (room.Down is not null && room.Waves.Count == 0)), $"{run.Id}.rooms.sky");
+            var shop = run.Shop;
+            Require(shop.GoldPerMonster >= 0 && shop.SkillPrice > 0 && shop.AmuletPrice > 0 && shop.HealPrice > 0 && shop.KeyPrice > 0 && shop.HealShare is > 0 and <= 1, $"{run.Id}.shop");
             foreach (var room in run.Rooms)
             {
+                Require(room.Kind != Stages.RoomKinds.Shop || (room.MerchantX is not null && room.Stands is { Count: > 0 } && room.Stands.Count >= shop.Skills + shop.Amulets + 2), $"{room.Id}.shop");
                 Require(room.Height >= RoomDef.ScreenHeight && room.GroundY < room.Height && room.Width >= 1920, $"{room.Id}.size");
                 Require(room.Waves.SelectMany(wave => wave.Spawns).All(spawn => spawn.X > 0 && spawn.X < room.Width && (spawn.Y is null || spawn.Y < room.GroundY)), $"{room.Id}.spawns");
             }

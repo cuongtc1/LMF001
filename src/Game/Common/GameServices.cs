@@ -18,6 +18,9 @@ public static class GameServices
     /// <summary>Debug: monsters at this level instead of the stage level.</summary>
     public static int? LevelOverride { get; set; }
 
+    /// <summary>The Raccoon has been healed once (no saves yet: this session only), so his stall appears in runs.</summary>
+    public static bool MerchantMet { get; set; }
+
     public static bool GodMode { get; set; }
 
     public static bool AirJumpUnlocked { get; set; }

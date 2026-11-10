@@ -28,6 +28,19 @@ public partial class HittableProp : Node2D, IDamageable
     /// <summary>The last hit was refused by <see cref="CanOpen"/>.</summary>
     public event Action? Refused;
 
+    /// <summary>Opens it without a hit (a purchase confirmed in a menu).</summary>
+    public void Open()
+    {
+        if (_hitsLeft <= 0)
+        {
+            return;
+        }
+
+        _hitsLeft = 0;
+        _hurtbox.SetDeferred(Area2D.PropertyName.Monitorable, false);
+        Broken?.Invoke(this);
+    }
+
     public void Setup(string sprite, float height, Vector2 feet, int hits)
     {
         var texture = GameServices.Texture(sprite);

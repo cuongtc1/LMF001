@@ -1668,6 +1668,73 @@
       ],
       "kind": "elite",
       "key_on_clear": true
+    },
+    {
+      "id": "raccoon_stall",
+      "width": 2400,
+      "ground_y": 885,
+      "layers": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/back.png",
+          "scroll_scale": 0.3,
+          "z_index": -30
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/wall_a.png",
+          "scroll_scale": 1.0,
+          "z_index": -10
+        }
+      ],
+      "platforms": [],
+      "waves": [],
+      "crates": [],
+      "kind": "shop",
+      "merchant_x": 1950,
+      "stands": [
+        600,
+        850,
+        1100,
+        1350,
+        1600
+      ],
+      "reward_on_clear": false
+    },
+    {
+      "id": "pantry",
+      "width": 2400,
+      "ground_y": 885,
+      "layers": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/back.png",
+          "scroll_scale": 0.3,
+          "z_index": -30
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/wall_b.png",
+          "scroll_scale": 1.0,
+          "z_index": -10
+        }
+      ],
+      "platforms": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/platforms/ledge_wide.png",
+          "x": 1200,
+          "y": 680,
+          "width": 640,
+          "top_inset": 52
+        }
+      ],
+      "waves": [],
+      "crates": [
+        400,
+        800,
+        1600,
+        2000
+      ],
+      "kind": "treasure",
+      "chest_x": 1200,
+      "chest_y": 680,
+      "reward_on_clear": false
     }
   ],
   "layouts": [
@@ -1712,7 +1779,7 @@
         {
           "x": 6,
           "y": 0,
-          "kind": "treasure"
+          "kind": "shop"
         },
         {
           "x": 7,
@@ -1787,7 +1854,7 @@
         {
           "x": 5,
           "y": 0,
-          "kind": "treasure"
+          "kind": "shop"
         },
         {
           "x": 6,
@@ -1847,7 +1914,7 @@
         {
           "x": 3,
           "y": 0,
-          "kind": "treasure"
+          "kind": "shop"
         },
         {
           "x": 4,
@@ -1896,5 +1963,22 @@
         }
       ]
     }
-  ]
+  ],
+  "shop": {
+    "gold_per_monster": 8,
+    "gold_per_elite": 60,
+    "crate_gold": 5,
+    "skills": 1,
+    "amulets": 2,
+    "skill_price": 220,
+    "amulet_price": 160,
+    "heal_price": 90,
+    "key_price": 120,
+    "heal_share": 0.35,
+    "merchant_sprite": "assets/monsters/chapter_01/raccoon_mask/healed.png",
+    "merchant_height": 200,
+    "stand_sprite": "assets/props/common/shrine_used.png",
+    "stand_height": 130,
+    "heal_sprite": "assets/props/common/hp_token.png"
+  }
 }

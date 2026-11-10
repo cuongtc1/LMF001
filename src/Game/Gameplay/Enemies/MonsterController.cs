@@ -111,6 +111,9 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
     /// <summary>Still in the fight: not being healed and not hiding (off-screen arrows point only at these).</summary>
     public bool IsActive => !_healing && !IsHidden && _appearTicks == 0;
 
+    /// <summary>Super armor monsters (mini bosses) and bosses give more gold.</summary>
+    public bool IsElite => _def.Ai.SuperArmor || _def.Ai.Boss;
+
     /// <summary>Middle of the body, for markers.</summary>
     public Vector2 BodyCenter => GlobalPosition + new Vector2(0, -_def.Art.Height / 2);
 

@@ -67,6 +67,15 @@ public partial class RunStage : Node2D
 
     /// <summary>Keys carried in this run (Little Noah keeps them per run too).</summary>
     private int _keys;
+
+    /// <summary>Gold carried in this run; lost on a defeat (Little Noah: "all gold will be lost").</summary>
+    private RunWallet _wallet = new();
+    private const float ShopIconHeight = 96;
+    private const float ShopIconLift = 70;
+    private const float ShopPriceLift = 40;
+    private const int ShopPriceFont = 30;
+    private static readonly Color ShopColor = new("52c49a");
+    private static readonly Color GoldColor = new("ffd34d");
     private readonly List<Node2D> _gates = [];
     private readonly RunStats _stats = new();
     private RunDef _run = null!;
@@ -141,6 +150,7 @@ public partial class RunStage : Node2D
         _hud.AmuletSetId = _run.AmuletSet;
         _hud.KeySprite = _run.Pickups.KeyIconSprite;
         _hud.Keys = () => _keys;
+        _hud.Gold = () => _wallet.Gold;
         _hud.Setup(_player);
         _minimap = new Minimap();
         AddChild(_minimap);
@@ -181,6 +191,7 @@ public partial class RunStage : Node2D
             AddChild(autoplay);
             autoplay.Setup(script, _player);
             _keys = autoplay.StartKeys;
+            _wallet.Earn(autoplay.StartGold);
             if (autoplay.StartRoom is { } room)
             {
                 JumpTo(room, autoplay.StartCleared);
@@ -237,7 +248,8 @@ public partial class RunStage : Node2D
     {
         var seed = AutoplayRunner.RequestedScript() is null ? Time.GetTicksUsec() : GameConstants.ScriptedRunSeed;
         _random = new SeededRandom(seed);
-        _map = StageMap.Generate(_run, seed);
+        _map = StageMap.Generate(_run, seed, GameServices.MerchantMet);
+        _wallet = new RunWallet();
         _player.Loadout.Clear();
         _player.Modifiers.Clear();
         _player.ApplyModifiers();
@@ -361,6 +373,7 @@ public partial class RunStage : Node2D
         }
 
         BuildProps();
+        BuildShop();
         var messages = GameServices.Messages;
         _hud.ShowStatus(messages.Get(InBossRoom ? MessageKeys.HudBoss : MessageKeys.RunArea));
         if (State.Cleared || _challenge is { NeedsLever: true })
@@ -460,6 +473,7 @@ public partial class RunStage : Node2D
             (messages.Get(MessageKeys.MapLair), LairColor),
             (messages.Get(MessageKeys.MapTrial), TrialColor),
             (messages.Get(MessageKeys.MapElite), EliteColor),
+            (messages.Get(MessageKeys.MapShop), ShopColor),
             (messages.Get(MessageKeys.MapBoss), BossColor),
         };
         _mapScreen.Open(_map, messages.Get(MessageKeys.RunArea), messages.Get(MessageKeys.MapHint), Accents(), legend, Warp);
@@ -490,6 +504,7 @@ public partial class RunStage : Node2D
             var room = _run.Rooms.First(item => item.Id == _map.Rooms[i]);
             Color? accent = room.Kind == RoomKinds.Boss ? BossColor
                 : room.Kind == RoomKinds.Elite ? EliteColor
+                : room.Kind == RoomKinds.Shop ? ShopColor
                 : room.Challenge?.Kind == ChallengeKinds.Lair ? LairColor
                 : room.Challenge is not null ? TrialColor
                 : room.ChestX is not null ? ChestColor
@@ -625,6 +640,166 @@ public partial class RunStage : Node2D
         };
     }
 
+    /// <summary>
+    /// The Raccoon's stall: items on stands with their price above (Little Noah, 26:15). Hitting a stand opens a card
+    /// with the item, its price and the gold left; "Leave it" is selected first, so a mashed combo never buys.
+    /// </summary>
+    private void BuildShop()
+    {
+        if (_room.Kind != RoomKinds.Shop)
+        {
+            return;
+        }
+
+        var shop = _run.Shop;
+        var data = GameServices.Data;
+        if (State.Stock.Count == 0)
+        {
+            var skills = _player.Loadout.IsFull ? [] : data.SkillSet(_player.SkillSetId).Skills.Where(skill => !_player.Loadout.Has(skill.Id)).Select(skill => skill.Id).ToList();
+            var amulets = data.AmuletSet(_run.AmuletSet).Amulets.Where(amulet => !_player.Modifiers.Has(amulet.Id)).Select(amulet => amulet.Id).ToList();
+            State.Stock.AddRange(ShopStock.Draw(shop, skills, amulets, _random));
+        }
+
+        var merchant = GameServices.Texture(shop.MerchantSprite);
+        RoomNode.AddChild(new Sprite2D
+        {
+            Texture = merchant,
+            Scale = new Vector2(-1, 1) * shop.MerchantHeight / merchant.GetHeight(),
+            Position = new Vector2(_room.MerchantX!.Value, _room.GroundY - shop.MerchantHeight / 2),
+            ZIndex = -3,
+        });
+        for (var i = 0; i < State.Stock.Count && i < _room.Stands!.Count; i++)
+        {
+            AddStand(i, State.Stock[i], _room.Stands[i]);
+        }
+
+        _hud.ShowStatus(GameServices.Messages.Get(MessageKeys.ShopWelcome));
+    }
+
+    private void AddStand(int index, ShopItem item, float x)
+    {
+        var shop = _run.Shop;
+        var sold = State.Sold.Contains(index);
+        var stand = new HittableProp();
+        RoomNode.AddChild(stand);
+        stand.Setup(shop.StandSprite, shop.StandHeight, new Vector2(x, _room.GroundY), sold ? 0 : 1);
+        var top = _room.GroundY - shop.StandHeight;
+        var icon = GameServices.Texture(ItemSprite(item));
+        var picture = new Sprite2D
+        {
+            Texture = icon,
+            Scale = Vector2.One * ShopIconHeight / icon.GetHeight(),
+            Position = new Vector2(x, top - ShopIconLift),
+            Visible = !sold,
+            ZIndex = 4,
+        };
+        RoomNode.AddChild(picture);
+        var price = UiCommon.OutlinedLabel(ShopPriceFont, sold ? GameServices.Messages.Get(MessageKeys.ShopSoldOut) : item.Price.ToString());
+        price.AddThemeColorOverride("font_color", GoldColor);
+        price.Position = new Vector2(x - 40, top - ShopIconLift - ShopIconHeight / 2 - ShopPriceLift - ShopPriceFont);
+        price.ZIndex = 4;
+        RoomNode.AddChild(price);
+        stand.CanOpen = () =>
+        {
+            OfferItem(index, item, stand);
+            return false;
+        };
+        stand.Broken += _ =>
+        {
+            picture.Visible = false;
+            price.Text = GameServices.Messages.Get(MessageKeys.ShopSoldOut);
+        };
+    }
+
+    private string ItemSprite(ShopItem item) => item.Kind switch
+    {
+        ShopItemKinds.Skill => $"{GameServices.Data.SkillSet(_player.SkillSetId).IconFolder}/{item.Id}.png",
+        ShopItemKinds.Amulet => $"{GameServices.Data.AmuletSet(_run.AmuletSet).IconFolder}/{item.Id}.png",
+        ShopItemKinds.Heal => _run.Shop.HealSprite,
+        _ => _run.Pickups.KeySprite,
+    };
+
+    private string ItemName(ShopItem item)
+    {
+        var messages = GameServices.Messages;
+        return item.Kind switch
+        {
+            ShopItemKinds.Skill => messages.Get(MessageKeys.SkillPrefix + item.Id),
+            ShopItemKinds.Amulet => messages.Get(MessageKeys.AmuletPrefix + item.Id),
+            ShopItemKinds.Heal => messages.Get(MessageKeys.ShopHeal),
+            _ => messages.Get(MessageKeys.ShopKey),
+        };
+    }
+
+    /// <summary>Shows the item card: "Leave it" or "Buy"; buying spends gold and opens the stand.</summary>
+    private void OfferItem(int index, ShopItem item, HittableProp stand)
+    {
+        if (_rewardPending)
+        {
+            return;
+        }
+
+        var messages = GameServices.Messages;
+        var name = ItemName(item);
+        var description = item.Kind switch
+        {
+            ShopItemKinds.Skill => messages.Get(MessageKeys.SkillPrefix + item.Id + MessageKeys.DescriptionSuffix),
+            ShopItemKinds.Amulet => messages.Get(MessageKeys.AmuletPrefix + item.Id + MessageKeys.DescriptionSuffix),
+            ShopItemKinds.Heal => messages.Get(MessageKeys.ShopHealDescription, Mathf.RoundToInt(_run.Shop.HealShare * 100)),
+            _ => messages.Get(MessageKeys.ShopKeyDescription),
+        };
+        var cards = new List<(string, string, Texture2D?)>
+        {
+            (messages.Get(MessageKeys.ShopLeave), string.Empty, null),
+            (name, description + "\n" + messages.Get(MessageKeys.ShopItem, item.Price, _wallet.Gold), GameServices.Texture(ItemSprite(item))),
+        };
+        _rewardPending = true;
+        _player.InputPaused = true;
+        _picker.Open(cards, choice =>
+        {
+            _rewardPending = false;
+            _player.InputPaused = false;
+            if (choice == 1 && Buy(index, item))
+            {
+                stand.Open();
+            }
+        });
+    }
+
+    private bool Buy(int index, ShopItem item)
+    {
+        var messages = GameServices.Messages;
+        if (!_wallet.TrySpend(item.Price))
+        {
+            _hud.ShowStatus(messages.Get(MessageKeys.ShopPoor, item.Price));
+            return false;
+        }
+
+        var data = GameServices.Data;
+        switch (item.Kind)
+        {
+            case ShopItemKinds.Skill:
+                _player.Loadout.Add(data.SkillSet(_player.SkillSetId).Skills.First(skill => skill.Id == item.Id));
+                break;
+            case ShopItemKinds.Amulet:
+                _player.Modifiers.Add(data.AmuletSet(_run.AmuletSet).Amulets.First(amulet => amulet.Id == item.Id));
+                _player.ApplyModifiers();
+                break;
+            case ShopItemKinds.Heal:
+                _player.Health.Heal(Mathf.RoundToInt(_player.Health.Max * _run.Shop.HealShare));
+                break;
+            default:
+                _keys++;
+                break;
+        }
+
+        State.Sold.Add(index);
+        AudioService.Play(SoundIds.UiConfirm);
+        GameLog.Info(MessageKeys.ShopBought, ItemName(item), _wallet.Gold);
+        _hud.ShowStatus(messages.Get(MessageKeys.ShopBought, ItemName(item), _wallet.Gold));
+        return true;
+    }
+
     /// <summary>A key lying in the room (or dropped on clear); taking it adds to the run's keys.</summary>
     private void SpawnKey(int index, Vector2 feet)
     {
@@ -657,6 +832,7 @@ public partial class RunStage : Node2D
         var token = new Pickup();
         RoomNode.AddChild(token);
         AudioService.Play(SoundIds.CrateBreak);
+        _wallet.Earn(_run.Shop.CrateGold);
         token.Setup(_player, _run.Pickups, _random.NextDouble() < _run.Pickups.HpChance ? TokenKind.Hp : TokenKind.Mp, crate.GlobalPosition + new Vector2(0, -TokenLift));
         crate.ChangeSprite(_run.Pickups.CrateBrokenSprite);
         crate.FadeAway(BrokenCrateSeconds);
@@ -736,6 +912,9 @@ public partial class RunStage : Node2D
     {
         _monsters.Remove(monster);
         _stats.Healed();
+        var gold = monster.IsElite ? _run.Shop.GoldPerElite : _run.Shop.GoldPerMonster;
+        _wallet.Earn(gold);
+        _gameFeel.ShowDamage(monster.BodyCenter, gold, GoldColor);
     }
 
     private void MarkCleared()
@@ -759,6 +938,7 @@ public partial class RunStage : Node2D
         if (InBossRoom)
         {
             GameLog.Info(MessageKeys.RunCleared);
+            GameServices.MerchantMet = true; // the healed Raccoon opens his stall in later runs
             _hud.ShowStatus(GameServices.Messages.Get(MessageKeys.HudClear));
             _clearScreenTicks = ClearScreenDelayTicks;
             return;

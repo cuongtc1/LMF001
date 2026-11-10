@@ -35,6 +35,9 @@ public partial class AutoplayRunner : Node, IPlayerInput
     /// <summary>False keeps reward screens open (for screenshots of the cards); the default picks the first card.</summary>
     public static bool PicksRewards { get; private set; } = true;
 
+    /// <summary>Gold carried at the start (to test the shop).</summary>
+    public int StartGold { get; private set; }
+
     /// <summary>Keys carried at the start (to test locked chests).</summary>
     public int StartKeys { get; private set; }
 
@@ -61,6 +64,11 @@ public partial class AutoplayRunner : Node, IPlayerInput
         GameServices.GodMode = document.RootElement.TryGetProperty("god_mode", out var god) && god.GetBoolean();
         PicksRewards = !document.RootElement.TryGetProperty("pick_rewards", out var picks) || picks.GetBoolean();
         StartKeys = document.RootElement.TryGetProperty("keys", out var keys) ? keys.GetInt32() : 0;
+        StartGold = document.RootElement.TryGetProperty("gold", out var gold) ? gold.GetInt32() : 0;
+        if (document.RootElement.TryGetProperty("merchant", out var merchant))
+        {
+            GameServices.MerchantMet = merchant.GetBoolean();
+        }
         // "hunt": [from, to] lets Lumi walk to the nearest monster and attack, so a test survives room layout changes
         if (document.RootElement.TryGetProperty("hunt", out var hunt))
         {

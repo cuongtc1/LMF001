@@ -37,6 +37,11 @@ public partial class PrototypeHud : CanvasLayer
 
     public string KeySprite { get; set; } = string.Empty;
 
+    /// <summary>Gold carried; null hides it (outside a run).</summary>
+    public System.Func<int>? Gold { get; set; }
+
+    private Label? _goldCount;
+
     private Label? _keyCount;
 
     /// <summary>The run's amulet set, for icons; empty outside a run.</summary>
@@ -85,6 +90,11 @@ public partial class PrototypeHud : CanvasLayer
             _keyCount = UiCommon.OutlinedLabel(28);
             _keyCount.VerticalAlignment = VerticalAlignment.Center;
             keyRow.AddChild(_keyCount);
+            _goldCount = UiCommon.OutlinedLabel(28);
+            _goldCount.VerticalAlignment = VerticalAlignment.Center;
+            _goldCount.AddThemeColorOverride("font_color", new Color("ffd34d"));
+            keyRow.AddChild(new Control { CustomMinimumSize = new Vector2(24, 0) });
+            keyRow.AddChild(_goldCount);
             column.AddChild(keyRow);
         }
 
@@ -132,6 +142,11 @@ public partial class PrototypeHud : CanvasLayer
         if (_keyCount is not null && Keys is not null)
         {
             _keyCount.Text = "x" + Keys();
+        }
+
+        if (_goldCount is not null && Gold is not null)
+        {
+            _goldCount.Text = GameServices.Messages.Get(MessageKeys.HudGold, Gold());
         }
         _hp.Value = _player.Health.Current;
         _mp.Value = _player.Mp;

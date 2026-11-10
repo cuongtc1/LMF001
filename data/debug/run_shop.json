@@ -1,0 +1,58 @@
+{
+  "god_mode": true,
+  "room": "raccoon_stall",
+  "merchant": true,
+  "gold": 500,
+  "skills": [
+    "jam_spread"
+  ],
+  "pick_rewards": false,
+  "end_tick": 400,
+  "screenshots": [
+    60,
+    130,
+    330
+  ],
+  "steps": [
+    {
+      "tick": 20,
+      "action": "teleport",
+      "x": 720,
+      "y": 880
+    },
+    {
+      "tick": 90,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 92,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 150,
+      "action": "move_right",
+      "pressed": true,
+      "global": true
+    },
+    {
+      "tick": 154,
+      "action": "move_right",
+      "pressed": false,
+      "global": true
+    },
+    {
+      "tick": 180,
+      "action": "attack_light",
+      "pressed": true,
+      "global": true
+    },
+    {
+      "tick": 184,
+      "action": "attack_light",
+      "pressed": false,
+      "global": true
+    }
+  ]
+}

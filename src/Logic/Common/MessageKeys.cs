@@ -58,6 +58,18 @@ public static class MessageKeys
     public const string RunChestLocked = "run.chest_locked";
     public const string RunKeyFound = "run.key_found";
     public const string RunKeyUsed = "run.key_used";
+    public const string MapShop = "map.shop";
+    public const string HudGold = "hud.gold";
+    public const string ShopWelcome = "shop.welcome";
+    public const string ShopItem = "shop.item";
+    public const string ShopPoor = "shop.poor";
+    public const string ShopBought = "shop.bought";
+    public const string ShopSoldOut = "shop.sold_out";
+    public const string ShopHeal = "shop.heal";
+    public const string ShopKey = "shop.key";
+    public const string ShopLeave = "shop.leave";
+    public const string ShopHealDescription = "shop.heal.desc";
+    public const string ShopKeyDescription = "shop.key.desc";
     public const string MapTrial = "map.trial";
     public const string MapBoss = "map.boss";
     public const string MapHint = "map.hint";
@@ -91,7 +103,7 @@ public static class MessageKeys
     [
         DataFileMissing, DataFileInvalid, DataUnknownId, DataDuplicateId, DataBadValue, DataLoaded, DataReloaded,
         GameBooted, StageLoaded, AssetMissing, CombatPlayerHit, CombatMonsterHit, CombatMonsterHealed,
-        AutoplayStarted, AutoplayFinished, DebugTitle, DebugDifficulty, DebugTier, DebugGodMode, DebugAirJump, DebugHeal, DebugArena, CombatStoic, CombatDizzy, CombatFlank, CombatPhaseTwo, CombatGuardBlock, CombatGuardPerfect, HudBoss, RunArea, RunShrinePrompt, RunRoomHealed, RunMoved, MapHere, MapShrine, MapTreasure, MapLair, MapElite, RunChestLocked, RunKeyFound, RunKeyUsed, MapTrial, MapBoss, MapHint, RunStarted, RunCleared, RewardPicked, DebugPrototype, RewardSkill, RewardAmulet, HudSkillSlot, HudSkillReady, HudSkillCooldown, HudSkillEmpty, HudWave, HudClear, ArenaWave, ArenaCleared,
+        AutoplayStarted, AutoplayFinished, DebugTitle, DebugDifficulty, DebugTier, DebugGodMode, DebugAirJump, DebugHeal, DebugArena, CombatStoic, CombatDizzy, CombatFlank, CombatPhaseTwo, CombatGuardBlock, CombatGuardPerfect, HudBoss, RunArea, RunShrinePrompt, RunRoomHealed, RunMoved, MapHere, MapShrine, MapTreasure, MapLair, MapElite, RunChestLocked, RunKeyFound, RunKeyUsed, MapShop, HudGold, ShopWelcome, ShopItem, ShopPoor, ShopBought, ShopSoldOut, ShopHeal, ShopKey, ShopLeave, ShopHealDescription, ShopKeyDescription, MapTrial, MapBoss, MapHint, RunStarted, RunCleared, RewardPicked, DebugPrototype, RewardSkill, RewardAmulet, HudSkillSlot, HudSkillReady, HudSkillCooldown, HudSkillEmpty, HudWave, HudClear, ArenaWave, ArenaCleared,
         DebugRespawn, DebugReload, DebugHelp, HudCombo,
         ResultDefeatTitle, ResultDefeatLine, ResultClearTitle, ResultClearLine, ResultTime, ResultRooms, ResultHealed, ResultCombo, ResultLoadout, ResultRetry, ResultAgain, RunDefeated,
         TrialOffer, TrialStarted, TrialLair, TrialNoHit, TrialWon, TrialBonusLost,

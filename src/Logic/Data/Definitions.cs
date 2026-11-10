@@ -377,6 +377,8 @@ public sealed record RoomDef(
     IReadOnlyList<SpotDef>? Keys = null,
     bool ChestLocked = false,
     bool KeyOnClear = false,
+    float? MerchantX = null,
+    IReadOnlyList<float>? Stands = null,
     bool HasFloor = true,
     float Height = RoomDef.ScreenHeight)
 {
@@ -450,7 +452,32 @@ public sealed record RunDef(
     string AmuletSet,
     int RewardChoices,
     IReadOnlyList<RoomDef> Rooms,
-    IReadOnlyList<LayoutDef> Layouts);
+    IReadOnlyList<LayoutDef> Layouts,
+    ShopDef Shop);
+
+/// <summary>Gold and the Raccoon's stall (Little Noah's shops, 26:00): gold from monsters, crates and chests.</summary>
+/// <param name="GoldPerMonster">Gold for each healed monster.</param>
+/// <param name="GoldPerElite">Gold for each healed elite (super armor) monster instead.</param>
+/// <param name="CrateGold">Gold from each broken crate.</param>
+/// <param name="Skills">Skills on sale per stall (when Lumi has a free slot).</param>
+/// <param name="Amulets">Amulets on sale per stall.</param>
+/// <param name="HealShare">Share of max HP the honey cake heals.</param>
+public sealed record ShopDef(
+    int GoldPerMonster,
+    int GoldPerElite,
+    int CrateGold,
+    int Skills,
+    int Amulets,
+    int SkillPrice,
+    int AmuletPrice,
+    int HealPrice,
+    int KeyPrice,
+    float HealShare,
+    string MerchantSprite,
+    float MerchantHeight,
+    string StandSprite,
+    float StandHeight,
+    string HealSprite);
 
 public sealed record InputActionDef(string Action, IReadOnlyList<string> Keys, IReadOnlyList<int> PadButtons, IReadOnlyList<int> PadAxes);
 

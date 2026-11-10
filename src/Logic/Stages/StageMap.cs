@@ -14,10 +14,13 @@ public static class RoomKinds
     /// <summary>A mini boss with a few helpers: a calmer, single big fight between the crowded rooms.</summary>
     public const string Elite = "elite";
 
+    /// <summary>The Raccoon's stall. Only once the Raccoon has been healed; before that the cell holds a treasure room.</summary>
+    public const string Shop = "shop";
+
     /// <summary>Ledges over open sky, no monsters; reached by climbing out of the room below.</summary>
     public const string Sky = "sky";
 
-    public static readonly string[] All = [Entrance, Fight, Treasure, Trial, Boss, Sky, Elite];
+    public static readonly string[] All = [Entrance, Fight, Treasure, Trial, Boss, Sky, Elite, Shop];
 }
 
 /// <summary>What a room looks like when Lumi comes back to it.</summary>
@@ -36,6 +39,11 @@ public sealed class RoomState
     public HashSet<int> TakenKeys { get; } = [];
 
     public const int ClearKey = -1;
+
+    /// <summary>The stall's items, drawn on the first visit.</summary>
+    public List<Run.ShopItem> Stock { get; } = [];
+
+    public HashSet<int> Sold { get; } = [];
 
     /// <summary>Chests by name ("room", "lair", "bonus"); true once opened.</summary>
     public Dictionary<string, bool> Chests { get; } = [];
@@ -101,7 +109,8 @@ public sealed class StageMap
     /// Picks a layout and fills each cell with an unused room of its kind. A cell with a cell above needs a room with a
     /// top gap; a cell with a cell below needs an open bottom. The same seed gives the same map.
     /// </summary>
-    public static StageMap Generate(RunDef run, ulong seed)
+    /// <param name="withShop">False before the Raccoon has been healed: shop cells take a treasure room.</param>
+    public static StageMap Generate(RunDef run, ulong seed, bool withShop = true)
     {
         var random = new SeededRandom(seed);
         var layout = run.Layouts[random.NextInt(0, run.Layouts.Count)];
@@ -112,7 +121,8 @@ public sealed class StageMap
         {
             var needsUp = cells.Contains((cell.X, cell.Y - 1));
             var needsDown = cells.Contains((cell.X, cell.Y + 1));
-            var pool = run.Rooms.Where(room => room.Kind == cell.Kind && !used.Contains(room.Id)
+            var kind = cell.Kind == RoomKinds.Shop && !withShop ? RoomKinds.Treasure : cell.Kind;
+            var pool = run.Rooms.Where(room => room.Kind == kind && !used.Contains(room.Id)
                 && (!needsUp || room.Up is not null) && (!needsDown || room.Down is not null)).ToList();
             if (pool.Count == 0)
             {
