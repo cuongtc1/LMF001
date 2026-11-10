@@ -47,4 +47,24 @@ public class ShopTests
             Assert.Contains(StageMap.Generate(run, seed, withShop: true).Rooms, shops.Contains);
         }
     }
+
+    [Fact]
+    public void ASkillFoundAfterTheStockWasDrawnIsReplaced()
+    {
+        var stock = new List<ShopItem> { new(ShopItemKinds.Skill, "dough_roll", 220), new(ShopItemKinds.Amulet, "wolf_fang", 160) };
+        var sold = new HashSet<int>();
+        ShopStock.Refresh(stock, sold, ["egg_whisk"], ["wolf_fang"], new SeededRandom(1));
+        Assert.Equal("egg_whisk", stock[0].Id);
+        Assert.Equal("wolf_fang", stock[1].Id);
+        Assert.Empty(sold);
+    }
+
+    [Fact]
+    public void NothingLeftToOfferMarksTheStandSold()
+    {
+        var stock = new List<ShopItem> { new(ShopItemKinds.Skill, "dough_roll", 220) };
+        var sold = new HashSet<int>();
+        ShopStock.Refresh(stock, sold, [], [], new SeededRandom(1));
+        Assert.Contains(0, sold);
+    }
 }

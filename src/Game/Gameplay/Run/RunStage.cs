@@ -653,11 +653,15 @@ public partial class RunStage : Node2D
 
         var shop = _run.Shop;
         var data = GameServices.Data;
+        var skills = _player.Loadout.IsFull ? [] : data.SkillSet(_player.SkillSetId).Skills.Where(skill => !_player.Loadout.Has(skill.Id)).Select(skill => skill.Id).ToList();
+        var amulets = data.AmuletSet(_run.AmuletSet).Amulets.Where(amulet => !_player.Modifiers.Has(amulet.Id)).Select(amulet => amulet.Id).ToList();
         if (State.Stock.Count == 0)
         {
-            var skills = _player.Loadout.IsFull ? [] : data.SkillSet(_player.SkillSetId).Skills.Where(skill => !_player.Loadout.Has(skill.Id)).Select(skill => skill.Id).ToList();
-            var amulets = data.AmuletSet(_run.AmuletSet).Amulets.Where(amulet => !_player.Modifiers.Has(amulet.Id)).Select(amulet => amulet.Id).ToList();
             State.Stock.AddRange(ShopStock.Draw(shop, skills, amulets, _random));
+        }
+        else
+        {
+            ShopStock.Refresh(State.Stock, State.Sold, skills, amulets, _random);
         }
 
         var merchant = GameServices.Texture(shop.MerchantSprite);

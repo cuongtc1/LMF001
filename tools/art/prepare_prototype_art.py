@@ -183,7 +183,11 @@ def key_and_locked_chest():
     key (item 3). The lying key (item 2) is drawn wrong: its body is tilted but the honey drop stays upright, so the
     lying key is made by rotating the upright one instead (producer's catch)."""
     chest, _, key = row_items(V + 'V/ver12_V_20.png', 3)
-    save(chest, PROPS + 'chest_locked.png')
+    # same pixel size as chest.png: the game swaps the sprite at the same scale when the chest opens (round 70 bug:
+    # the high-resolution locked chest turned into a tiny open chest)
+    plain = Image.open(PROPS + 'chest.png')
+    size = (round(chest.shape[1] * plain.height / chest.shape[0]), plain.height)
+    save(np.asarray(Image.fromarray(chest).resize(size, Image.LANCZOS)), PROPS + 'chest_locked.png')
     upright = crop_alpha(inside_outline(key))
     save(upright, PROPS + 'key.png')
     lying = np.asarray(Image.fromarray(upright).rotate(-70, resample=Image.BICUBIC, expand=True))
