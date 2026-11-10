@@ -425,6 +425,7 @@ public sealed record PickupDef(
     float BigChestHeight,
     string KeySprite,
     float KeyHeight,
+    string KeyIconSprite,
     string LockedChestSprite);
 
 /// <summary>A spot in a room: x and the feet height.</summary>

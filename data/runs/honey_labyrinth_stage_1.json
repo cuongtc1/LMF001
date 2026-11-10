@@ -29,8 +29,9 @@
     "lever_height": 150,
     "big_chest_height": 180,
     "key_sprite": "assets/props/common/key.png",
-    "key_height": 70,
-    "locked_chest_sprite": "assets/props/common/chest_locked.png"
+    "key_height": 100,
+    "locked_chest_sprite": "assets/props/common/chest_locked.png",
+    "key_icon_sprite": "assets/props/common/key_lying.png"
   },
   "amulet_set": "honey_labyrinth",
   "reward_choices": 3,

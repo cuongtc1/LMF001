@@ -139,7 +139,7 @@ public partial class RunStage : Node2D
         _hud = new PrototypeHud();
         AddChild(_hud);
         _hud.AmuletSetId = _run.AmuletSet;
-        _hud.KeySprite = _run.Pickups.KeySprite;
+        _hud.KeySprite = _run.Pickups.KeyIconSprite;
         _hud.Keys = () => _keys;
         _hud.Setup(_player);
         _minimap = new Minimap();

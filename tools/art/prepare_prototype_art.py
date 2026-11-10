@@ -178,6 +178,31 @@ def icons():
         save(icon(a), f'{ICONS}amulets/{name}.png')
 
 
+def key_and_locked_chest():
+    """Round 68, prompt V: chest from V_20 (crossed chains read "locked" best at chest size), key from V_20's upright
+    key (item 3). The lying key (item 2) is drawn wrong: its body is tilted but the honey drop stays upright, so the
+    lying key is made by rotating the upright one instead (producer's catch)."""
+    chest, _, key = row_items(V + 'V/ver12_V_20.png', 3)
+    save(chest, PROPS + 'chest_locked.png')
+    upright = crop_alpha(inside_outline(key))
+    save(upright, PROPS + 'key.png')
+    lying = np.asarray(Image.fromarray(upright).rotate(-70, resample=Image.BICUBIC, expand=True))
+    save(crop_alpha(lying), PROPS + 'key_lying.png')
+
+
+def inside_outline(a, dark=95, close=5):
+    """Keeps what the dark outline encloses; glow, rays and sparkles outside the outline become transparent.
+    Pale parts inside the drawing (cream petals) stay, which a white or paleness cut would lose."""
+    rgb_part = a[..., :3]
+    outline = (rgb_part.astype(np.int32).sum(2) < dark * 3).astype(np.uint8)
+    outline = cv2.morphologyEx(outline, cv2.MORPH_CLOSE, np.ones((close, close), np.uint8))
+    _, labels = cv2.connectedComponents(1 - outline)
+    edge = np.unique(np.r_[labels[0], labels[-1], labels[:, 0], labels[:, -1]])
+    outside = np.isin(labels, edge[edge > 0])
+    alpha = cv2.GaussianBlur((~outside).astype(np.float32), (0, 0), 0.8)
+    return np.dstack([rgb_part, (np.clip(alpha, 0, 1) * 255).astype(np.uint8)])
+
+
 def props():
     """Crate pair from M_1 (straight side view), chest pair from M_5 (red wood stands apart from the honey crates),
     tokens from M_2 (yellow star reads best at token size)."""
@@ -309,6 +334,7 @@ def effects():
 
 if __name__ == '__main__':
     icons()
+    key_and_locked_chest()
     background()
     platforms()
     monsters()
