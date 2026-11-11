@@ -122,7 +122,10 @@ public sealed record AttackDef(
     bool GuardBreak,
     string? ViewClip = null,
     int RehitTicks = 0,
-    string? Projectile = null)
+    string? Projectile = null,
+    bool PassThrough = false,
+    bool TurnAtEnd = false,
+    float LiftSpeed = 0)
 {
     public int TotalTicks => StartupTicks + ActiveTicks + RecoveryTicks;
 }
@@ -134,7 +137,13 @@ public sealed record AttackDef(
 /// <param name="FirstSprint">Z during a dash or the run after it.</param>
 /// <param name="FirstHeavy">X on the ground.</param>
 /// <param name="FirstCounter">Z right after a perfect guard.</param>
-public sealed record AttackSetDef(string Id, string First, string FirstAir, string FirstAirUp, string FirstAirHeavy, string FirstSprint, string FirstHeavy, string FirstCounter, IReadOnlyList<AttackDef> Attacks);
+/// <param name="FirstAirUpHeavy">X while rising (upward pass); falls back to <paramref name="FirstAirHeavy"/>.</param>
+/// <param name="FirstSprintHeavy">X during a dash (long pass); falls back to <paramref name="FirstHeavy"/>.</param>
+/// <param name="PassReach">A pass targets the nearest monster whose front is at most this far ahead of Lumi.</param>
+/// <param name="PassMargin">Gap left between that monster's back and Lumi when she lands.</param>
+/// <param name="PassMax">Longest pass.</param>
+public sealed record AttackSetDef(string Id, string First, string FirstAir, string FirstAirUp, string FirstAirHeavy, string FirstSprint, string FirstHeavy, string FirstCounter, IReadOnlyList<AttackDef> Attacks,
+    string? FirstAirUpHeavy = null, string? FirstSprintHeavy = null, float PassReach = 0, float PassMargin = 0, float PassMax = 0);
 
 public sealed record MonsterStatsDef(int MaxHp, int Attack, float Defense, float Speed);
 

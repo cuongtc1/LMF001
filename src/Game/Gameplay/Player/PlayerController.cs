@@ -40,6 +40,11 @@ public partial class PlayerController : CharacterBody2D, IDamageable
     private int _vfxSwingId;
     private bool _onPlatform;
     private int _skillInvulnerableTicks;
+
+    /// <summary>Lunge of the current pass slash, measured from the monster it passes (null: the attack's own lunge).</summary>
+    private float? _passLunge;
+    private AttackSetDef _attacks = null!;
+    private const float PassHeightSlack = 40;
     private SkillSetDef _skills = null!;
 
     private const float ProjectileForward = 80;
@@ -97,6 +102,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         _gameFeel = gameFeel;
         _spawn = spawn;
         _motor = new PlayerMotor(def.Movement);
+        _attacks = attacks;
         _combo = new ComboRunner(attacks, def.Combat.AttackBufferTicks);
         _skills = GameServices.Data.SkillSet(def.Combat.SkillSet);
         Loadout = new SkillLoadout(_skills.Slots);
@@ -178,7 +184,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
 
     public bool TakeHit(in HitInfo hit)
     {
-        if (GameServices.GodMode || _invulnerableTicks > 0 || _skillInvulnerableTicks > 0 || Health.IsDead)
+        if (GameServices.GodMode || _invulnerableTicks > 0 || _skillInvulnerableTicks > 0 || Passing || Health.IsDead)
         {
             return false;
         }
@@ -270,7 +276,10 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         }
 
         TryStartSkill(input.SkillPressed);
+        var before = _combo.Current;
+        var beforePhase = _combo.Phase;
         _combo.Advance(CurrentEntry(input));
+        StepPass(before, beforePhase);
         if (_combo.JustStarted && input.MoveX != 0)
         {
             _motor.Face(Mathf.Sign(input.MoveX));
@@ -446,10 +455,53 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         return _motor.IsSprinting || _motor.IsDashing ? ComboEntry.Sprint : ComboEntry.Ground;
     }
 
-    /// <summary>Monsters stop Lumi, except while she dashes or uses a skill.</summary>
+    /// <summary>
+    /// Combo kit v2 ("Z hits, X goes through"): a pass slash carries Lumi just behind the monster in front, she is
+    /// invulnerable while passing, and she turns to face it when the pass ends, so the next Z hits its back.
+    /// </summary>
+    private void StepPass(AttackDef? before, AttackPhase beforePhase)
+    {
+        if (before is { TurnAtEnd: true } && beforePhase != AttackPhase.Recovery && (_combo.Current != before || _combo.Phase == AttackPhase.Recovery || _combo.JustStarted))
+        {
+            _motor.Face(-_motor.Facing);
+        }
+
+        if (!_combo.JustStarted || _combo.Current is not { } attack)
+        {
+            return;
+        }
+
+        _passLunge = null;
+        if (attack.PassThrough)
+        {
+            var set = _attacks;
+            var targets = Blockers.Where(body => body.BlocksBody && SameHeight(body))
+                .Select(body => (body.FeetPosition.X, body.BodySize.X / 2));
+            _passLunge = PassRule.Distance(GlobalPosition.X, _motor.Facing, _def.Body.Width / 2, targets, set.PassReach, set.PassMargin, attack.LungePixels, set.PassMax);
+        }
+
+        if (attack.LiftSpeed > 0)
+        {
+            _motor.Knockback(0, -attack.LiftSpeed);
+        }
+    }
+
+    /// <summary>A pass slash while it moves: no body blocking and no damage taken.</summary>
+    private bool Passing => _combo.Current is { PassThrough: true } && _combo.Phase != AttackPhase.Recovery;
+
+    private bool SameHeight(IBodyBlocker body)
+    {
+        var feet = body.FeetPosition;
+        return GlobalPosition.Y > feet.Y - body.BodySize.Y - PassHeightSlack && GlobalPosition.Y - _def.Body.Height < feet.Y + PassHeightSlack;
+    }
+
+    /// <summary>
+    /// Monsters stop Lumi (round 73: a ground dash too, so X is the way through), except while she dashes in the air,
+    /// passes or uses a skill.
+    /// </summary>
     private void PushOutOfBodies()
     {
-        if (_motor.IsDashing || _skillInvulnerableTicks > 0 || Health.IsDead)
+        if ((_motor.IsDashing && !IsOnFloor()) || Passing || _skillInvulnerableTicks > 0 || Health.IsDead)
         {
             return;
         }
@@ -476,7 +528,8 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             return 0;
         }
 
-        return _motor.Facing * attack.LungePixels / (attack.StartupTicks + attack.ActiveTicks) * GameConstants.TicksPerSecond * _combo.AttackSpeed;
+        var lunge = attack.PassThrough && _passLunge is { } pass ? pass : attack.LungePixels;
+        return _motor.Facing * lunge / (attack.StartupTicks + attack.ActiveTicks) * GameConstants.TicksPerSecond * _combo.AttackSpeed;
     }
 
     private void StepAttack()

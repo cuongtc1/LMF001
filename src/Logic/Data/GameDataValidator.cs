@@ -64,6 +64,9 @@ public static class GameDataValidator
             Require(ids.Contains(set.FirstHeavy), $"{set.Id}.first_heavy");
             Require(ids.Contains(set.FirstCounter), $"{set.Id}.first_counter");
             Require(ids.Contains(set.FirstSprint), $"{set.Id}.first_sprint");
+            Require(set.FirstAirUpHeavy is null || ids.Contains(set.FirstAirUpHeavy), $"{set.Id}.first_air_up_heavy");
+            Require(set.FirstSprintHeavy is null || ids.Contains(set.FirstSprintHeavy), $"{set.Id}.first_sprint_heavy");
+            Require(!set.Attacks.Any(attack => attack.PassThrough) || set is { PassReach: > 0, PassMax: > 0 }, $"{set.Id}.pass");
             foreach (var attack in set.Attacks)
             {
                 Require(attack.Next is null || ids.Contains(attack.Next), $"{set.Id}.{attack.Id}.next");

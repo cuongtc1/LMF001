@@ -7,17 +7,24 @@ namespace LumiFeast.Logic.Tests;
 public class GameDataTests
 {
     [Fact]
-    public void LevelOneSetMatchesTheDesign()
+    public void ComboKitMatchesTheDesign()
     {
+        // 02_combat.md "Combo kit v2": Z hits, X goes through
         var set = TestData.Game.AttackSet("lumi_sword");
         AttackDef Get(string id) => set.Attacks.First(attack => attack.Id == id);
         Assert.Equal(set.First, Get(Get(Get(set.First).Next!).Next!).Next);
-        Assert.True(Get(Get(set.First).NextHeavy!).LaunchSpeed > 0);
-        Assert.NotNull(Get(set.FirstHeavy).NextHeavy);
-        Assert.Null(Get(set.FirstAir).Next);
-        Assert.True(Get(set.FirstAirHeavy).PlungeSpeed > 0);
-        Assert.True(Get(set.FirstAirHeavy).LandingLagTicks > 0);
-        Assert.Equal((3f, 5f, 4f), (Get(set.First).Mana, Get(set.FirstHeavy).Mana, Get(set.FirstSprint).Mana));
+        var pass = Get(Get(set.First).NextHeavy!);
+        Assert.True(pass is { PassThrough: true, TurnAtEnd: true });
+        Assert.Equal(pass.Id, Get(Get(set.First).Next!).NextHeavy);
+        Assert.True(Get(Get(Get(Get(set.First).Next!).Next!).NextHeavy!).LaunchSpeed > 0);
+        Assert.True(Get(set.FirstHeavy).PassThrough);
+        Assert.True(Get(set.FirstHeavy).StartupTicks > pass.StartupTicks);
+        Assert.True(Get(set.FirstSprintHeavy!).PassThrough);
+        Assert.True(Get(set.FirstAirUpHeavy!).PassThrough);
+        Assert.True(Get(set.FirstAirHeavy) is { PassThrough: true, PlungeSpeed: > 0, LandingLagTicks: > 0 });
+        Assert.Equal("a3", Get(Get(set.FirstAir).Next!).Next);
+        Assert.DoesNotContain(set.Attacks, attack => attack.Id == "xx");
+        Assert.All(set.Attacks.Where(attack => attack.PassThrough), attack => Assert.Null(attack.NextHeavy));
     }
 
     [Fact]

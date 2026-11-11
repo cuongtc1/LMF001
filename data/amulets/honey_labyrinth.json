@@ -119,7 +119,7 @@
         {
           "kind": "attack_slow",
           "value": 0.3,
-          "target": "xx",
+          "target": "x_rise",
           "projectile": null,
           "min_hp_ratio": 0,
           "ticks": 180
@@ -139,7 +139,7 @@
         {
           "kind": "attack_mana",
           "value": 5,
-          "target": "xx",
+          "target": "x_rise",
           "projectile": null,
           "min_hp_ratio": 0
         },

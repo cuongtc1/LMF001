@@ -1,0 +1,64 @@
+{
+  "start_x": 1560,
+  "god_mode": true,
+  "end_tick": 200,
+  "screenshots": [
+    80,
+    92,
+    100,
+    112,
+    130
+  ],
+  "steps": [
+    {
+      "tick": 40,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 42,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 62,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 64,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 84,
+      "action": "attack_heavy",
+      "pressed": true
+    },
+    {
+      "tick": 86,
+      "action": "attack_heavy",
+      "pressed": false
+    },
+    {
+      "tick": 118,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 120,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 140,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 142,
+      "action": "attack_light",
+      "pressed": false
+    }
+  ]
+}

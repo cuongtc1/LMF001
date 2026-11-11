@@ -89,10 +89,25 @@ public class ComboRunnerTests
     }
 
     [Fact]
-    public void ZAfterDashZKeepsTheZComboGoing()
+    public void ZAfterDashZSkipsTheOpener()
     {
+        // combo kit v2: the lunge stab flows straight into the quick second slash
         var set = TestData.Game.AttackSet("lumi_sword");
-        Assert.Equal(set.First, set.Attacks.First(attack => attack.Id == set.FirstSprint).Next);
+        Assert.Equal(set.Attacks.First(attack => attack.Id == set.First).Next, set.Attacks.First(attack => attack.Id == set.FirstSprint).Next);
+    }
+
+    [Fact]
+    public void XRisingAndXInADashPickTheirOwnPasses()
+    {
+        var set = Set with { FirstAirUpHeavy = "b", FirstSprintHeavy = "a" };
+        var combo = new ComboRunner(set, 8);
+        combo.PressAttack(heavy: true);
+        combo.Advance(ComboEntry.AirUp);
+        Assert.Equal("b", combo.Current?.Id);
+        combo = new ComboRunner(set, 8);
+        combo.PressAttack(heavy: true);
+        combo.Advance(ComboEntry.Sprint);
+        Assert.Equal("a", combo.Current?.Id);
     }
 
     [Fact]
