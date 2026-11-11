@@ -111,6 +111,15 @@ public class ComboRunnerTests
     }
 
     [Fact]
+    public void AnEmptyFirstHeavyMeansXAloneDoesNothing()
+    {
+        var combo = new ComboRunner(Set with { FirstHeavy = string.Empty }, 8);
+        combo.PressAttack(heavy: true);
+        combo.Advance();
+        Assert.False(combo.IsAttacking);
+    }
+
+    [Fact]
     public void UpSlashSharesTheOneAirAttack()
     {
         var combo = new ComboRunner(Set, 8);

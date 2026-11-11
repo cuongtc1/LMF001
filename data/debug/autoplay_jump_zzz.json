@@ -1,0 +1,54 @@
+{
+  "start_x": 900,
+  "god_mode": true,
+  "end_tick": 140,
+  "screenshots": [
+    56,
+    70,
+    84,
+    96,
+    110
+  ],
+  "steps": [
+    {
+      "tick": 40,
+      "action": "jump",
+      "pressed": true
+    },
+    {
+      "tick": 52,
+      "action": "jump",
+      "pressed": false
+    },
+    {
+      "tick": 50,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 52,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 64,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 66,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 78,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 80,
+      "action": "attack_light",
+      "pressed": false
+    }
+  ]
+}

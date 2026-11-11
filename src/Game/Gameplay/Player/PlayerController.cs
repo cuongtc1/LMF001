@@ -108,7 +108,6 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         _spawn = spawn;
         _motor = new PlayerMotor(def.Movement);
         _attacks = attacks;
-        PassCharge = new PassCharge(attacks.PassHitsNeeded);
         _combo = new ComboRunner(attacks, def.Combat.AttackBufferTicks);
         _skills = GameServices.Data.SkillSet(def.Combat.SkillSet);
         Loadout = new SkillLoadout(_skills.Slots);
@@ -267,11 +266,9 @@ public partial class PlayerController : CharacterBody2D, IDamageable
 
         var input = InputPaused ? PlayerFrameInput.None : InputSource.Read();
         MoveInput = input.MoveX;
-        // combo kit v3: on the ground X only answers once Z has earned a pass (mashing X does nothing)
-        var heavyAllowed = input.HeavyPressed && (!IsOnFloor() || PassCharge.Ready);
-        if ((input.AttackPressed || heavyAllowed) && _stunTicks == 0 && _landingLagTicks == 0)
+        if ((input.AttackPressed || input.HeavyPressed) && _stunTicks == 0 && _landingLagTicks == 0)
         {
-            _combo.PressAttack(heavyAllowed && !input.AttackPressed);
+            _combo.PressAttack(input.HeavyPressed && !input.AttackPressed);
         }
         else if (_guardHitTicks == 0 && _stunTicks == 0 && _guard.TakeAutoCounter())
         {
@@ -325,7 +322,8 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             input.DashPressed,
             onFloor,
             attacking is not null || _stunTicks > 0 || _landingLagTicks > 0 || Health.IsDead || _guard.IsGuarding,
-            attacking is not null && !onFloor && _combo.Phase != AttackPhase.Recovery ? _def.Movement.AirAttackGravityScale : 1,
+            // light gravity through an air slash and, when another slash can follow, its recovery too
+            attacking is not null && !onFloor && (_combo.Phase != AttackPhase.Recovery || attacking.Next is not null) ? _def.Movement.AirAttackGravityScale : 1,
             LungeVelocity(),
             input.DownHeld,
             attacking is not null && _combo.Phase == AttackPhase.Active ? attacking.PlungeSpeed : 0));
@@ -502,9 +500,10 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             return;
         }
 
-        if (attack.PassThrough || attack.LiftSpeed > 0)
+        // the air string hangs in the air: each air slash gives a small hop instead of falling after the first one
+        if (attack.EndsOnLanding && attack.PlungeSpeed == 0 && !IsOnFloor() && _attacks.AirHopSpeed > 0)
         {
-            PassCharge.TryUse();
+            _motor.Knockback(_motor.VelocityX, Mathf.Min(_motor.VelocityY, -_attacks.AirHopSpeed));
         }
 
         _passLunge = null;
@@ -528,8 +527,6 @@ public partial class PlayerController : CharacterBody2D, IDamageable
     /// <summary>Only the middle of a pass, while Lumi is inside the monster, is safe (v3: the start and end can be hit).</summary>
     private bool PassingSafe => _combo.Current is { PassThrough: true } && _combo.Phase == AttackPhase.Active;
 
-    /// <summary>Z hits earn passes (combo kit v3).</summary>
-    public PassCharge PassCharge { get; private set; } = new(0);
 
     private bool SameHeight(IBodyBlocker body)
     {
@@ -608,11 +605,6 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         };
         var swing = attack.RehitTicks > 0 ? _combo.SwingId * RehitStride + _combo.Tick / attack.RehitTicks : _combo.SwingId;
         var landed = _hitbox.Sweep(swing, attack.Hitbox, _motor.Facing, hit);
-        if (swing != _manaSwing && attack.Id != _skillAttack && !attack.PassThrough && attack.LiftSpeed == 0 && landed.Any(target => target is IBodyBlocker))
-        {
-            PassCharge.Landed();
-        }
-
         if (landed.Count > 0 && swing != _manaSwing)
         {
             // flat bonus once per swing, however many monsters it hits (Finisher Fuel)

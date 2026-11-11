@@ -61,7 +61,7 @@ public static class GameDataValidator
             Require(ids.Contains(set.FirstAir), $"{set.Id}.first_air");
             Require(ids.Contains(set.FirstAirHeavy), $"{set.Id}.first_air_heavy");
             Require(ids.Contains(set.FirstAirUp), $"{set.Id}.first_air_up");
-            Require(ids.Contains(set.FirstHeavy), $"{set.Id}.first_heavy");
+            Require(set.FirstHeavy.Length == 0 || ids.Contains(set.FirstHeavy), $"{set.Id}.first_heavy");
             Require(ids.Contains(set.FirstCounter), $"{set.Id}.first_counter");
             Require(ids.Contains(set.FirstSprint), $"{set.Id}.first_sprint");
             Require(set.FirstAirUpHeavy is null || ids.Contains(set.FirstAirUpHeavy), $"{set.Id}.first_air_up_heavy");

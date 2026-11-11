@@ -146,16 +146,16 @@ public sealed record AttackDef(
 /// <param name="FirstAirUp">Z while rising with Up held.</param>
 /// <param name="FirstAirHeavy">X in the air.</param>
 /// <param name="FirstSprint">Z during a dash or the run after it.</param>
-/// <param name="FirstHeavy">X on the ground.</param>
+/// <param name="FirstHeavy">X on the ground; empty: X alone does nothing (combo kit v4, X only inside combos).</param>
 /// <param name="FirstCounter">Z right after a perfect guard.</param>
 /// <param name="FirstAirUpHeavy">X while rising (upward pass); falls back to <paramref name="FirstAirHeavy"/>.</param>
 /// <param name="FirstSprintHeavy">X during a dash (long pass); falls back to <paramref name="FirstHeavy"/>.</param>
 /// <param name="PassReach">A pass targets the nearest monster whose front is at most this far ahead of Lumi.</param>
 /// <param name="PassMargin">Gap left between that monster's back and Lumi when she lands.</param>
 /// <param name="PassMax">Longest pass.</param>
-/// <param name="PassHitsNeeded">Z swings that must land before a pass or the rising slash (combo kit v3); 0: free.</param>
+/// <param name="AirHopSpeed">Each air slash lifts Lumi this fast, so Jump Z Z Z hangs in the air (round 78).</param>
 public sealed record AttackSetDef(string Id, string First, string FirstAir, string FirstAirUp, string FirstAirHeavy, string FirstSprint, string FirstHeavy, string FirstCounter, IReadOnlyList<AttackDef> Attacks,
-    string? FirstAirUpHeavy = null, string? FirstSprintHeavy = null, float PassReach = 0, float PassMargin = 0, float PassMax = 0, int PassHitsNeeded = 0);
+    string? FirstAirUpHeavy = null, string? FirstSprintHeavy = null, float PassReach = 0, float PassMargin = 0, float PassMax = 0, float AirHopSpeed = 0);
 
 public sealed record MonsterStatsDef(int MaxHp, int Attack, float Defense, float Speed);
 

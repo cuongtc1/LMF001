@@ -9,20 +9,22 @@ public class GameDataTests
     [Fact]
     public void ComboKitMatchesTheDesign()
     {
-        // 02_combat.md "Combo kit v3": Z hits, X goes through, and a pass is earned by two landed Z swings
+        // 02_combat.md "Combo kit v4": X only inside combos (Z Z X pass, Z Z Z X rising slash), no up-slash in the air
         var set = TestData.Game.AttackSet("lumi_sword");
         AttackDef Get(string id) => set.Attacks.First(attack => attack.Id == id);
-        Assert.Equal(set.First, Get(Get(Get(set.First).Next!).Next!).Next);
-        Assert.Equal(2, set.PassHitsNeeded);
-        var pass = Get(Get(Get(set.First).Next!).NextHeavy!);
-        Assert.True(pass is { PassThrough: true, TurnAtEnd: true });
-        Assert.True(Get(Get(Get(Get(set.First).Next!).Next!).NextHeavy!).LaunchSpeed > 0);
-        Assert.Equal(pass.Id, set.FirstHeavy);
-        Assert.Null(set.FirstSprintHeavy);
-        Assert.Null(set.FirstAirUpHeavy);
+        var z1 = Get(set.First);
+        var z2 = Get(z1.Next!);
+        var z3 = Get(z2.Next!);
+        Assert.Equal(set.First, z3.Next);
+        Assert.Null(z1.NextHeavy);
+        Assert.True(Get(z2.NextHeavy!) is { PassThrough: true, TurnAtEnd: true });
+        Assert.True(Get(z3.NextHeavy!).LaunchSpeed > 0);
+        Assert.Equal(string.Empty, set.FirstHeavy);
+        Assert.Equal(set.FirstAir, set.FirstAirUp);
         Assert.False(Get(set.FirstAirHeavy).PassThrough);
         Assert.Single(set.Attacks, attack => attack.PassThrough);
         Assert.Equal("a3", Get(Get(set.FirstAir).Next!).Next);
+        Assert.True(set.AirHopSpeed > 0);
     }
 
     [Fact]

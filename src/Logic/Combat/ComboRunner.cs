@@ -109,10 +109,10 @@ public sealed class ComboRunner(AttackSetDef set, int bufferTicks)
             }
         }
 
-        if (Current is null && _buffer > 0 && !(inAir && _airStringSpent))
+        if (Current is null && _buffer > 0 && !(inAir && _airStringSpent) && FirstAttack(entry) is { Length: > 0 } first)
         {
             _airStringSpent = inAir;
-            Start(FirstAttack(entry));
+            Start(first);
         }
 
         _buffer = Math.Max(0, _buffer - 1);

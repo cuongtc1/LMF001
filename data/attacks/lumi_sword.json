@@ -2,10 +2,10 @@
   "id": "lumi_sword",
   "first": "z1",
   "first_air": "a1",
-  "first_air_up": "au",
+  "first_air_up": "a1",
   "first_air_heavy": "ax",
   "first_sprint": "s1",
-  "first_heavy": "x_pass",
+  "first_heavy": "",
   "first_counter": "counter",
   "pass_reach": 240,
   "pass_margin": 24,
@@ -35,7 +35,7 @@
       "vfx_y": -105,
       "launch_speed": 0,
       "ends_on_landing": false,
-      "next_heavy": "x_pass",
+      "next_heavy": null,
       "chain_from_tick": 26,
       "stun_ticks": 40,
       "knockdown": false,
@@ -424,43 +424,6 @@
       "projectile": null
     },
     {
-      "id": "au",
-      "damage_multiplier": 0.8,
-      "startup_ticks": 6,
-      "active_ticks": 5,
-      "recovery_ticks": 12,
-      "cancel_from_tick": 11,
-      "next": null,
-      "lunge_pixels": 30,
-      "hitbox": {
-        "x": -70,
-        "y": -360,
-        "width": 260,
-        "height": 320
-      },
-      "hitstop_ticks": 3,
-      "shake_pixels": 0,
-      "knockback_speed": 60,
-      "vfx": "slash_diagonal",
-      "hit_vfx": "hit_light",
-      "vfx_x": 60,
-      "vfx_y": -250,
-      "launch_speed": 0,
-      "ends_on_landing": true,
-      "next_heavy": null,
-      "chain_from_tick": 15,
-      "stun_ticks": 40,
-      "knockdown": false,
-      "plunge_speed": 0,
-      "mana": 3,
-      "stagger": 2,
-      "landing_lag_ticks": 0,
-      "guard_break": false,
-      "view_clip": null,
-      "rehit_ticks": 0,
-      "projectile": null
-    },
-    {
       "id": "sk_skewer",
       "damage_multiplier": 1.4,
       "startup_ticks": 6,
@@ -683,5 +646,5 @@
       "projectile": null
     }
   ],
-  "pass_hits_needed": 2
+  "air_hop_speed": 240
 }
