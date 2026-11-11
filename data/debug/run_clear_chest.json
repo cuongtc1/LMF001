@@ -1,0 +1,14 @@
+{
+  "god_mode": true,
+  "room": "gate",
+  "skills": [],
+  "end_tick": 3600,
+  "screenshots": [
+    3590
+  ],
+  "hunt": [
+    30,
+    3000
+  ],
+  "steps": []
+}

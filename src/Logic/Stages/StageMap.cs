@@ -45,8 +45,11 @@ public sealed class RoomState
 
     public HashSet<int> Sold { get; } = [];
 
-    /// <summary>Chests by name ("room", "lair", "bonus"); true once opened.</summary>
+    /// <summary>Chests by name ("room", "lair", "bonus", "clear"); true once opened.</summary>
     public Dictionary<string, bool> Chests { get; } = [];
+
+    /// <summary>Where the chest that appeared when the room was healed stands (Little Noah 28:40).</summary>
+    public float ClearChestX { get; set; }
 }
 
 /// <summary>

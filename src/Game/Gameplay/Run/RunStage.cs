@@ -50,6 +50,8 @@ public partial class RunStage : Node2D
     private const string RoomChest = "room";
     private const string LairChest = "lair";
     private const string BonusChest = "bonus";
+    private const string ClearChest = "clear";
+    private const float ClearChestEdge = 320;
 
     /// <summary>A lair turns the room dusky and mysterious while it runs.</summary>
     private static readonly Color LairShade = new(0.62f, 0.57f, 0.86f);
@@ -620,6 +622,7 @@ public partial class RunStage : Node2D
         {
             LairChest => (_room.Challenge!.ChestX, pickups.BigChestHeight),
             BonusChest => (_room.Challenge!.ChestX, pickups.ChestHeight),
+            ClearChest => (State.ClearChestX, pickups.ChestHeight),
             _ => (_room.ChestX ?? 0, pickups.ChestHeight),
         };
         var feet = name == RoomChest ? _room.ChestY ?? _room.GroundY : _room.GroundY;
@@ -651,7 +654,7 @@ public partial class RunStage : Node2D
                 GameLog.Info(MessageKeys.RunKeyUsed, _keys);
             }
 
-            OfferReward(locked ? RewardKind.Any : RewardKind.Amulets);
+            GiveReward(locked ? RewardKind.Any : RewardKind.Amulets);
         };
     }
 
@@ -1042,8 +1045,11 @@ public partial class RunStage : Node2D
         AudioService.Play(SoundIds.RoomHealed);
         if (_room.RewardOnClear && !State.RewardTaken)
         {
+            // Little Noah 28:40: "FOES DEFEATED!", then a chest appears; opening it gives one random reward, no choice
             State.RewardTaken = true;
-            OfferReward(RewardKind.Any);
+            State.ClearChestX = Mathf.Clamp(_player.GlobalPosition.X, ClearChestEdge, _room.Width - ClearChestEdge);
+            State.Chests[ClearChest] = false;
+            SpawnChest(ClearChest);
         }
     }
 
@@ -1085,8 +1091,33 @@ public partial class RunStage : Node2D
             });
     }
 
-    /// <summary>One of three: skills while a slot is free, and amulets not taken yet.</summary>
-    private void OfferReward(RewardKind kind, System.Action? onPicked = null)
+    /// <summary>
+    /// A chest's reward (round 73, Little Noah 28:44): one random skill or amulet, taken at once and shown in a short
+    /// card on the HUD, so the run does not stop for reading. Only the skill shrine still offers a choice.
+    /// </summary>
+    private void GiveReward(RewardKind kind)
+    {
+        var data = GameServices.Data;
+        var skillSet = data.Character(GameConstants.PlayerCharacterId).Combat.SkillSet;
+        var pool = RewardPool(kind);
+        var picks = RewardDraw.Pick(pool, 1, _random);
+        if (picks.Count == 0)
+        {
+            DropGold(_player.GlobalPosition + new Vector2(0, -200), _run.Shop.CrateGold * 4, true);
+            return;
+        }
+
+        var key = picks[0];
+        var isSkill = key.StartsWith(MessageKeys.SkillPrefix, System.StringComparison.Ordinal);
+        Take(key);
+        var messages = GameServices.Messages;
+        var picture = isSkill
+            ? GameIcons.Skill(skillSet, key[MessageKeys.SkillPrefix.Length..])
+            : GameIcons.Amulet(_run.AmuletSet, key[MessageKeys.AmuletPrefix.Length..]);
+        _hud.ShowReward(picture, messages.Get(key), messages.Get(key + MessageKeys.DescriptionSuffix));
+    }
+
+    private List<string> RewardPool(RewardKind kind)
     {
         var data = GameServices.Data;
         var skills = data.SkillSet(data.Character(GameConstants.PlayerCharacterId).Combat.SkillSet).Skills;
@@ -1101,6 +1132,34 @@ public partial class RunStage : Node2D
         {
             pool.AddRange(amulets.Where(amulet => !_player.Modifiers.Has(amulet.Id)).Select(amulet => MessageKeys.AmuletPrefix + amulet.Id));
         }
+
+        return pool;
+    }
+
+    private void Take(string key)
+    {
+        var data = GameServices.Data;
+        var skills = data.SkillSet(data.Character(GameConstants.PlayerCharacterId).Combat.SkillSet).Skills;
+        var amulets = data.AmuletSet(_run.AmuletSet).Amulets;
+        if (key.StartsWith(MessageKeys.SkillPrefix, System.StringComparison.Ordinal))
+        {
+            _player.Loadout.Add(skills.First(skill => MessageKeys.SkillPrefix + skill.Id == key));
+        }
+        else
+        {
+            _player.Modifiers.Add(amulets.First(amulet => MessageKeys.AmuletPrefix + amulet.Id == key));
+            _player.ApplyModifiers();
+        }
+
+        GameLog.Info(MessageKeys.RewardPicked, key);
+    }
+
+    /// <summary>One of three: the skill shrine's choice (rare, like Little Noah's cauldrons).</summary>
+    private void OfferReward(RewardKind kind, System.Action? onPicked = null)
+    {
+        var data = GameServices.Data;
+        var skills = data.SkillSet(data.Character(GameConstants.PlayerCharacterId).Combat.SkillSet).Skills;
+        var pool = RewardPool(kind);
         var picks = RewardDraw.Pick(pool, _run.RewardChoices, _random);
         if (picks.Count == 0)
         {
@@ -1124,18 +1183,7 @@ public partial class RunStage : Node2D
         _player.InputPaused = true;
         _picker.Open(cards, index =>
         {
-            var key = picks[index];
-            if (key.StartsWith(MessageKeys.SkillPrefix, System.StringComparison.Ordinal))
-            {
-                _player.Loadout.Add(skills.First(skill => MessageKeys.SkillPrefix + skill.Id == key));
-            }
-            else
-            {
-                _player.Modifiers.Add(amulets.First(amulet => MessageKeys.AmuletPrefix + amulet.Id == key));
-                _player.ApplyModifiers();
-            }
-
-            GameLog.Info(MessageKeys.RewardPicked, key);
+            Take(picks[index]);
             _rewardPending = false;
             _player.InputPaused = false;
             onPicked?.Invoke();

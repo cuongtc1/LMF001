@@ -133,6 +133,43 @@ public partial class PrototypeHud : CanvasLayer
         AddChild(_status);
     }
 
+    /// <summary>
+    /// A chest's reward: icon, name and its one-line description for a few seconds (round 73), so the run never stops
+    /// for a choice card.
+    /// </summary>
+    public void ShowReward(Texture2D? icon, string title, string line)
+    {
+        _rewardCard?.QueueFree();
+        var card = new PanelContainer { Position = new Vector2(RewardLeft, RewardTop), CustomMinimumSize = new Vector2(UiCommon.ScreenWidth - RewardLeft * 2, 0) };
+        card.AddThemeStyleboxOverride("panel", new StyleBoxFlat { BgColor = new Color(0.1f, 0.08f, 0.15f, 0.82f), CornerRadiusTopLeft = 14, CornerRadiusTopRight = 14, CornerRadiusBottomLeft = 14, CornerRadiusBottomRight = 14, ContentMarginLeft = 18, ContentMarginRight = 18, ContentMarginTop = 10, ContentMarginBottom = 10 });
+        var row = new HBoxContainer { Alignment = BoxContainer.AlignmentMode.Center };
+        row.AddThemeConstantOverride("separation", 18);
+        card.AddChild(row);
+        if (icon is not null)
+        {
+            row.AddChild(new TextureRect { Texture = icon, CustomMinimumSize = Vector2.One * RewardIconSize, ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered });
+        }
+
+        var text = new VBoxContainer { Alignment = BoxContainer.AlignmentMode.Center };
+        row.AddChild(text);
+        var name = UiCommon.OutlinedLabel(34, title);
+        name.AddThemeColorOverride("font_color", new Color("ffd34d"));
+        text.AddChild(name);
+        text.AddChild(UiCommon.OutlinedLabel(24, line));
+        AddChild(card);
+        _rewardCard = card;
+        var tween = card.CreateTween();
+        tween.TweenInterval(RewardSeconds);
+        tween.TweenProperty(card, "modulate:a", 0f, 0.4f);
+        tween.TweenCallback(Callable.From(card.QueueFree));
+    }
+
+    private Control? _rewardCard;
+    private const float RewardLeft = 560;
+    private const float RewardTop = 200;
+    private const float RewardIconSize = 96;
+    private const float RewardSeconds = 3.2f;
+
     /// <summary>Shows a boss health bar; null hides it.</summary>
     public void TrackBoss(Health? boss)
     {
