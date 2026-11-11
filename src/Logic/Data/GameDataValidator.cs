@@ -95,6 +95,7 @@ public static class GameDataValidator
             foreach (var area in run.Areas ?? [])
             {
                 Require(area.Layouts.Count > 0, $"{run.Id}.{area.Id}.layouts");
+                Require(area.DoorSprite is null || run.DoorHeight > 0, $"{run.Id}.{area.Id}.door");
                 Require(area.Next.All(next => run.Areas!.Any(other => other.Id == next)), $"{run.Id}.{area.Id}.next");
                 var gate = area.Next.Count > 0 ? Stages.RoomKinds.Gate : Stages.RoomKinds.Boss;
                 Require(area.Layouts.All(layout => layout.Cells.Count(cell => cell.Kind == gate) == 1), $"{run.Id}.{area.Id}.{gate}");

@@ -789,11 +789,13 @@ public partial class RunStage : Node2D
             var x = _room.Doors[i];
             var door = new HittableProp();
             RoomNode.AddChild(door);
-            door.Setup(_run.GateSprite, _run.GateHeight, new Vector2(x, _room.GroundY), 1);
+            var art = _run.Areas!.First(area => area.Id == next).DoorSprite;
+            var height = art is null ? _run.GateHeight : _run.DoorHeight;
+            door.Setup(art ?? _run.GateSprite, height, new Vector2(x, _room.GroundY), 1);
             var label = UiCommon.OutlinedLabel(DoorLabelFont, messages.Get(MessageKeys.AreaPrefix + next));
             label.HorizontalAlignment = HorizontalAlignment.Center;
             label.Size = new Vector2(420, 0);
-            label.Position = new Vector2(x - 210, _room.GroundY - _run.GateHeight - DoorLabelLift - DoorLabelFont);
+            label.Position = new Vector2(x - 210, _room.GroundY - height - DoorLabelLift - DoorLabelFont);
             label.ZIndex = 4;
             RoomNode.AddChild(label);
             door.Broken += _ => EnterArea(next);

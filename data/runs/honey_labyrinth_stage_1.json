@@ -2011,6 +2011,7 @@
     },
     {
       "id": "thorn_hollow",
+      "door_sprite": "assets/props/common/door_thorn.png",
       "layouts": [
         {
           "id": "hollow",
@@ -2047,6 +2048,7 @@
     },
     {
       "id": "honey_cellar",
+      "door_sprite": "assets/props/common/door_cellar.png",
       "layouts": [
         {
           "id": "cellar",
@@ -2081,5 +2083,6 @@
       ],
       "next": []
     }
-  ]
+  ],
+  "door_height": 360
 }

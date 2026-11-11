@@ -213,10 +213,11 @@ garden = [
 ]
 data["areas"] = [
     {"id": "bloom_garden", "layouts": garden, "next": ["thorn_hollow", "honey_cellar"]},
-    {"id": "thorn_hollow", "layouts": [{"id": "hollow", "cells": cells((0, 0, F), (1, 0, T), (2, 0, F), (3, 0, M), (4, 0, B))}], "next": []},
-    {"id": "honey_cellar", "layouts": [{"id": "cellar", "cells": cells((0, 0, R), (1, 0, F), (2, 0, M), (3, 0, R), (4, 0, B))}], "next": []},
+    {"id": "thorn_hollow", "door_sprite": "assets/props/common/door_thorn.png", "layouts": [{"id": "hollow", "cells": cells((0, 0, F), (1, 0, T), (2, 0, F), (3, 0, M), (4, 0, B))}], "next": []},
+    {"id": "honey_cellar", "door_sprite": "assets/props/common/door_cellar.png", "layouts": [{"id": "cellar", "cells": cells((0, 0, R), (1, 0, F), (2, 0, M), (3, 0, R), (4, 0, B))}], "next": []},
 ]
 data["layouts"] = garden
+data["door_height"] = 360
 data["rooms"] = list(rooms.values())
 
 json.dump(data, open(path, "w", encoding="utf-8"), indent=2, ensure_ascii=False)

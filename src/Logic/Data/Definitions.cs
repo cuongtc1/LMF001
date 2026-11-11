@@ -464,13 +464,15 @@ public sealed record RunDef(
     IReadOnlyList<RoomDef> Rooms,
     IReadOnlyList<LayoutDef> Layouts,
     ShopDef Shop,
-    IReadOnlyList<AreaDef>? Areas = null);
+    IReadOnlyList<AreaDef>? Areas = null,
+    float DoorHeight = 0);
 
 /// <summary>
 /// One area of a run (Little Noah's "Breezy Fields"): a grid of rooms. Its gate room shows one door per next area
 /// (Little Noah 18:55: two doors name the next areas); an area with no next areas ends at the boss.
 /// </summary>
-public sealed record AreaDef(string Id, IReadOnlyList<LayoutDef> Layouts, IReadOnlyList<string> Next);
+/// <param name="DoorSprite">This area's door in the gate room before it (null: the gate pillar).</param>
+public sealed record AreaDef(string Id, IReadOnlyList<LayoutDef> Layouts, IReadOnlyList<string> Next, string? DoorSprite = null);
 
 /// <summary>Gold and the Raccoon's stall (Little Noah's shops, 26:00): gold from monsters, crates and chests.</summary>
 /// <param name="GoldPerMonster">Gold for each healed monster.</param>

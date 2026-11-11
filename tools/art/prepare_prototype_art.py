@@ -251,6 +251,13 @@ def stall_and_coins():
         save(crop_alpha(inside_outline(a)), PROPS + name + '.png')
 
 
+def area_doors():
+    """Round 75, prompt Y: Y_6 (producer's pick; its rough sandstone matches the labyrinth walls and the thorny vines
+    suit Thorn Hollow): thorn arch, honey cellar door, used arch."""
+    for name, a in zip(['door_thorn', 'door_cellar', 'door_used'], row_items(V + 'Y/ver12_Y_6.png', 3)):
+        save(drop_ground_line(crop_alpha(inside_outline(a))), PROPS + name + '.png')
+
+
 def props():
     """Crate pair from M_1 (straight side view), chest pair from M_5 (red wood stands apart from the honey crates),
     tokens from M_2 (yellow star reads best at token size)."""
@@ -384,6 +391,7 @@ if __name__ == '__main__':
     icons()
     key_and_locked_chest()
     stall_and_coins()
+    area_doors()
     background()
     platforms()
     monsters()
