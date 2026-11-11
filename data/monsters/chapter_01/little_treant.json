@@ -30,7 +30,8 @@
     "stagger_break_ticks": 0,
     "stagger_damage_scale": 1,
     "front_guard_scale": 0.2,
-    "bounces_off_walls": false
+    "bounces_off_walls": false,
+    "turn_ticks": 55
   },
   "attack": {
     "damage_multiplier": 1.0,

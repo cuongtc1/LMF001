@@ -563,6 +563,8 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
             new HitInfo(_stats.Attack, move.DamageMultiplier, _brain.Facing, _def.Attack.KnockbackSpeed, 0, _def.Id), PhysicsLayers.PlayerHurtbox);
     }
 
+    private int _vfxSwing = -1;
+
     private void StepStrike()
     {
         var move = _brain.CurrentMove;
@@ -586,6 +588,13 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
             }
 
             return;
+        }
+
+        if (move is { Vfx: { } vfx } && _vfxSwing != _brain.SwingId)
+        {
+            _vfxSwing = _brain.SwingId;
+            _gameFeel.PlayEffect(vfx, GlobalPosition + new Vector2(0, -_def.Body.Height / 2), _brain.Facing);
+            _gameFeel.Shake(4);
         }
 
         var hit = new HitInfo(_stats.Attack, move?.DamageMultiplier ?? _def.Attack.DamageMultiplier, _brain.Facing, _def.Attack.KnockbackSpeed, 0, _def.Id, 0, move?.Knockdown ?? _def.Attack.Knockdown);

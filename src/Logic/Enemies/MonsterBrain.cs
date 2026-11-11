@@ -139,6 +139,14 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats, ulong seed
     /// <summary>A rolling monster turns around when it hits a wall.</summary>
     public void BounceOffWall()
     {
+        if (ai.WallStunTicks > 0 && State == MonsterState.Attack)
+        {
+            // a charging beetle that misses runs into the wall and reels (round 81)
+            MoveVelocityX = 0;
+            Set(MonsterState.Dizzy, ai.WallStunTicks);
+            return;
+        }
+
         if (ai.BouncesOffWalls && State == MonsterState.Attack)
         {
             Facing = -Facing;
@@ -269,7 +277,21 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats, ulong seed
             return;
         }
 
-        Facing = deltaX < 0 ? -1 : 1;
+        if (!TurnToward(deltaX))
+        {
+            // a heavy monster turning around stands still: the moment a pass behind it pays off
+            State = MonsterState.Chase;
+            return;
+        }
+
+        if (_counterPending && ai.CounterMove is { } counter && distance <= counter.MaxRange && onFloor)
+        {
+            _counterPending = false;
+            CurrentMove = counter;
+            Set(MonsterState.Windup, Scaled(counter.WindupTicks));
+            return;
+        }
+
         if (ai.KeepDistance > 0 && distance < ai.KeepDistance && (_cooldown > 0 || !mayAttack))
         {
             // ranged monsters back away while they reload or wait for a turn
@@ -337,8 +359,38 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats, ulong seed
         }
     }
 
+    /// <returns>True when it faces Lumi; heavy monsters take <see cref="MonsterAiDef.TurnTicks"/> to turn.</returns>
+    private bool TurnToward(float deltaX)
+    {
+        var want = deltaX < 0 ? -1 : 1;
+        if (want == Facing || ai.TurnTicks == 0)
+        {
+            Facing = want;
+            _turnTimer = 0;
+            return true;
+        }
+
+        if (_turnTimer == 0)
+        {
+            _turnTimer = ai.TurnTicks;
+            return false;
+        }
+
+        if (--_turnTimer > 0)
+        {
+            return false;
+        }
+
+        Facing = want;
+        return true;
+    }
+
+    private int _turnTimer;
+    private bool _counterPending;
+
     private void EnterStoic(int ticks)
     {
+        _counterPending = ai.CounterMove is not null;
         _stoicTimer = ticks;
         _hitsTaken = 0;
         _cooldown = 0;

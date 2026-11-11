@@ -20,9 +20,9 @@
     "hover_height": 0,
     "super_armor": false,
     "stun_scale": 1.0,
-    "stoic_threshold": 0,
-    "stoic_ticks": 0,
-    "stoic_reset_ticks": 0,
+    "stoic_threshold": 4,
+    "stoic_ticks": 60,
+    "stoic_reset_ticks": 120,
     "stoic_hp_marks": [],
     "down_ticks": 70,
     "getup_armor_ticks": 45,
@@ -31,7 +31,33 @@
     "stagger_damage_scale": 1,
     "front_guard_scale": 1.0,
     "bounces_off_walls": false,
-    "climbs": true
+    "climbs": true,
+    "counter_move": {
+      "id": "spore_burst",
+      "kind": "strike",
+      "min_range": 0,
+      "max_range": 200,
+      "weight": 1,
+      "windup_ticks": 24,
+      "active_ticks": 8,
+      "recovery_ticks": 40,
+      "lunge_speed": 0,
+      "damage_multiplier": 0.8,
+      "hitbox": {
+        "x": -190,
+        "y": -170,
+        "width": 380,
+        "height": 190
+      },
+      "knockdown": false,
+      "steal_mp": 0,
+      "projectile_sprite": null,
+      "projectile_ticks": 0,
+      "projectile_gravity": 0,
+      "projectile_height": 0,
+      "marker_ticks": 0,
+      "vfx": "slash_ring"
+    }
   },
   "attack": {
     "damage_multiplier": 1.0,

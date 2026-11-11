@@ -178,7 +178,8 @@ public sealed record MonsterMoveDef(
     int ProjectileTicks,
     float ProjectileGravity,
     float ProjectileHeight,
-    int MarkerTicks);
+    int MarkerTicks,
+    string? Vfx = null);
 
 /// <param name="SuperArmor">Armored during its own windup and strike.</param>
 /// <param name="StoicThreshold">Hits before it armors up and fights back; 0 means never.</param>
@@ -187,6 +188,9 @@ public sealed record MonsterMoveDef(
 /// <param name="StoicHpMarks">HP fractions, high to low, that also trigger armor once each.</param>
 /// <param name="Boss">Always fights, uses the HUD bar, ignores attack turns.</param>
 /// <param name="KeepDistance">Ranged monsters step back while reloading when Lumi is closer than this.</param>
+/// <param name="TurnTicks">Above 0: it needs this long to turn around (heavy monsters: a pass behind it opens its back).</param>
+/// <param name="WallStunTicks">Above 0: running into a wall during its attack leaves it dizzy this long (charging beetle).</param>
+/// <param name="CounterMove">Used once right after it armors up (stoic): a counter such as a spore burst around itself.</param>
 public sealed record MonsterAiDef(
     string Behavior,
     float AggroRange,
@@ -217,7 +221,10 @@ public sealed record MonsterAiDef(
     IReadOnlyList<MonsterMoveDef>? Moves = null,
     bool Climbs = false,
     bool Boss = false,
-    float KeepDistance = 0);
+    float KeepDistance = 0,
+    int TurnTicks = 0,
+    int WallStunTicks = 0,
+    MonsterMoveDef? CounterMove = null);
 
 /// <summary>How climbing monsters follow Lumi onto ledges (all pixels; ticks at 60 per second).</summary>
 /// <param name="StepHeight">Height difference that counts as "on another level".</param>
