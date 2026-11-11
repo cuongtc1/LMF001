@@ -5,7 +5,7 @@
   "hurt_knockback_up": 380,
   "hurt_hitstop_ticks": 6,
   "respawn_ticks": 90,
-  "heal_fade_ticks": 40,
+  "heal_fade_ticks": 60,
   "enemy_gravity": 2400,
   "knockback_decay": 2600,
   "shake_decay": 60,

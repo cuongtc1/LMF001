@@ -16,7 +16,9 @@ namespace LumiFeast.Game.Gameplay.Enemies;
 public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBlocker
 {
     private const float FlashStrength = 2.2f;
-    private const float HealRisePixels = 90;
+    private const float HealPopScale = 1.35f;
+    private const float HealHopPixels = 50;
+    private const float HealRunPixels = 320;
     private const float BobPixels = 10;
     private const float BobPerTick = 0.09f;
     private const float AuraScale = 1.12f;
@@ -652,13 +654,66 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         _turns?.Release(this);
         AudioService.Play(SoundIds.MonsterHealed);
         _hurtbox.SetDeferred(Area2D.PropertyName.Monitorable, false);
-        _sprite.Texture = _healed;
+        _aura.Visible = false;
+        _sprite.Rotation = 0;
         _sprite.Modulate = Colors.White;
+        _sprite.Texture = _healed;
+        // round 82 (producer): the old "rise and fade" read as dying. Now: the corruption puffs off, the healed creature
+        // pops out, hops once toward Lumi as a thank-you and scampers off the other way. Gold and the room count come
+        // at once; the little show is only art.
+        GameLog.Info(MessageKeys.CombatMonsterHealed, _def.Id);
+        Healed?.Invoke(this);
+        SpawnCleanseBurst();
+        var toLumi = _player.GlobalPosition.X < GlobalPosition.X ? -1 : 1;
+        var artDirection = _def.Art.FacesLeft ? -1 : 1;
+        var size = _def.Art.Height / _healed.GetHeight();
+        var facing = new Vector2(size * (toLumi == artDirection ? 1 : -1), size);
+        var leaving = new Vector2(-facing.X, facing.Y);
+        var ground = -_def.Art.Height / 2;
+        _sprite.Position = new Vector2(0, ground);
+        _sprite.Scale = facing * HealPopScale;
         var seconds = _feel.HealFadeTicks / GameConstants.TicksPerSecond;
-        var tween = CreateTween().SetParallel();
-        tween.TweenProperty(_sprite, "position:y", _sprite.Position.Y - HealRisePixels, seconds).SetEase(Tween.EaseType.Out).SetTrans(Tween.TransitionType.Back);
-        tween.TweenProperty(_sprite, "modulate:a", 0f, seconds).SetDelay(seconds * 0.5f);
-        tween.Chain().TweenCallback(Callable.From(FinishHeal));
+        var tween = CreateTween();
+        tween.TweenProperty(_sprite, "scale", facing, seconds * 0.2f).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
+        tween.TweenProperty(_sprite, "position:y", ground - HealHopPixels, seconds * 0.12f).SetEase(Tween.EaseType.Out);
+        tween.TweenProperty(_sprite, "position:y", ground, seconds * 0.12f).SetEase(Tween.EaseType.In);
+        tween.TweenProperty(_sprite, "scale", leaving, 0.01f);
+        tween.TweenProperty(_sprite, "position", new Vector2(-toLumi * HealRunPixels / 2, ground - HealHopPixels * 0.6f), seconds * 0.18f);
+        tween.TweenProperty(_sprite, "position", new Vector2(-toLumi * HealRunPixels, ground), seconds * 0.18f);
+        tween.Parallel().TweenProperty(_sprite, "modulate:a", 0f, seconds * 0.18f);
+        tween.TweenCallback(Callable.From(FreeIfAlive));
+    }
+
+    /// <summary>Purple corruption puffing off the healed monster (shared by every monster, no art needed).</summary>
+    private void SpawnCleanseBurst()
+    {
+        var burst = new CpuParticles2D
+        {
+            Emitting = true,
+            OneShot = true,
+            Amount = 26,
+            Explosiveness = 0.95f,
+            Lifetime = 0.7,
+            Direction = Vector2.Up,
+            Spread = 180,
+            InitialVelocityMin = 160,
+            InitialVelocityMax = 360,
+            Gravity = new Vector2(0, -120),
+            ScaleAmountMin = 7,
+            ScaleAmountMax = 14,
+            Color = new Color("b45cc9"),
+            ColorRamp = new Gradient { Colors = [new Color("d68cff"), new Color(1, 0.95f, 0.7f, 0)] },
+            GlobalPosition = GlobalPosition + new Vector2(0, -_def.Body.Height / 2),
+            ZIndex = 6,
+        };
+        GetParent().AddChild(burst);
+        GetTree().CreateTimer(1.2).Timeout += () =>
+        {
+            if (IsInstanceValid(burst))
+            {
+                burst.QueueFree();
+            }
+        };
     }
 
     /// <summary>Leaves the fight without being healed: a lost trial sends the rest away.</summary>
@@ -678,13 +733,6 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         {
             QueueFree();
         }
-    }
-
-    private void FinishHeal()
-    {
-        GameLog.Info(MessageKeys.CombatMonsterHealed, _def.Id);
-        Healed?.Invoke(this);
-        QueueFree();
     }
 
     private Texture2D ArtTexture(string file) => GameServices.Texture($"{_def.Art.Folder}/{file}");
