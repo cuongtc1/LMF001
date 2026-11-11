@@ -274,7 +274,7 @@ public partial class RunStage : Node2D
         _random = new SeededRandom(seed);
         AutoplayRunner.ClimbTarget = () =>
             _room.Up is { } up && _map.Neighbor(_map.Current, 0, -1) is var above && above >= 0 && !_map.State(above).Visited
-                ? new Vector2(up.X, _room.Height > RoomDef.ScreenHeight ? 300 : 0)
+                ? new Vector2(up.X, -80)
                 : null;
         _usedRooms = [];
         _area = _run.Areas?[0];

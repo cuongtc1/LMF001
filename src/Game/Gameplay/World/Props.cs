@@ -66,7 +66,13 @@ public partial class HittableProp : Node2D, IDamageable
         var tween = CreateTween();
         tween.TweenInterval(seconds / 2);
         tween.TweenProperty(this, CanvasItem.PropertyName.Modulate.ToString(), Colors.Transparent, seconds / 2);
-        tween.TweenCallback(Callable.From(QueueFree));
+        tween.TweenCallback(Callable.From(() =>
+        {
+            if (IsInstanceValid(this))
+            {
+                QueueFree();
+            }
+        }));
     }
 
     public bool TakeHit(in HitInfo hit)

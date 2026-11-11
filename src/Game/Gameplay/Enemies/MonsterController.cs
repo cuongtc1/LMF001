@@ -660,7 +660,15 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         _hitbox.Close();
         var tween = CreateTween();
         tween.TweenProperty(this, "modulate:a", 0f, RunOffSeconds);
-        tween.TweenCallback(Callable.From(QueueFree));
+        tween.TweenCallback(Callable.From(FreeIfAlive)); // the room may be gone already (round 74 bot crash)
+    }
+
+    private void FreeIfAlive()
+    {
+        if (IsInstanceValid(this))
+        {
+            QueueFree();
+        }
     }
 
     private void FinishHeal()

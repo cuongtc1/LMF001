@@ -139,7 +139,10 @@ public partial class PrototypeHud : CanvasLayer
     /// </summary>
     public void ShowReward(Texture2D? icon, string title, string line)
     {
-        _rewardCard?.QueueFree();
+        if (_rewardCard is not null && IsInstanceValid(_rewardCard))
+        {
+            _rewardCard.QueueFree(); // the last card may have faded out and freed itself already
+        }
         var card = new PanelContainer { Position = new Vector2(RewardLeft, RewardTop), CustomMinimumSize = new Vector2(UiCommon.ScreenWidth - RewardLeft * 2, 0) };
         card.AddThemeStyleboxOverride("panel", new StyleBoxFlat { BgColor = new Color(0.1f, 0.08f, 0.15f, 0.82f), CornerRadiusTopLeft = 14, CornerRadiusTopRight = 14, CornerRadiusBottomLeft = 14, CornerRadiusBottomRight = 14, ContentMarginLeft = 18, ContentMarginRight = 18, ContentMarginTop = 10, ContentMarginBottom = 10 });
         var row = new HBoxContainer { Alignment = BoxContainer.AlignmentMode.Center };
