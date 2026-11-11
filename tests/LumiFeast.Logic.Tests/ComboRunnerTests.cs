@@ -89,11 +89,13 @@ public class ComboRunnerTests
     }
 
     [Fact]
-    public void ZAfterDashZSkipsTheOpener()
+    public void DashZIsItsOwnOpenerAndZZXStillNeedsTwoSlashes()
     {
-        // combo kit v2: the lunge stab flows straight into the quick second slash
+        // round 79 (producer): after the lunge stab the Z chain starts again at Z1, so Dash Z, Z Z X passes, never Dash Z Z X
         var set = TestData.Game.AttackSet("lumi_sword");
-        Assert.Equal(set.Attacks.First(attack => attack.Id == set.First).Next, set.Attacks.First(attack => attack.Id == set.FirstSprint).Next);
+        var stab = set.Attacks.First(attack => attack.Id == set.FirstSprint);
+        Assert.Equal(set.First, stab.Next);
+        Assert.Null(stab.NextHeavy);
     }
 
     [Fact]

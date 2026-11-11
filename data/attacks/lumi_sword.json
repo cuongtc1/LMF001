@@ -129,7 +129,7 @@
       "active_ticks": 5,
       "recovery_ticks": 12,
       "cancel_from_tick": 11,
-      "next": "z2",
+      "next": "z1",
       "lunge_pixels": 150,
       "hitbox": {
         "x": 10,
