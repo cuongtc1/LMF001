@@ -1,0 +1,44 @@
+{
+  "start_x": 700,
+  "god_mode": true,
+  "end_tick": 110,
+  "screenshots": [
+    55,
+    60,
+    64,
+    68,
+    74
+  ],
+  "steps": [
+    {
+      "tick": 30,
+      "action": "move_right",
+      "pressed": true
+    },
+    {
+      "tick": 50,
+      "action": "dash",
+      "pressed": true
+    },
+    {
+      "tick": 52,
+      "action": "dash",
+      "pressed": false
+    },
+    {
+      "tick": 56,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 58,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 60,
+      "action": "move_right",
+      "pressed": false
+    }
+  ]
+}
