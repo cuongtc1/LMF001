@@ -169,6 +169,7 @@ public sealed record MonsterStatsDef(int MaxHp, int Attack, float Defense, float
 /// <param name="Bounces">The charge turns at walls and keeps going until its active time ends.</param>
 /// <param name="Count">Projectiles per throw, spread around the target by <paramref name="Spread"/> (pot rain).</param>
 /// <param name="Wave">Shock waves both ways along the floor when the strike starts (an area move).</param>
+/// <param name="Tell">Body tell during the windup of an area move: "leap" (rises, then stomps) or "swell" (puffs up and shakes).</param>
 public sealed record MonsterMoveDef(
     string Id,
     string Kind,
@@ -194,7 +195,8 @@ public sealed record MonsterMoveDef(
     bool Bounces = false,
     int Count = 1,
     float Spread = 0,
-    GroundWaveDef? Wave = null);
+    GroundWaveDef? Wave = null,
+    string? Tell = null);
 
 /// <param name="SuperArmor">Armored during its own windup and strike.</param>
 /// <param name="StoicThreshold">Hits before it armors up and fights back; 0 means never.</param>

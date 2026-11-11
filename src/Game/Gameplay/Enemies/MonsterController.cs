@@ -407,6 +407,30 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         ShowState();
     }
 
+    private const float LeapTellPixels = 130;
+    private const float SwellTellScale = 0.35f;
+    private const float SwellShakePixels = 7;
+
+    /// <summary>Area moves show their windup with the body (round 86 rule): leap up then stomp, or swell and shake.</summary>
+    private void ShowAreaTell()
+    {
+        if (_brain.State != MonsterState.Windup || _brain.CurrentMove is not { Tell: { } tell } move || move.WindupTicks <= 0)
+        {
+            return;
+        }
+
+        var progress = Mathf.Clamp(1 - _brain.StateTicksLeft / (float)move.WindupTicks, 0, 1);
+        if (tell == MonsterTells.Leap)
+        {
+            _sprite.Position += new Vector2(0, -Mathf.Sin(progress * Mathf.Pi / 2) * LeapTellPixels);
+        }
+        else if (tell == MonsterTells.Swell)
+        {
+            _sprite.Scale *= 1 + SwellTellScale * progress;
+            _sprite.Position += new Vector2(Mathf.Sin(_age * 1.3f) * SwellShakePixels * progress, 0);
+        }
+    }
+
     private Label? _danger;
     private const int DangerFont = 46;
     private static readonly Color DangerColor = new("ff4d4d");
@@ -752,6 +776,7 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         var centerY = down ? -_def.Art.Height * DownSinkShare : -_def.Art.Height * pose.ScaleY / 2;
         var hover = _flying ? Mathf.Sin(_age * BobPerTick) * BobPixels : 0;
         _sprite.Position = new Vector2(pose.OffsetX, centerY + pose.OffsetY + hover);
+        ShowAreaTell();
         _aura.Texture = _sprite.Texture;
         _aura.Visible = _brain.IsArmored;
     }

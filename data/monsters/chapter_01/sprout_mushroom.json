@@ -56,7 +56,8 @@
       "projectile_gravity": 0,
       "projectile_height": 0,
       "marker_ticks": 0,
-      "vfx": "slash_ring"
+      "vfx": "slash_ring",
+      "tell": "swell"
     }
   },
   "attack": {

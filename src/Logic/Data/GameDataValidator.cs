@@ -84,6 +84,13 @@ public static class GameDataValidator
             Require(monster.Stats.MaxHp > 0 && monster.Attack.DamageMultiplier >= 0, monster.Id);
             Require(monster.Ai.StunScale >= 0 && monster.Ai.StoicHpMarks.All(mark => mark is > 0 and < 1), monster.Id);
             RequireVfx(data, monster.Attack.HitVfx);
+            // an area move (shock waves, or a hit area wider than its body) needs a body tell (round 86 rule)
+            foreach (var move in (monster.Ai.Moves ?? []).Append(monster.Ai.CounterMove).OfType<MonsterMoveDef>())
+            {
+                // a strike centered on the monster (reaches both sides); throws fly at Lumi and an ambush shows a floor marker
+                var area = move.Wave is not null || (move.Kind == Enemies.MonsterMoveKinds.Strike && move.Hitbox.X + move.Hitbox.Width / 2 <= 20);
+                Require(!area || move.Tell is Enemies.MonsterTells.Leap or Enemies.MonsterTells.Swell, $"{monster.Id}.{move.Id}.tell");
+            }
         }
 
         foreach (var run in data.Runs.Values)

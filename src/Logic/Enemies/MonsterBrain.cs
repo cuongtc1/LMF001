@@ -23,6 +23,13 @@ public static class MonsterBehaviors
     public const string Flyer = "flyer";
 }
 
+/// <summary>Body tells for area moves (MonsterMoveDef.Tell).</summary>
+public static class MonsterTells
+{
+    public const string Leap = "leap";
+    public const string Swell = "swell";
+}
+
 public static class MonsterMoveKinds
 {
     public const string Strike = "strike";

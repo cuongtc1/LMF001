@@ -198,7 +198,8 @@
           "speed": 900,
           "ticks": 80,
           "damage_multiplier": 0.8
-        }
+        },
+        "tell": "leap"
       }
     ],
     "climbs": true,
