@@ -108,6 +108,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         _spawn = spawn;
         _motor = new PlayerMotor(def.Movement);
         _attacks = attacks;
+        PassCharge = new PassCharge(attacks.PassHitsNeeded);
         _combo = new ComboRunner(attacks, def.Combat.AttackBufferTicks);
         _skills = GameServices.Data.SkillSet(def.Combat.SkillSet);
         Loadout = new SkillLoadout(_skills.Slots);
@@ -189,7 +190,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
 
     public bool TakeHit(in HitInfo hit)
     {
-        if (GameServices.GodMode || _invulnerableTicks > 0 || _skillInvulnerableTicks > 0 || Passing || Health.IsDead)
+        if (GameServices.GodMode || _invulnerableTicks > 0 || _skillInvulnerableTicks > 0 || PassingSafe || Health.IsDead)
         {
             return false;
         }
@@ -266,9 +267,11 @@ public partial class PlayerController : CharacterBody2D, IDamageable
 
         var input = InputPaused ? PlayerFrameInput.None : InputSource.Read();
         MoveInput = input.MoveX;
-        if ((input.AttackPressed || input.HeavyPressed) && _stunTicks == 0 && _landingLagTicks == 0)
+        // combo kit v3: on the ground X only answers once Z has earned a pass (mashing X does nothing)
+        var heavyAllowed = input.HeavyPressed && (!IsOnFloor() || PassCharge.Ready);
+        if ((input.AttackPressed || heavyAllowed) && _stunTicks == 0 && _landingLagTicks == 0)
         {
-            _combo.PressAttack(input.HeavyPressed);
+            _combo.PressAttack(heavyAllowed && !input.AttackPressed);
         }
         else if (_guardHitTicks == 0 && _stunTicks == 0 && _guard.TakeAutoCounter())
         {
@@ -499,6 +502,11 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             return;
         }
 
+        if (attack.PassThrough || attack.LiftSpeed > 0)
+        {
+            PassCharge.TryUse();
+        }
+
         _passLunge = null;
         if (attack.PassThrough)
         {
@@ -514,8 +522,14 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         }
     }
 
-    /// <summary>A pass slash while it moves: no body blocking and no damage taken.</summary>
+    /// <summary>A pass slash while it moves: no body blocking.</summary>
     private bool Passing => _combo.Current is { PassThrough: true } && _combo.Phase != AttackPhase.Recovery;
+
+    /// <summary>Only the middle of a pass, while Lumi is inside the monster, is safe (v3: the start and end can be hit).</summary>
+    private bool PassingSafe => _combo.Current is { PassThrough: true } && _combo.Phase == AttackPhase.Active;
+
+    /// <summary>Z hits earn passes (combo kit v3).</summary>
+    public PassCharge PassCharge { get; private set; } = new(0);
 
     private bool SameHeight(IBodyBlocker body)
     {
@@ -524,12 +538,12 @@ public partial class PlayerController : CharacterBody2D, IDamageable
     }
 
     /// <summary>
-    /// Monsters stop Lumi (round 73: a ground dash too, so X is the way through), except while she dashes in the air,
-    /// passes or uses a skill.
+    /// Monsters stop Lumi, dashes included (round 77: an air dash gets past only above a monster's head), except while
+    /// she passes or uses a skill.
     /// </summary>
     private void PushOutOfBodies()
     {
-        if ((_motor.IsDashing && !IsOnFloor()) || Passing || _skillInvulnerableTicks > 0 || Health.IsDead)
+        if (Passing || _skillInvulnerableTicks > 0 || Health.IsDead)
         {
             return;
         }
@@ -594,6 +608,11 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         };
         var swing = attack.RehitTicks > 0 ? _combo.SwingId * RehitStride + _combo.Tick / attack.RehitTicks : _combo.SwingId;
         var landed = _hitbox.Sweep(swing, attack.Hitbox, _motor.Facing, hit);
+        if (swing != _manaSwing && attack.Id != _skillAttack && !attack.PassThrough && attack.LiftSpeed == 0 && landed.Any(target => target is IBodyBlocker))
+        {
+            PassCharge.Landed();
+        }
+
         if (landed.Count > 0 && swing != _manaSwing)
         {
             // flat bonus once per swing, however many monsters it hits (Finisher Fuel)

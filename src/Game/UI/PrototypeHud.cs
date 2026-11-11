@@ -41,6 +41,7 @@ public partial class PrototypeHud : CanvasLayer
     public System.Func<int>? Gold { get; set; }
 
     private Label? _goldCount;
+    private Label _passPips = null!;
 
     /// <summary>Coin drawn before the gold count.</summary>
     public string GoldSprite { get; set; } = string.Empty;
@@ -125,6 +126,11 @@ public partial class PrototypeHud : CanvasLayer
         AddChild(_bossBar);
 
         // centered under the bars, clear of the minimap in the top-right corner
+        // combo kit v3: X is ready after two landed Z swings; the pips fill as Z lands
+        _passPips = UiCommon.OutlinedLabel(30);
+        _passPips.Position = new Vector2(PassPipsLeft, PassPipsTop);
+        AddChild(_passPips);
+
         _status = UiCommon.OutlinedLabel(38);
         _status.Position = new Vector2(StatusLeft, StatusTop);
         _status.Size = new Vector2(UiCommon.ScreenWidth - StatusLeft * 2, 0);
@@ -190,9 +196,16 @@ public partial class PrototypeHud : CanvasLayer
         _status.Visible = text.Length > 0;
     }
 
+    private const float PassPipsLeft = 1100;
+    private const float PassPipsTop = 104;
+    private static readonly Color PassReadyColor = new("7fe3ff");
+
     public override void _Process(double delta)
     {
         _hp.MaxValue = _player.Health.Max;
+        var pass = _player.PassCharge;
+        _passPips.Text = "[X] " + new string('●', pass.Charges) + new string('○', pass.Needed - pass.Charges);
+        _passPips.Modulate = pass.Ready ? PassReadyColor : new Color(1, 1, 1, 0.55f);
         if (_keyCount is not null && Keys is not null)
         {
             _keyCount.Text = "x" + Keys();

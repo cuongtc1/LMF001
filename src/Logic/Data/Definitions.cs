@@ -153,8 +153,9 @@ public sealed record AttackDef(
 /// <param name="PassReach">A pass targets the nearest monster whose front is at most this far ahead of Lumi.</param>
 /// <param name="PassMargin">Gap left between that monster's back and Lumi when she lands.</param>
 /// <param name="PassMax">Longest pass.</param>
+/// <param name="PassHitsNeeded">Z swings that must land before a pass or the rising slash (combo kit v3); 0: free.</param>
 public sealed record AttackSetDef(string Id, string First, string FirstAir, string FirstAirUp, string FirstAirHeavy, string FirstSprint, string FirstHeavy, string FirstCounter, IReadOnlyList<AttackDef> Attacks,
-    string? FirstAirUpHeavy = null, string? FirstSprintHeavy = null, float PassReach = 0, float PassMargin = 0, float PassMax = 0);
+    string? FirstAirUpHeavy = null, string? FirstSprintHeavy = null, float PassReach = 0, float PassMargin = 0, float PassMax = 0, int PassHitsNeeded = 0);
 
 public sealed record MonsterStatsDef(int MaxHp, int Attack, float Defense, float Speed);
 
