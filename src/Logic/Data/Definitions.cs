@@ -30,7 +30,17 @@ public sealed record MovementDef(
 
 public sealed record CharacterCombatDef(string AttackSet, float MpPerSecond, int AttackBufferTicks, string SkillSet);
 
-public sealed record SkillDef(string Id, string Attack, float MpCost, int CooldownTicks, int InvulnerableTicks);
+/// <param name="Levels">Upgrades found in a run: Levels[0] is Lv2, Levels[1] is Lv3 (H2, round 75).</param>
+public sealed record SkillDef(string Id, string Attack, float MpCost, int CooldownTicks, int InvulnerableTicks, IReadOnlyList<SkillLevelDef>? Levels = null)
+{
+    public int MaxLevel => 1 + (Levels?.Count ?? 0);
+}
+
+/// <summary>What a skill level adds; every level must change something the player can see.</summary>
+/// <param name="DamageScale">Damage of the skill's hits and shots.</param>
+/// <param name="Repeats">The move plays this many extra times by itself (Jam Spread Lv2: two waves).</param>
+/// <param name="CooldownScale">Cooldown share.</param>
+public sealed record SkillLevelDef(float DamageScale = 1, int Repeats = 0, float CooldownScale = 1);
 
 /// <param name="RiseSpeed">Upward launch speed; with <paramref name="Gravity"/> the shot flies in an arc.</param>
 /// <param name="RehitTicks">Above 0: hits the same monsters again every this many ticks.</param>
@@ -41,7 +51,8 @@ public sealed record ProjectileDef(string Id, string Sprite, float Speed, int Ti
     float Gravity = 0, float RiseSpeed = 0, int RehitTicks = 0, bool Pull = false, float HitSize = 0, float BurstSize = 0);
 
 /// <param name="IconFolder">Each skill's icon is {IconFolder}/{skill id}.png.</param>
-public sealed record SkillSetDef(string Id, int Slots, IReadOnlyList<SkillDef> Skills, IReadOnlyList<ProjectileDef> Projectiles, string IconFolder = "");
+/// <param name="DefaultLoadout">Skills equipped before the player changes them at the entrance shrine.</param>
+public sealed record SkillSetDef(string Id, int Slots, IReadOnlyList<SkillDef> Skills, IReadOnlyList<ProjectileDef> Projectiles, string IconFolder = "", IReadOnlyList<string>? DefaultLoadout = null);
 
 /// <param name="MinHpRatio">The effect works only while HP is at least this share of max HP.</param>
 /// <param name="Target">Attack id the effect is limited to (projectiles, finisher effects); null for all.</param>

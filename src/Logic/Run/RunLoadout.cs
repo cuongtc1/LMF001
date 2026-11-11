@@ -3,11 +3,15 @@ using LumiFeast.Logic.Data;
 
 namespace LumiFeast.Logic.Run;
 
-/// <summary>Skill slots picked during a run, with their cooldowns.</summary>
+/// <summary>
+/// The skills Lumi takes into a run (H2, round 75: four permanent skills picked at the entrance shrine), their level in
+/// this run and their cooldowns. Runs level them up; levels reset when the run ends.
+/// </summary>
 public sealed class SkillLoadout(int slotCount)
 {
     private readonly SkillDef?[] _slots = new SkillDef?[slotCount];
     private readonly int[] _cooldowns = new int[slotCount];
+    private readonly int[] _levels = new int[slotCount];
 
     public IReadOnlyList<SkillDef?> Slots => _slots;
 
@@ -16,6 +20,30 @@ public sealed class SkillLoadout(int slotCount)
     public bool Has(string id) => _slots.Any(slot => slot?.Id == id);
 
     public int CooldownLeft(int slot) => _cooldowns[slot];
+
+    /// <summary>1 for a fresh skill, 0 for an empty slot.</summary>
+    public int Level(int slot) => _slots[slot] is null ? 0 : _levels[slot];
+
+    public int LevelOf(string id) => Array.FindIndex(_slots, slot => slot?.Id == id) is var slot and >= 0 ? _levels[slot] : 0;
+
+    /// <summary>Equipped skills that can still level up.</summary>
+    public IEnumerable<SkillDef> Upgradable => _slots.OfType<SkillDef>().Where(skill => LevelOf(skill.Id) < skill.MaxLevel);
+
+    /// <summary>Raises an equipped skill one level; false when it is not equipped or already at its top level.</summary>
+    public bool LevelUp(string id)
+    {
+        var slot = Array.FindIndex(_slots, skill => skill?.Id == id);
+        if (slot < 0 || _levels[slot] >= _slots[slot]!.MaxLevel)
+        {
+            return false;
+        }
+
+        _levels[slot]++;
+        return true;
+    }
+
+    /// <summary>What the slot's current level adds (null at Lv1).</summary>
+    public SkillLevelDef? Bonus(int slot) => _slots[slot] is { Levels: { } levels } && _levels[slot] > 1 ? levels[_levels[slot] - 2] : null;
 
     /// <summary>Puts the skill in the first free slot.</summary>
     public bool Add(SkillDef skill)
@@ -27,6 +55,7 @@ public sealed class SkillLoadout(int slotCount)
         }
 
         _slots[free] = skill;
+        _levels[free] = 1;
         return true;
     }
 
@@ -34,6 +63,7 @@ public sealed class SkillLoadout(int slotCount)
     {
         Array.Clear(_slots);
         Array.Clear(_cooldowns);
+        Array.Clear(_levels);
     }
 
     public void Step()
@@ -52,7 +82,7 @@ public sealed class SkillLoadout(int slotCount)
             return null;
         }
 
-        _cooldowns[slot] = (int)MathF.Round(skill.CooldownTicks * cooldownScale);
+        _cooldowns[slot] = (int)MathF.Round(skill.CooldownTicks * cooldownScale * (Bonus(slot)?.CooldownScale ?? 1));
         return skill;
     }
 }

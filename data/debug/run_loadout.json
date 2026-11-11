@@ -1,0 +1,123 @@
+{
+  "god_mode": true,
+  "end_tick": 260,
+  "screenshots": [
+    80,
+    180,
+    250
+  ],
+  "steps": [
+    {
+      "tick": 10,
+      "action": "teleport",
+      "x": 1350,
+      "y": 880
+    },
+    {
+      "tick": 40,
+      "action": "attack_light",
+      "pressed": true
+    },
+    {
+      "tick": 42,
+      "action": "attack_light",
+      "pressed": false
+    },
+    {
+      "tick": 90,
+      "action": "move_right",
+      "pressed": true,
+      "global": true
+    },
+    {
+      "tick": 92,
+      "action": "move_right",
+      "pressed": false,
+      "global": true
+    },
+    {
+      "tick": 100,
+      "action": "move_right",
+      "pressed": true,
+      "global": true
+    },
+    {
+      "tick": 102,
+      "action": "move_right",
+      "pressed": false,
+      "global": true
+    },
+    {
+      "tick": 110,
+      "action": "move_right",
+      "pressed": true,
+      "global": true
+    },
+    {
+      "tick": 112,
+      "action": "move_right",
+      "pressed": false,
+      "global": true
+    },
+    {
+      "tick": 120,
+      "action": "move_right",
+      "pressed": true,
+      "global": true
+    },
+    {
+      "tick": 122,
+      "action": "move_right",
+      "pressed": false,
+      "global": true
+    },
+    {
+      "tick": 130,
+      "action": "attack_light",
+      "pressed": true,
+      "global": true
+    },
+    {
+      "tick": 132,
+      "action": "attack_light",
+      "pressed": false,
+      "global": true
+    },
+    {
+      "tick": 150,
+      "action": "move_left",
+      "pressed": true,
+      "global": true
+    },
+    {
+      "tick": 152,
+      "action": "move_left",
+      "pressed": false,
+      "global": true
+    },
+    {
+      "tick": 160,
+      "action": "attack_light",
+      "pressed": true,
+      "global": true
+    },
+    {
+      "tick": 162,
+      "action": "attack_light",
+      "pressed": false,
+      "global": true
+    },
+    {
+      "tick": 200,
+      "action": "attack_heavy",
+      "pressed": true,
+      "global": true
+    },
+    {
+      "tick": 202,
+      "action": "attack_heavy",
+      "pressed": false,
+      "global": true
+    }
+  ]
+}

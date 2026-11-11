@@ -231,7 +231,8 @@ public partial class PrototypeHud : CanvasLayer
 
             var cooldown = _player.Loadout.CooldownLeft(i);
             var state = cooldown > 0 ? messages.Get(MessageKeys.HudSkillCooldown, Mathf.CeilToInt(cooldown / GameConstants.TicksPerSecond)) : messages.Get(MessageKeys.HudSkillReady);
-            _skills[i].Text = messages.Get(MessageKeys.HudSkillSlot, key, string.Empty, state);
+            var level = _player.Loadout.Level(i);
+            _skills[i].Text = messages.Get(MessageKeys.HudSkillSlot, key, level > 1 ? "Lv" + level : string.Empty, state);
             var dim = cooldown > 0 || _player.Mp < skill.MpCost ? Colors.Gray : Colors.White;
             _skills[i].Modulate = dim;
             _skillIcons[i].Modulate = dim;

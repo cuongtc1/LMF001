@@ -8,42 +8,93 @@
       "attack": "sk_skewer",
       "mp_cost": 30,
       "cooldown_ticks": 240,
-      "invulnerable_ticks": 30
+      "invulnerable_ticks": 30,
+      "levels": [
+        {
+          "repeats": 1
+        },
+        {
+          "damage_scale": 1.4,
+          "cooldown_scale": 0.75
+        }
+      ]
     },
     {
       "id": "tenderizer",
       "attack": "sk_tenderizer",
       "mp_cost": 35,
       "cooldown_ticks": 300,
-      "invulnerable_ticks": 24
+      "invulnerable_ticks": 24,
+      "levels": [
+        {
+          "damage_scale": 1.4
+        },
+        {
+          "repeats": 1
+        }
+      ]
     },
     {
       "id": "jam_spread",
       "attack": "sk_jam",
       "mp_cost": 25,
       "cooldown_ticks": 180,
-      "invulnerable_ticks": 10
+      "invulnerable_ticks": 10,
+      "levels": [
+        {
+          "repeats": 1
+        },
+        {
+          "repeats": 2
+        }
+      ]
     },
     {
       "id": "dough_roll",
       "attack": "sk_roll",
       "mp_cost": 20,
       "cooldown_ticks": 240,
-      "invulnerable_ticks": 44
+      "invulnerable_ticks": 44,
+      "levels": [
+        {
+          "cooldown_scale": 0.6
+        },
+        {
+          "repeats": 1
+        }
+      ]
     },
     {
       "id": "egg_whisk",
       "attack": "sk_whisk",
       "mp_cost": 45,
       "cooldown_ticks": 360,
-      "invulnerable_ticks": 10
+      "invulnerable_ticks": 10,
+      "levels": [
+        {
+          "damage_scale": 1.5
+        },
+        {
+          "damage_scale": 1.5,
+          "cooldown_scale": 0.7
+        }
+      ]
     },
     {
       "id": "berry_bomb",
       "attack": "sk_berry",
       "mp_cost": 40,
       "cooldown_ticks": 300,
-      "invulnerable_ticks": 10
+      "invulnerable_ticks": 10,
+      "levels": [
+        {
+          "repeats": 1
+        },
+        {
+          "repeats": 1,
+          "damage_scale": 1.4
+        }
+      ]
     }
   ],
   "projectiles": [
@@ -93,5 +144,11 @@
       "rise_speed": 900,
       "burst_size": 360
     }
+  ],
+  "default_loadout": [
+    "skewer",
+    "tenderizer",
+    "jam_spread",
+    "dough_roll"
   ]
 }

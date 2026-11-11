@@ -92,9 +92,22 @@ public partial class AutoplayRunner : Node, IPlayerInput
         {
             _player.Heal();
             var set = GameServices.Data.SkillSet(GameServices.Data.Character(GameConstants.PlayerCharacterId).Combat.SkillSet);
+            _player.Loadout.Clear();
             foreach (var id in skills.EnumerateArray())
             {
                 _player.Loadout.Add(set.Skills.First(skill => skill.Id == id.GetString()));
+            }
+        }
+
+        // "skill_levels": {"jam_spread": 2} raises equipped skills (to test H2 upgrades)
+        if (document.RootElement.TryGetProperty("skill_levels", out var levels))
+        {
+            foreach (var entry in levels.EnumerateObject())
+            {
+                for (var level = 1; level < entry.Value.GetInt32(); level++)
+                {
+                    _player.Loadout.LevelUp(entry.Name);
+                }
             }
         }
 

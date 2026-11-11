@@ -95,6 +95,7 @@ public partial class RunStage : Node2D
     private RunDef _run = null!;
     private RoomDef _room = null!;
     private StageMap _map = new([]);
+    private SkillLoadoutScreen _loadoutScreen = null!;
 
     /// <summary>The area Lumi is in (null: the run is one map without areas).</summary>
     private AreaDef? _area;
@@ -179,6 +180,8 @@ public partial class RunStage : Node2D
         AddChild(_minimap);
         _mapScreen = new MapScreen();
         AddChild(_mapScreen);
+        _loadoutScreen = new SkillLoadoutScreen();
+        AddChild(_loadoutScreen);
 
         _picker = new RewardPicker();
         AddChild(_picker);
@@ -283,6 +286,7 @@ public partial class RunStage : Node2D
             : StageMap.Generate(_run, _area.Layouts, _random, GameServices.MerchantMet, _usedRooms);
         _wallet = new RunWallet();
         _player.Loadout.Clear();
+        EquipSkills();
         _player.Modifiers.Clear();
         _player.ApplyModifiers();
         _stats.Reset();
@@ -399,9 +403,9 @@ public partial class RunStage : Node2D
         _challengeSettled = false;
         _challenge = _room.Challenge is { } trial && !State.Cleared ? new ChallengeRun(trial) : null;
         _shade.Color = Colors.White;
-        if (_room.Waves.Count == 0 && _room.ShrineX is null)
+        if (_room.Waves.Count == 0)
         {
-            State.Cleared = true; // nothing to heal here
+            State.Cleared = true; // nothing to heal here (the shrine changes skills and never locks the room)
         }
 
         _goldInFlight = 0; // coins of the last room were freed with it; the wallet already has their gold
@@ -410,6 +414,11 @@ public partial class RunStage : Node2D
         BuildDoors();
         var messages = GameServices.Messages;
         _hud.ShowStatus(InBossRoom ? messages.Get(MessageKeys.HudBoss) : AreaName);
+        if (_room.ShrineX is not null)
+        {
+            _hud.ShowStatus(messages.Get(MessageKeys.RunShrinePrompt));
+        }
+
         if (State.Cleared || _challenge is { NeedsLever: true })
         {
             SetOpen(true);
@@ -417,11 +426,6 @@ public partial class RunStage : Node2D
             {
                 _hud.ShowStatus(messages.Get(MessageKeys.TrialOffer));
             }
-        }
-        else if (_room.ShrineX is not null)
-        {
-            SetOpen(false);
-            _hud.ShowStatus(messages.Get(MessageKeys.RunShrinePrompt));
         }
         else
         {
@@ -595,22 +599,12 @@ public partial class RunStage : Node2D
         {
             var shrine = new HittableProp();
             RoomNode.AddChild(shrine);
-            shrine.Setup(_run.ShrineSprite, _run.ShrineHeight, new Vector2(shrineX, _room.GroundY), State.Cleared ? 0 : 1);
-            if (State.Cleared)
+            shrine.Setup(_run.ShrineSprite, _run.ShrineHeight, new Vector2(shrineX, _room.GroundY), 1);
+            // H2 (round 75): the shrine changes the equipped skills, as often as Lumi likes, before she leaves
+            shrine.CanOpen = () =>
             {
-                shrine.ChangeSprite(_run.ShrineUsedSprite);
-            }
-
-            shrine.Broken += _ =>
-            {
-                AudioService.Play(SoundIds.Shrine);
-                OfferReward(RewardKind.Skills, () =>
-                {
-                    shrine.ChangeSprite(_run.ShrineUsedSprite);
-                    State.Cleared = true;
-                    SetOpen(true);
-                    ShowMinimap();
-                });
+                OpenLoadout();
+                return false;
             };
         }
 
@@ -692,7 +686,7 @@ public partial class RunStage : Node2D
 
         var shop = _run.Shop;
         var data = GameServices.Data;
-        var skills = _player.Loadout.IsFull ? [] : data.SkillSet(_player.SkillSetId).Skills.Where(skill => !_player.Loadout.Has(skill.Id)).Select(skill => skill.Id).ToList();
+        var skills = _player.Loadout.Upgradable.Select(skill => skill.Id).ToList(); // H2: the stall sells the next level
         var amulets = data.AmuletSet(_run.AmuletSet).Amulets.Where(amulet => !_player.Modifiers.Has(amulet.Id)).Select(amulet => amulet.Id).ToList();
         if (State.Stock.Count == 0)
         {
@@ -769,6 +763,37 @@ public partial class RunStage : Node2D
             picture.Visible = false;
             price.Text = GameServices.Messages.Get(MessageKeys.ShopSoldOut);
         };
+    }
+
+    private void EquipSkills()
+    {
+        var set = GameServices.Data.SkillSet(_player.SkillSetId);
+        foreach (var id in GameServices.EquippedSkills ?? set.DefaultLoadout ?? [])
+        {
+            _player.Loadout.Add(set.Skills.First(skill => skill.Id == id));
+        }
+    }
+
+    private void OpenLoadout()
+    {
+        if (_rewardPending)
+        {
+            return;
+        }
+
+        AudioService.Play(SoundIds.Shrine);
+        _rewardPending = true;
+        _player.InputPaused = true;
+        var set = GameServices.Data.SkillSet(_player.SkillSetId);
+        var equipped = _player.Loadout.Slots.OfType<SkillDef>().Select(skill => skill.Id).ToList();
+        _loadoutScreen.Open(set, equipped, chosen =>
+        {
+            GameServices.EquippedSkills = chosen;
+            _player.Loadout.Clear();
+            EquipSkills();
+            _rewardPending = false;
+            _player.InputPaused = false;
+        });
     }
 
     /// <summary>
@@ -885,7 +910,7 @@ public partial class RunStage : Node2D
         var messages = GameServices.Messages;
         return item.Kind switch
         {
-            ShopItemKinds.Skill => messages.Get(MessageKeys.SkillPrefix + item.Id),
+            ShopItemKinds.Skill => messages.Get(MessageKeys.SkillLevelName, messages.Get(MessageKeys.SkillPrefix + item.Id), _player.Loadout.LevelOf(item.Id) + 1),
             ShopItemKinds.Amulet => messages.Get(MessageKeys.AmuletPrefix + item.Id),
             ShopItemKinds.Heal => messages.Get(MessageKeys.ShopHeal),
             _ => messages.Get(MessageKeys.ShopKey),
@@ -904,7 +929,7 @@ public partial class RunStage : Node2D
         var name = ItemName(item);
         var description = item.Kind switch
         {
-            ShopItemKinds.Skill => messages.Get(MessageKeys.SkillPrefix + item.Id + MessageKeys.DescriptionSuffix),
+            ShopItemKinds.Skill => messages.Get(MessageKeys.SkillPrefix + item.Id + MessageKeys.SkillLevelSuffix + (_player.Loadout.LevelOf(item.Id) + 1)),
             ShopItemKinds.Amulet => messages.Get(MessageKeys.AmuletPrefix + item.Id + MessageKeys.DescriptionSuffix),
             ShopItemKinds.Heal => messages.Get(MessageKeys.ShopHealDescription, Mathf.RoundToInt(_run.Shop.HealShare * 100)),
             _ => messages.Get(MessageKeys.ShopKeyDescription),
@@ -940,7 +965,7 @@ public partial class RunStage : Node2D
         switch (item.Kind)
         {
             case ShopItemKinds.Skill:
-                _player.Loadout.Add(data.SkillSet(_player.SkillSetId).Skills.First(skill => skill.Id == item.Id));
+                _player.Loadout.LevelUp(item.Id);
                 break;
             case ShopItemKinds.Amulet:
                 _player.Modifiers.Add(data.AmuletSet(_run.AmuletSet).Amulets.First(amulet => amulet.Id == item.Id));
@@ -1179,10 +1204,15 @@ public partial class RunStage : Node2D
         var isSkill = key.StartsWith(MessageKeys.SkillPrefix, System.StringComparison.Ordinal);
         Take(key);
         var messages = GameServices.Messages;
-        var picture = isSkill
-            ? GameIcons.Skill(skillSet, key[MessageKeys.SkillPrefix.Length..])
-            : GameIcons.Amulet(_run.AmuletSet, key[MessageKeys.AmuletPrefix.Length..]);
-        _hud.ShowReward(picture, messages.Get(key), messages.Get(key + MessageKeys.DescriptionSuffix));
+        if (isSkill)
+        {
+            var id = key[MessageKeys.SkillPrefix.Length..];
+            var level = _player.Loadout.LevelOf(id);
+            _hud.ShowReward(GameIcons.Skill(skillSet, id), messages.Get(MessageKeys.SkillLevelName, messages.Get(key), level), messages.Get(key + MessageKeys.SkillLevelSuffix + level));
+            return;
+        }
+
+        _hud.ShowReward(GameIcons.Amulet(_run.AmuletSet, key[MessageKeys.AmuletPrefix.Length..]), messages.Get(key), messages.Get(key + MessageKeys.DescriptionSuffix));
     }
 
     private List<string> RewardPool(RewardKind kind)
@@ -1191,9 +1221,9 @@ public partial class RunStage : Node2D
         var skills = data.SkillSet(data.Character(GameConstants.PlayerCharacterId).Combat.SkillSet).Skills;
         var amulets = data.AmuletSet(_run.AmuletSet).Amulets;
         var pool = new List<string>();
-        if (!_player.Loadout.IsFull && kind != RewardKind.Amulets)
+        if (kind != RewardKind.Amulets)
         {
-            pool.AddRange(skills.Where(skill => !_player.Loadout.Has(skill.Id)).Select(skill => MessageKeys.SkillPrefix + skill.Id));
+            pool.AddRange(_player.Loadout.Upgradable.Select(skill => MessageKeys.SkillPrefix + skill.Id));
         }
 
         if (kind != RewardKind.Skills)
@@ -1211,7 +1241,7 @@ public partial class RunStage : Node2D
         var amulets = data.AmuletSet(_run.AmuletSet).Amulets;
         if (key.StartsWith(MessageKeys.SkillPrefix, System.StringComparison.Ordinal))
         {
-            _player.Loadout.Add(skills.First(skill => MessageKeys.SkillPrefix + skill.Id == key));
+            _player.Loadout.LevelUp(key[MessageKeys.SkillPrefix.Length..]);
         }
         else
         {
@@ -1220,45 +1250,5 @@ public partial class RunStage : Node2D
         }
 
         GameLog.Info(MessageKeys.RewardPicked, key);
-    }
-
-    /// <summary>One of three: the skill shrine's choice (rare, like Little Noah's cauldrons).</summary>
-    private void OfferReward(RewardKind kind, System.Action? onPicked = null)
-    {
-        var data = GameServices.Data;
-        var skills = data.SkillSet(data.Character(GameConstants.PlayerCharacterId).Combat.SkillSet).Skills;
-        var pool = RewardPool(kind);
-        var picks = RewardDraw.Pick(pool, _run.RewardChoices, _random);
-        if (picks.Count == 0)
-        {
-            return;
-        }
-
-        var messages = GameServices.Messages;
-        var skillSet = data.Character(GameConstants.PlayerCharacterId).Combat.SkillSet;
-        var cards = picks.Select(key =>
-        {
-            var isSkill = key.StartsWith(MessageKeys.SkillPrefix, System.StringComparison.Ordinal);
-            var body = messages.Get(key + MessageKeys.DescriptionSuffix) + "\n" + (isSkill
-                ? messages.Get(MessageKeys.RewardSkill, skills.First(skill => MessageKeys.SkillPrefix + skill.Id == key).MpCost)
-                : messages.Get(MessageKeys.RewardAmulet));
-            var picture = isSkill
-                ? GameIcons.Skill(skillSet, key[MessageKeys.SkillPrefix.Length..])
-                : GameIcons.Amulet(_run.AmuletSet, key[MessageKeys.AmuletPrefix.Length..]);
-            return (messages.Get(key), body, (Texture2D?)picture);
-        }).ToList();
-        _rewardPending = true;
-        _player.InputPaused = true;
-        _picker.Open(cards, index =>
-        {
-            Take(picks[index]);
-            _rewardPending = false;
-            _player.InputPaused = false;
-            onPicked?.Invoke();
-        });
-        if (AutoplayRunner.RequestedScript() is not null && AutoplayRunner.PicksRewards)
-        {
-            _picker.Choose(0);
-        }
     }
 }

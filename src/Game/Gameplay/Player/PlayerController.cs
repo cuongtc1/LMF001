@@ -44,6 +44,11 @@ public partial class PlayerController : CharacterBody2D, IDamageable
     /// <summary>Lunge of the current pass slash, measured from the monster it passes (null: the attack's own lunge).</summary>
     private float? _passLunge;
     private AttackSetDef _attacks = null!;
+
+    /// <summary>The skill move playing now, with what its level adds.</summary>
+    private string? _skillAttack;
+    private float _skillDamage = 1;
+    private int _skillRepeats;
     private const float PassHeightSlack = 40;
     private SkillSetDef _skills = null!;
 
@@ -280,6 +285,7 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         var beforePhase = _combo.Phase;
         _combo.Advance(CurrentEntry(input));
         StepPass(before, beforePhase);
+        StepSkillRepeats();
         if (_combo.JustStarted && input.MoveX != 0)
         {
             _motor.Face(Mathf.Sign(input.MoveX));
@@ -368,6 +374,11 @@ public partial class PlayerController : CharacterBody2D, IDamageable
             return;
         }
 
+        var bonus = Loadout.Bonus(slot);
+        _skillAttack = skill.Attack;
+        _skillDamage = bonus?.DamageScale ?? 1;
+        _skillRepeats = bonus?.Repeats ?? 0;
+
         if (free)
         {
             _freeSkillUses.TryUse(freeLimit);
@@ -410,7 +421,24 @@ public partial class PlayerController : CharacterBody2D, IDamageable
     }
 
     private float DamageScale(AttackDef attack) =>
-        Modifiers.Scale(attack.GuardBreak ? AmuletEffects.HeavyDamage : AmuletEffects.LightDamage);
+        Modifiers.Scale(attack.GuardBreak ? AmuletEffects.HeavyDamage : AmuletEffects.LightDamage) * (attack.Id == _skillAttack ? _skillDamage : 1);
+
+    /// <summary>A levelled skill plays again by itself (Jam Spread Lv2: a second wave), free, once the move can cancel.</summary>
+    private void StepSkillRepeats()
+    {
+        if (_combo.Current?.Id != _skillAttack)
+        {
+            _skillRepeats = 0;
+            return;
+        }
+
+        if (_skillRepeats > 0 && _combo.CanCancel)
+        {
+            _skillRepeats--;
+            _combo.StartSkill(_skillAttack!);
+            _hitbox.Close();
+        }
+    }
 
     private void OnLanded(IDamageable target)
     {

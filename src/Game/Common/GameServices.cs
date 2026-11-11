@@ -21,6 +21,9 @@ public static class GameServices
     /// <summary>The Raccoon has been healed once (no saves yet: this session only), so his stall appears in runs.</summary>
     public static bool MerchantMet { get; set; }
 
+    /// <summary>Skills Lumi takes into runs (H2), changed at the entrance shrine; null: the skill set's default loadout.</summary>
+    public static System.Collections.Generic.IReadOnlyList<string>? EquippedSkills { get; set; }
+
     public static bool GodMode { get; set; }
 
     public static bool AirJumpUnlocked { get; set; }

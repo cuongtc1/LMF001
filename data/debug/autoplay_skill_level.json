@@ -1,0 +1,28 @@
+{
+  "start_x": 1300,
+  "god_mode": true,
+  "skills": [
+    "jam_spread"
+  ],
+  "skill_levels": {
+    "jam_spread": 3
+  },
+  "end_tick": 160,
+  "screenshots": [
+    62,
+    80,
+    98
+  ],
+  "steps": [
+    {
+      "tick": 40,
+      "action": "skill_1",
+      "pressed": true
+    },
+    {
+      "tick": 42,
+      "action": "skill_1",
+      "pressed": false
+    }
+  ]
+}
