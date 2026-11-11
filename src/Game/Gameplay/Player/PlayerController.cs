@@ -412,13 +412,23 @@ public partial class PlayerController : CharacterBody2D, IDamageable
     private void LaunchProjectile(string id, AttackDef attack)
     {
         var shot = _skills.Projectiles.First(projectile => projectile.Id == id);
-        var hit = new HitInfo(Attack, shot.DamageMultiplier * DamageScale(attack), _motor.Facing, attack.KnockbackSpeed, 0, _def.Id, attack.StunTicks, false, shot.Stagger, true)
+        var hit = new HitInfo(Attack, shot.DamageMultiplier * DamageScale(attack), _motor.Facing, attack.KnockbackSpeed, shot.Launch, _def.Id, attack.StunTicks, shot.Knockdown, shot.Stagger, true)
         {
             BackMultiplier = Modifiers.Scale(AmuletEffects.BackDamage),
         };
         var projectile = new Projectile();
         GetParent().AddChild(projectile);
-        projectile.Landed = OnLanded;
+        var skillShot = attack.Id == _skillAttack;
+        projectile.Landed = target =>
+        {
+            OnLanded(target);
+            if (skillShot)
+            {
+                // skills hit hard: a freeze and a shake on every landed skill shot (round 85)
+                _gameFeel.Hitstop(attack.HitstopTicks);
+                _gameFeel.Shake(attack.ShakePixels);
+            }
+        };
         projectile.RehitTicks = shot.RehitTicks;
         projectile.Pull = shot.Pull;
         projectile.HitSize = shot.HitSize;
@@ -431,8 +441,33 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         };
         // arcing shots burst at Lumi's feet level; straight shots fly until their time runs out
         var floor = shot.Gravity > 0 ? GlobalPosition.Y : ProjectileFloor;
-        projectile.Launch(shot.Sprite, shot.Height, GlobalPosition + new Vector2(_motor.Facing * ProjectileForward, -ProjectileHeight),
-            new Vector2(_motor.Facing * shot.Speed, -shot.RiseSpeed), shot.Gravity, floor, hit, PhysicsLayers.EnemyHurtbox, shot.Pierce, shot.Ticks);
+        var from = GlobalPosition + new Vector2(_motor.Facing * ProjectileForward, -ProjectileHeight);
+        projectile.Launch(shot.Sprite, shot.Height, from, AimedVelocity(shot, from), shot.Gravity, floor, hit, PhysicsLayers.EnemyHurtbox, shot.Pierce, shot.Ticks);
+    }
+
+    private const float AimReach = 1000;
+
+    /// <summary>An aimed arc lands on the nearest monster ahead (Berry Bomb, round 85: it missed too often).</summary>
+    private Vector2 AimedVelocity(ProjectileDef shot, Vector2 from)
+    {
+        var straight = new Vector2(_motor.Facing * shot.Speed, -shot.RiseSpeed);
+        if (!shot.Aim || shot.Gravity <= 0)
+        {
+            return straight;
+        }
+
+        var target = Blockers.Where(body => body.BlocksBody && (body.FeetPosition.X - GlobalPosition.X) * _motor.Facing > 0
+                && Mathf.Abs(body.FeetPosition.X - GlobalPosition.X) < AimReach)
+            .OrderBy(body => Mathf.Abs(body.FeetPosition.X - GlobalPosition.X)).FirstOrDefault();
+        if (target is null)
+        {
+            return straight;
+        }
+
+        var dx = target.FeetPosition.X - from.X;
+        var seconds = Mathf.Max(0.35f, Mathf.Abs(dx) / shot.Speed);
+        var dy = target.FeetPosition.Y - target.BodySize.Y / 2 - from.Y;
+        return new Vector2(dx / seconds, dy / seconds - shot.Gravity * seconds / 2);
     }
 
     private float DamageScale(AttackDef attack) =>

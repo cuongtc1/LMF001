@@ -89,7 +89,7 @@
         "kind": "throw",
         "min_range": 300,
         "max_range": 1600,
-        "weight": 2,
+        "weight": 3,
         "windup_ticks": 30,
         "active_ticks": 8,
         "recovery_ticks": 30,
@@ -108,7 +108,9 @@
         "projectile_gravity": 2400,
         "projectile_height": 90,
         "marker_ticks": 0,
-        "from_hp": 0.66
+        "from_hp": 0.66,
+        "count": 3,
+        "spread": 230
       },
       {
         "id": "ambush",
@@ -142,10 +144,10 @@
         "min_range": 0,
         "max_range": 2400,
         "weight": 2,
-        "windup_ticks": 75,
+        "windup_ticks": 70,
         "active_ticks": 110,
         "recovery_ticks": 80,
-        "lunge_speed": 1150,
+        "lunge_speed": 1750,
         "damage_multiplier": 1.0,
         "hitbox": {
           "x": -60,
@@ -163,6 +165,40 @@
         "from_hp": 0.34,
         "danger": true,
         "bounces": true
+      },
+      {
+        "id": "honey_slam",
+        "kind": "strike",
+        "min_range": 0,
+        "max_range": 900,
+        "weight": 2,
+        "windup_ticks": 46,
+        "active_ticks": 8,
+        "recovery_ticks": 50,
+        "lunge_speed": 0,
+        "damage_multiplier": 1.0,
+        "hitbox": {
+          "x": -200,
+          "y": -200,
+          "width": 400,
+          "height": 210
+        },
+        "knockdown": true,
+        "steal_mp": 0,
+        "projectile_sprite": null,
+        "projectile_ticks": 0,
+        "projectile_gravity": 0,
+        "projectile_height": 0,
+        "marker_ticks": 0,
+        "from_hp": 0.9,
+        "vfx": "slash_ring",
+        "wave": {
+          "sprite": "assets/vfx/common/slash_wave.png",
+          "height": 100,
+          "speed": 900,
+          "ticks": 80,
+          "damage_multiplier": 0.8
+        }
       }
     ],
     "climbs": true,

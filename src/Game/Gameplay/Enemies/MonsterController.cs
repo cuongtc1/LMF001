@@ -394,7 +394,9 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
             _velocityY = Mathf.Min(_velocityY, 0);
         }
 
-        if (IsOnWall())
+        // only a wall it is running into counts: right after turning, the old wall would flip it back every tick
+        // (round 85: Grand Heist crawled at walking speed)
+        if (IsOnWall() && Mathf.Sign(GetWallNormal().X) == -_brain.Facing)
         {
             _brain.BounceOffWall();
         }
@@ -463,14 +465,19 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
 
         if (_def.Ai.LandingWave is { } wave)
         {
-            _gameFeel.Shake(6);
-            foreach (var side in new[] { -1, 1 })
-            {
-                var shot = new Projectile();
-                GetParent().AddChild(shot);
-                shot.Launch(wave.Sprite, wave.Height, GlobalPosition + new Vector2(side * _def.Body.Width / 2, -wave.Height / 2), new Vector2(side * wave.Speed, 0), 0, GlobalPosition.Y,
-                    new HitInfo(_stats.Attack, wave.DamageMultiplier, side, _def.Attack.KnockbackSpeed, 0, _def.Id), PhysicsLayers.PlayerHurtbox, true, wave.Ticks);
-            }
+            SendWaves(wave);
+        }
+    }
+
+    private void SendWaves(GroundWaveDef wave)
+    {
+        _gameFeel.Shake(6);
+        foreach (var side in new[] { -1, 1 })
+        {
+            var shot = new Projectile();
+            GetParent().AddChild(shot);
+            shot.Launch(wave.Sprite, wave.Height, GlobalPosition + new Vector2(side * _def.Body.Width / 2, -wave.Height / 2), new Vector2(side * wave.Speed, 0), 0, GlobalPosition.Y,
+                new HitInfo(_stats.Attack, wave.DamageMultiplier, side, _def.Attack.KnockbackSpeed, 0, _def.Id), PhysicsLayers.PlayerHurtbox, true, wave.Ticks);
         }
     }
 
@@ -645,12 +652,17 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
     {
         var from = GlobalPosition + new Vector2(_brain.Facing * ThrowForward, -_def.Art.Height * ThrowHeightShare);
         var seconds = move.ProjectileTicks / GameConstants.TicksPerSecond;
-        var target = _player.GlobalPosition + new Vector2(0, -ThrowAimHeight);
-        var velocity = new Vector2((target.X - from.X) / seconds, (target.Y - from.Y) / seconds - move.ProjectileGravity * seconds / 2);
-        var pot = new Projectile();
-        GetParent().AddChild(pot);
-        pot.Launch(move.ProjectileSprite!, move.ProjectileHeight, from, velocity, move.ProjectileGravity, GlobalPosition.Y,
-            new HitInfo(_stats.Attack, move.DamageMultiplier, _brain.Facing, _def.Attack.KnockbackSpeed, 0, _def.Id), PhysicsLayers.PlayerHurtbox);
+        for (var i = 0; i < move.Count; i++)
+        {
+            // several pots rain around Lumi: standing still is not enough, she must move out (round 85)
+            var offset = (i - (move.Count - 1) / 2f) * move.Spread;
+            var target = _player.GlobalPosition + new Vector2(offset, -ThrowAimHeight);
+            var velocity = new Vector2((target.X - from.X) / seconds, (target.Y - from.Y) / seconds - move.ProjectileGravity * seconds / 2);
+            var pot = new Projectile();
+            GetParent().AddChild(pot);
+            pot.Launch(move.ProjectileSprite!, move.ProjectileHeight, from, velocity, move.ProjectileGravity, GlobalPosition.Y,
+                new HitInfo(_stats.Attack, move.DamageMultiplier, _brain.Facing, _def.Attack.KnockbackSpeed, 0, _def.Id), PhysicsLayers.PlayerHurtbox);
+        }
     }
 
     private int _vfxSwing = -1;
@@ -680,11 +692,19 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
             return;
         }
 
-        if (move is { Vfx: { } vfx } && _vfxSwing != _brain.SwingId)
+        if (move is not null && _vfxSwing != _brain.SwingId && (move.Vfx is not null || move.Wave is not null))
         {
             _vfxSwing = _brain.SwingId;
-            _gameFeel.PlayEffect(vfx, GlobalPosition + new Vector2(0, -_def.Body.Height / 2), _brain.Facing);
-            _gameFeel.Shake(4);
+            if (move.Vfx is { } vfx)
+            {
+                _gameFeel.PlayEffect(vfx, GlobalPosition + new Vector2(0, -_def.Body.Height / 2), _brain.Facing);
+                _gameFeel.Shake(4);
+            }
+
+            if (move.Wave is { } wave)
+            {
+                SendWaves(wave);
+            }
         }
 
         var hit = new HitInfo(_stats.Attack, move?.DamageMultiplier ?? _def.Attack.DamageMultiplier, _brain.Facing, _def.Attack.KnockbackSpeed, 0, _def.Id, 0, move?.Knockdown ?? _def.Attack.Knockdown);

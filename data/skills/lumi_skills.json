@@ -54,7 +54,7 @@
       "attack": "sk_roll",
       "mp_cost": 20,
       "cooldown_ticks": 240,
-      "invulnerable_ticks": 44,
+      "invulnerable_ticks": 12,
       "levels": [
         {
           "cooldown_scale": 0.6
@@ -103,10 +103,11 @@
       "sprite": "assets/vfx/common/slash_wave.png",
       "speed": 1300,
       "ticks": 45,
-      "height": 200,
-      "damage_multiplier": 1.8,
+      "height": 260,
+      "damage_multiplier": 2.0,
       "pierce": true,
-      "stagger": 4
+      "stagger": 6,
+      "hit_size": 260
     },
     {
       "id": "star_wave",
@@ -129,7 +130,8 @@
       "stagger": 1,
       "rehit_ticks": 15,
       "pull": true,
-      "hit_size": 260
+      "hit_size": 260,
+      "launch": 180
     },
     {
       "id": "berry_bomb",
@@ -137,12 +139,27 @@
       "speed": 700,
       "ticks": 0,
       "height": 90,
-      "damage_multiplier": 1.2,
+      "damage_multiplier": 2.2,
       "pierce": false,
-      "stagger": 3,
+      "stagger": 6,
       "gravity": 2400,
       "rise_speed": 900,
-      "burst_size": 360
+      "burst_size": 420,
+      "launch": 820,
+      "aim": true
+    },
+    {
+      "id": "dough_ball",
+      "sprite": "assets/ui/icons/skills/dough_roll.png",
+      "speed": 620,
+      "ticks": 80,
+      "height": 170,
+      "damage_multiplier": 0.55,
+      "pierce": true,
+      "stagger": 3,
+      "rehit_ticks": 12,
+      "hit_size": 180,
+      "knockdown": true
     }
   ],
   "default_loadout": [

@@ -47,8 +47,12 @@ public sealed record SkillLevelDef(float DamageScale = 1, int Repeats = 0, float
 /// <param name="Pull">Hits pull monsters toward the shot (Egg Whisk).</param>
 /// <param name="HitSize">Square hit area; 0 keeps the default.</param>
 /// <param name="BurstSize">Above 0: the shot bursts in a square this wide when it lands or ends (Berry Bomb).</param>
+/// <param name="Launch">Monsters hit fly up this fast (round 85: skills must move monsters, not only hurt them).</param>
+/// <param name="Knockdown">Monsters hit fall down.</param>
+/// <param name="Aim">An arcing shot aims at the nearest monster ahead instead of a fixed arc (Berry Bomb).</param>
 public sealed record ProjectileDef(string Id, string Sprite, float Speed, int Ticks, float Height, float DamageMultiplier, bool Pierce, float Stagger,
-    float Gravity = 0, float RiseSpeed = 0, int RehitTicks = 0, bool Pull = false, float HitSize = 0, float BurstSize = 0);
+    float Gravity = 0, float RiseSpeed = 0, int RehitTicks = 0, bool Pull = false, float HitSize = 0, float BurstSize = 0,
+    float Launch = 0, bool Knockdown = false, bool Aim = false);
 
 /// <param name="IconFolder">Each skill's icon is {IconFolder}/{skill id}.png.</param>
 /// <param name="DefaultLoadout">Skills equipped before the player changes them at the entrance shrine.</param>
@@ -163,6 +167,8 @@ public sealed record MonsterStatsDef(int MaxHp, int Attack, float Defense, float
 /// <param name="FromHp">The move is used only once HP is at or below this share (boss phases).</param>
 /// <param name="Danger">A big move: a "DANGER!" warning shows over the monster during its windup (Elsword 6-4, 9:20).</param>
 /// <param name="Bounces">The charge turns at walls and keeps going until its active time ends.</param>
+/// <param name="Count">Projectiles per throw, spread around the target by <paramref name="Spread"/> (pot rain).</param>
+/// <param name="Wave">Shock waves both ways along the floor when the strike starts (an area move).</param>
 public sealed record MonsterMoveDef(
     string Id,
     string Kind,
@@ -185,7 +191,10 @@ public sealed record MonsterMoveDef(
     string? Vfx = null,
     float FromHp = 1,
     bool Danger = false,
-    bool Bounces = false);
+    bool Bounces = false,
+    int Count = 1,
+    float Spread = 0,
+    GroundWaveDef? Wave = null);
 
 /// <param name="SuperArmor">Armored during its own windup and strike.</param>
 /// <param name="StoicThreshold">Hits before it armors up and fights back; 0 means never.</param>

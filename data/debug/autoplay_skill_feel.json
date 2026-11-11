@@ -1,0 +1,51 @@
+{
+  "start_x": 1300,
+  "god_mode": true,
+  "skills": [
+    "jam_spread",
+    "dough_roll",
+    "berry_bomb"
+  ],
+  "end_tick": 300,
+  "screenshots": [
+    52,
+    62,
+    145,
+    165,
+    185,
+    240,
+    252
+  ],
+  "steps": [
+    {
+      "tick": 40,
+      "action": "skill_1",
+      "pressed": true
+    },
+    {
+      "tick": 42,
+      "action": "skill_1",
+      "pressed": false
+    },
+    {
+      "tick": 130,
+      "action": "skill_2",
+      "pressed": true
+    },
+    {
+      "tick": 132,
+      "action": "skill_2",
+      "pressed": false
+    },
+    {
+      "tick": 220,
+      "action": "skill_3",
+      "pressed": true
+    },
+    {
+      "tick": 222,
+      "action": "skill_3",
+      "pressed": false
+    }
+  ]
+}
