@@ -1085,14 +1085,27 @@ public partial class RunStage : Node2D
             var monster = MonsterSpawner.Spawn(RoomNode, spawn.Monster, spawn.X, spawn.Y ?? _room.GroundY, _run.Level + (_challenge?.Def.LevelBonus ?? 0), _gameFeel, _player);
             monster.SetRoomFloor(_room.GroundY);
             monster.ShareTurns(_turns);
-            monster.Healed += OnHealed;
-            _monsters.Add(monster);
+            AddMonster(monster);
             // the mini boss is the first monster of an elite room; it shows on the big bar like a boss
             if (InBossRoom || (_room.Kind == RoomKinds.Elite && monster == _monsters[0]))
             {
                 _hud.TrackBoss(monster.Health);
             }
         }
+    }
+
+    private void AddMonster(MonsterController monster)
+    {
+        monster.Healed += OnHealed;
+        monster.Summoning += (id, at) =>
+        {
+            // helpers come out of the same light column as every new monster
+            var helper = MonsterSpawner.Spawn(RoomNode, id, at.X, _room.GroundY, _run.Level + (_challenge?.Def.LevelBonus ?? 0), _gameFeel, _player);
+            helper.SetRoomFloor(_room.GroundY);
+            helper.ShareTurns(_turns);
+            AddMonster(helper);
+        };
+        _monsters.Add(monster);
     }
 
     private void OnHealed(MonsterController monster)

@@ -191,6 +191,9 @@ public sealed record MonsterMoveDef(
 /// <param name="TurnTicks">Above 0: it needs this long to turn around (heavy monsters: a pass behind it opens its back).</param>
 /// <param name="WallStunTicks">Above 0: running into a wall during its attack leaves it dizzy this long (charging beetle).</param>
 /// <param name="CounterMove">Used once right after it armors up (stoic): a counter such as a spore burst around itself.</param>
+/// <param name="LandingHazard">Left on the floor where its attack ends (sticky honey).</param>
+/// <param name="LandingWave">Sent both ways along the floor where its attack ends.</param>
+/// <param name="Summon">Monsters it calls once at an HP share.</param>
 public sealed record MonsterAiDef(
     string Behavior,
     float AggroRange,
@@ -224,7 +227,21 @@ public sealed record MonsterAiDef(
     float KeepDistance = 0,
     int TurnTicks = 0,
     int WallStunTicks = 0,
-    MonsterMoveDef? CounterMove = null);
+    MonsterMoveDef? CounterMove = null,
+    HazardDef? LandingHazard = null,
+    GroundWaveDef? LandingWave = null,
+    SummonDef? Summon = null);
+
+/// <summary>A puddle left where an attack lands (Honey Slime): Lumi inside it is slowed.</summary>
+/// <param name="Slow">Share of Lumi's walking speed taken away.</param>
+/// <param name="SlowTicks">How long the slow lasts after she steps out.</param>
+public sealed record HazardDef(float Width, int Ticks, float Slow, int SlowTicks, string Color);
+
+/// <summary>Shock waves that run both ways along the floor when an attack lands (Honey King's slam); jump them.</summary>
+public sealed record GroundWaveDef(string Sprite, float Height, float Speed, int Ticks, float DamageMultiplier);
+
+/// <summary>Helpers it calls once when its HP falls under <paramref name="AtHp"/> (Honey King calls slimes).</summary>
+public sealed record SummonDef(string Monster, int Count, float AtHp, float Spread);
 
 /// <summary>How climbing monsters follow Lumi onto ledges (all pixels; ticks at 60 per second).</summary>
 /// <param name="StepHeight">Height difference that counts as "on another level".</param>

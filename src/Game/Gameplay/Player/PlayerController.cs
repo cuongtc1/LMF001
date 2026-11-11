@@ -167,6 +167,19 @@ public partial class PlayerController : CharacterBody2D, IDamageable
 
     public void LoseMp(float amount) => Mp = Mathf.Max(0, Mp - amount);
 
+    /// <summary>Sticky honey and similar statuses (round 83): walking slower for a short time; the strongest slow wins.</summary>
+    public void Slow(float share, int ticks)
+    {
+        _slow = _slowTicks > 0 ? Mathf.Max(_slow, share) : share;
+        _slowTicks = Mathf.Max(_slowTicks, ticks);
+    }
+
+    /// <summary>Slowed right now (the view tints Lumi).</summary>
+    public bool IsSlowed => _slowTicks > 0;
+
+    private float _slow;
+    private int _slowTicks;
+
     public void GainMp(float amount) => Mp = Mathf.Min(MaxMp, Mp + amount);
 
     /// <summary>Steam Bath counters left in this room.</summary>
@@ -315,8 +328,9 @@ public partial class PlayerController : CharacterBody2D, IDamageable
         _motor.AirJumpUnlocked = GameServices.AirJumpUnlocked;
         var wasDashing = _motor.IsDashing;
         var wasRising = _motor.VelocityY < 0;
+        _slowTicks = Mathf.Max(0, _slowTicks - 1);
         _motor.Step(new MotorInput(
-            input.MoveX,
+            input.MoveX * (_slowTicks > 0 ? 1 - _slow : 1),
             input.JumpPressed,
             input.JumpHeld,
             input.DashPressed,

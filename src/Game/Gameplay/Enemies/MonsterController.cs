@@ -3,6 +3,7 @@ using Godot;
 using LumiFeast.Game.Common;
 using LumiFeast.Game.Gameplay.Combat;
 using LumiFeast.Game.Gameplay.Player;
+using LumiFeast.Game.Gameplay.World;
 using LumiFeast.Game.UI;
 using LumiFeast.Logic.Combat;
 using LumiFeast.Logic.Common;
@@ -285,6 +286,7 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
             eyes.Alert(_player.GlobalPosition.X - GlobalPosition.X);
             OnNoticed(callOthers: true);
         }
+        TrySummon();
         var wasPhaseOne = !_brain.InPhaseTwo;
         if (_brain.RegisterHit((float)Health.Current / Health.Max))
         {
@@ -398,7 +400,59 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
         }
 
         StepStrike();
+        StepLanding();
         ShowState();
+    }
+
+    /// <summary>Called with a monster id and a position for each helper it summons (the run spawns them).</summary>
+    public event System.Action<string, Vector2>? Summoning;
+
+    private MonsterState _lastState;
+    private bool _summoned;
+
+    /// <summary>When an attack ends on the floor: a sticky puddle (slime) or shock waves both ways (Honey King).</summary>
+    private void StepLanding()
+    {
+        var ended = _lastState == MonsterState.Attack && _brain.State != MonsterState.Attack && IsOnFloor();
+        _lastState = _brain.State;
+        if (!ended)
+        {
+            return;
+        }
+
+        if (_def.Ai.LandingHazard is { } hazard)
+        {
+            var puddle = new StickyPuddle();
+            GetParent().AddChild(puddle);
+            puddle.Setup(_player, hazard, GlobalPosition);
+        }
+
+        if (_def.Ai.LandingWave is { } wave)
+        {
+            _gameFeel.Shake(6);
+            foreach (var side in new[] { -1, 1 })
+            {
+                var shot = new Projectile();
+                GetParent().AddChild(shot);
+                shot.Launch(wave.Sprite, wave.Height, GlobalPosition + new Vector2(side * _def.Body.Width / 2, -wave.Height / 2), new Vector2(side * wave.Speed, 0), 0, GlobalPosition.Y,
+                    new HitInfo(_stats.Attack, wave.DamageMultiplier, side, _def.Attack.KnockbackSpeed, 0, _def.Id), PhysicsLayers.PlayerHurtbox, true, wave.Ticks);
+            }
+        }
+    }
+
+    private void TrySummon()
+    {
+        if (_summoned || _def.Ai.Summon is not { } summon || Health.Current > Health.Max * summon.AtHp)
+        {
+            return;
+        }
+
+        _summoned = true;
+        for (var i = 0; i < summon.Count; i++)
+        {
+            var offset = (i - (summon.Count - 1) / 2f) * summon.Spread;
+            Summoning?.Invoke(summon.Monster, GlobalPosition + new Vector2(offset == 0 ? summon.Spread : offset, 0));
+        }
     }
 
     /// <summary>A dark shape fades into the monster; then it can be hit and starts to look around.</summary>

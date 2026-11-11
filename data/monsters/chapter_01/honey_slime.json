@@ -31,7 +31,14 @@
     "stagger_damage_scale": 1,
     "front_guard_scale": 1.0,
     "bounces_off_walls": false,
-    "climbs": true
+    "climbs": true,
+    "landing_hazard": {
+      "width": 170,
+      "ticks": 300,
+      "slow": 0.45,
+      "slow_ticks": 20,
+      "color": "e8b23acc"
+    }
   },
   "attack": {
     "damage_multiplier": 1.0,

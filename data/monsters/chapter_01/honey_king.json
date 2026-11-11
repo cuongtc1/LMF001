@@ -33,7 +33,20 @@
     "stagger_break_ticks": 150,
     "stagger_damage_scale": 1.5,
     "front_guard_scale": 1.0,
-    "bounces_off_walls": false
+    "bounces_off_walls": false,
+    "landing_wave": {
+      "sprite": "assets/vfx/common/slash_wave.png",
+      "height": 90,
+      "speed": 760,
+      "ticks": 70,
+      "damage_multiplier": 0.7
+    },
+    "summon": {
+      "monster": "honey_slime",
+      "count": 2,
+      "at_hp": 0.5,
+      "spread": 260
+    }
   },
   "attack": {
     "damage_multiplier": 1.0,
