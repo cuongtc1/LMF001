@@ -51,7 +51,8 @@ public class StageMapTests
             var map = StageMap.Generate(Run, seed);
             Assert.Equal(map.Rooms.Count, map.Rooms.Distinct().Count());
             Assert.Equal(RoomKinds.Entrance, Kind(map.Rooms[0]));
-            Assert.Single(map.Rooms, id => Kind(id) == RoomKinds.Boss);
+            // round 74: the first area ends at a gate; the boss waits in the next area (AreaTests)
+            Assert.Single(map.Rooms, id => Kind(id) == RoomKinds.Gate);
         }
     }
 

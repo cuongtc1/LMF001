@@ -92,6 +92,20 @@ public static class GameDataValidator
             Require(rooms.Count == run.Rooms.Count, $"{run.Id}.rooms");
             Require(run.Rooms.All(room => Stages.RoomKinds.All.Contains(room.Kind)), $"{run.Id}.rooms.kind");
             Require(run.Rooms.All(room => room.HasFloor || (room.Down is not null && room.Waves.Count == 0)), $"{run.Id}.rooms.sky");
+            foreach (var area in run.Areas ?? [])
+            {
+                Require(area.Layouts.Count > 0, $"{run.Id}.{area.Id}.layouts");
+                Require(area.Next.All(next => run.Areas!.Any(other => other.Id == next)), $"{run.Id}.{area.Id}.next");
+                var gate = area.Next.Count > 0 ? Stages.RoomKinds.Gate : Stages.RoomKinds.Boss;
+                Require(area.Layouts.All(layout => layout.Cells.Count(cell => cell.Kind == gate) == 1), $"{run.Id}.{area.Id}.{gate}");
+            }
+
+            foreach (var room in run.Rooms.Where(room => room.Kind == Stages.RoomKinds.Gate))
+            {
+                var doors = run.Areas?.Max(area => area.Next.Count) ?? 0;
+                Require(room.Doors is { } list && list.Count >= doors, $"{room.Id}.doors");
+            }
+
             var shop = run.Shop;
             Require(shop.GoldPerMonster >= 0 && shop.SkillPrice > 0 && shop.AmuletPrice > 0 && shop.HealPrice > 0 && shop.KeyPrice > 0 && shop.HealShare is > 0 and <= 1, $"{run.Id}.shop");
             foreach (var room in run.Rooms)
@@ -101,11 +115,17 @@ public static class GameDataValidator
                 Require(room.Waves.SelectMany(wave => wave.Spawns).All(spawn => spawn.X > 0 && spawn.X < room.Width && (spawn.Y is null || spawn.Y < room.GroundY)), $"{room.Id}.spawns");
             }
             Require(run.Layouts.Count > 0, $"{run.Id}.layouts");
-            foreach (var layout in run.Layouts)
+            foreach (var layout in run.Layouts.Concat(run.Areas?.SelectMany(area => area.Layouts) ?? []))
             {
                 Require(layout.Cells.All(cell => Stages.RoomKinds.All.Contains(cell.Kind)), $"{layout.Id}.kind");
-                Require(layout.Cells.Count(cell => cell.Kind == Stages.RoomKinds.Entrance) == 1 && layout.Cells.Count(cell => cell.Kind == Stages.RoomKinds.Boss) == 1, layout.Id);
                 Require(layout.Cells.Select(cell => (cell.X, cell.Y)).Distinct().Count() == layout.Cells.Count, $"{layout.Id}.cells");
+            }
+
+            // without areas a layout is the whole run; with areas the first area starts it and the last ones end it
+            foreach (var layout in run.Areas is null ? run.Layouts : run.Areas[0].Layouts)
+            {
+                Require(layout.Cells.Count(cell => cell.Kind == Stages.RoomKinds.Entrance) == 1, layout.Id);
+                Require(run.Areas is not null || layout.Cells.Count(cell => cell.Kind == Stages.RoomKinds.Boss) == 1, layout.Id);
             }
             data.AmuletSet(run.AmuletSet);
             foreach (var room in run.Rooms.Where(room => room.Challenge is not null))

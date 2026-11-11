@@ -389,7 +389,8 @@ public sealed record RoomDef(
     float? MerchantX = null,
     IReadOnlyList<float>? Stands = null,
     bool HasFloor = true,
-    float Height = RoomDef.ScreenHeight)
+    float Height = RoomDef.ScreenHeight,
+    IReadOnlyList<float>? Doors = null)
 {
     /// <summary>One screen; taller rooms scroll up and down with the camera.</summary>
     public const float ScreenHeight = 1080;
@@ -462,7 +463,14 @@ public sealed record RunDef(
     int RewardChoices,
     IReadOnlyList<RoomDef> Rooms,
     IReadOnlyList<LayoutDef> Layouts,
-    ShopDef Shop);
+    ShopDef Shop,
+    IReadOnlyList<AreaDef>? Areas = null);
+
+/// <summary>
+/// One area of a run (Little Noah's "Breezy Fields"): a grid of rooms. Its gate room shows one door per next area
+/// (Little Noah 18:55: two doors name the next areas); an area with no next areas ends at the boss.
+/// </summary>
+public sealed record AreaDef(string Id, IReadOnlyList<LayoutDef> Layouts, IReadOnlyList<string> Next);
 
 /// <summary>Gold and the Raccoon's stall (Little Noah's shops, 26:00): gold from monsters, crates and chests.</summary>
 /// <param name="GoldPerMonster">Gold for each healed monster.</param>

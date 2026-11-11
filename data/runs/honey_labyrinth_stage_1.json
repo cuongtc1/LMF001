@@ -965,7 +965,13 @@
         "spawn_x": 900,
         "spawn_y": -20
       },
-      "height": 2160
+      "height": 2160,
+      "keys": [
+        {
+          "x": 2350,
+          "y": 990
+        }
+      ]
     },
     {
       "id": "climb_b",
@@ -1101,7 +1107,13 @@
         "spawn_x": 2000,
         "spawn_y": -20
       },
-      "height": 2160
+      "height": 2160,
+      "keys": [
+        {
+          "x": 500,
+          "y": 990
+        }
+      ]
     },
     {
       "id": "sky_nest",
@@ -1735,16 +1747,47 @@
       "chest_x": 1200,
       "chest_y": 680,
       "reward_on_clear": false
+    },
+    {
+      "id": "crossroads",
+      "width": 2400,
+      "ground_y": 885,
+      "layers": [
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/back.png",
+          "scroll_scale": 0.3,
+          "z_index": -30
+        },
+        {
+          "sprite": "assets/backgrounds/chapter_01/honey_labyrinth/wall_a.png",
+          "scroll_scale": 1.0,
+          "z_index": -10
+        }
+      ],
+      "platforms": [],
+      "waves": [],
+      "crates": [],
+      "kind": "gate",
+      "doors": [
+        1350,
+        1950
+      ],
+      "reward_on_clear": false
     }
   ],
   "layouts": [
     {
-      "id": "long_nest",
+      "id": "garden_stairs",
       "cells": [
         {
           "x": 0,
           "y": 0,
           "kind": "entrance"
+        },
+        {
+          "x": -1,
+          "y": 0,
+          "kind": "treasure"
         },
         {
           "x": 1,
@@ -1757,64 +1800,34 @@
           "kind": "fight"
         },
         {
-          "x": 3,
-          "y": 0,
-          "kind": "trial"
-        },
-        {
-          "x": 4,
-          "y": 0,
-          "kind": "fight"
-        },
-        {
-          "x": 4,
+          "x": 2,
           "y": -1,
           "kind": "sky"
         },
         {
+          "x": 3,
+          "y": -1,
+          "kind": "sky"
+        },
+        {
+          "x": 4,
+          "y": -1,
+          "kind": "trial"
+        },
+        {
           "x": 5,
-          "y": 0,
+          "y": -1,
           "kind": "fight"
         },
         {
           "x": 6,
-          "y": 0,
-          "kind": "shop"
-        },
-        {
-          "x": 7,
-          "y": 0,
-          "kind": "elite"
-        },
-        {
-          "x": 8,
-          "y": 0,
-          "kind": "fight"
-        },
-        {
-          "x": 9,
-          "y": 0,
-          "kind": "trial"
-        },
-        {
-          "x": 10,
-          "y": 0,
-          "kind": "fight"
-        },
-        {
-          "x": 11,
-          "y": 0,
-          "kind": "treasure"
-        },
-        {
-          "x": 12,
-          "y": 0,
-          "kind": "boss"
+          "y": -1,
+          "kind": "gate"
         }
       ]
     },
     {
-      "id": "long_high_road",
+      "id": "garden_tower",
       "cells": [
         {
           "x": 0,
@@ -1843,11 +1856,6 @@
         },
         {
           "x": 4,
-          "y": -1,
-          "kind": "sky"
-        },
-        {
-          "x": 4,
           "y": 0,
           "kind": "fight"
         },
@@ -1859,107 +1867,7 @@
         {
           "x": 6,
           "y": 0,
-          "kind": "fight"
-        },
-        {
-          "x": 7,
-          "y": 0,
-          "kind": "elite"
-        },
-        {
-          "x": 8,
-          "y": 0,
-          "kind": "trial"
-        },
-        {
-          "x": 9,
-          "y": 0,
-          "kind": "fight"
-        },
-        {
-          "x": 10,
-          "y": 0,
-          "kind": "treasure"
-        },
-        {
-          "x": 11,
-          "y": 0,
-          "kind": "boss"
-        }
-      ]
-    },
-    {
-      "id": "long_climbs",
-      "cells": [
-        {
-          "x": 0,
-          "y": 0,
-          "kind": "entrance"
-        },
-        {
-          "x": 1,
-          "y": 0,
-          "kind": "fight"
-        },
-        {
-          "x": 1,
-          "y": -1,
-          "kind": "sky"
-        },
-        {
-          "x": 2,
-          "y": 0,
-          "kind": "fight"
-        },
-        {
-          "x": 3,
-          "y": 0,
-          "kind": "shop"
-        },
-        {
-          "x": 4,
-          "y": 0,
-          "kind": "trial"
-        },
-        {
-          "x": 5,
-          "y": 0,
-          "kind": "fight"
-        },
-        {
-          "x": 6,
-          "y": 0,
-          "kind": "elite"
-        },
-        {
-          "x": 7,
-          "y": 0,
-          "kind": "fight"
-        },
-        {
-          "x": 7,
-          "y": -1,
-          "kind": "sky"
-        },
-        {
-          "x": 8,
-          "y": 0,
-          "kind": "trial"
-        },
-        {
-          "x": 9,
-          "y": 0,
-          "kind": "fight"
-        },
-        {
-          "x": 10,
-          "y": 0,
-          "kind": "treasure"
-        },
-        {
-          "x": 11,
-          "y": 0,
-          "kind": "boss"
+          "kind": "gate"
         }
       ]
     }
@@ -1986,10 +1894,192 @@
     "sold_stand_sprite": "assets/props/shop/stand_sold.png",
     "stand_height": 115,
     "heal_sprite": "assets/props/common/hp_token.png",
-    "coin_sprites": ["assets/props/common/coin.png", "assets/props/common/coin_half.png", "assets/props/common/coin_edge.png"],
+    "coin_sprites": [
+      "assets/props/common/coin.png",
+      "assets/props/common/coin_half.png",
+      "assets/props/common/coin_edge.png"
+    ],
     "coin_pile_sprite": "assets/props/common/coin_pile.png",
     "coin_height": 40,
     "coin_value": 4,
     "max_coins": 8
-  }
+  },
+  "areas": [
+    {
+      "id": "bloom_garden",
+      "layouts": [
+        {
+          "id": "garden_stairs",
+          "cells": [
+            {
+              "x": 0,
+              "y": 0,
+              "kind": "entrance"
+            },
+            {
+              "x": -1,
+              "y": 0,
+              "kind": "treasure"
+            },
+            {
+              "x": 1,
+              "y": 0,
+              "kind": "fight"
+            },
+            {
+              "x": 2,
+              "y": 0,
+              "kind": "fight"
+            },
+            {
+              "x": 2,
+              "y": -1,
+              "kind": "sky"
+            },
+            {
+              "x": 3,
+              "y": -1,
+              "kind": "sky"
+            },
+            {
+              "x": 4,
+              "y": -1,
+              "kind": "trial"
+            },
+            {
+              "x": 5,
+              "y": -1,
+              "kind": "fight"
+            },
+            {
+              "x": 6,
+              "y": -1,
+              "kind": "gate"
+            }
+          ]
+        },
+        {
+          "id": "garden_tower",
+          "cells": [
+            {
+              "x": 0,
+              "y": 0,
+              "kind": "entrance"
+            },
+            {
+              "x": 1,
+              "y": 0,
+              "kind": "fight"
+            },
+            {
+              "x": 2,
+              "y": 0,
+              "kind": "trial"
+            },
+            {
+              "x": 3,
+              "y": 0,
+              "kind": "fight"
+            },
+            {
+              "x": 3,
+              "y": -1,
+              "kind": "sky"
+            },
+            {
+              "x": 4,
+              "y": 0,
+              "kind": "fight"
+            },
+            {
+              "x": 5,
+              "y": 0,
+              "kind": "shop"
+            },
+            {
+              "x": 6,
+              "y": 0,
+              "kind": "gate"
+            }
+          ]
+        }
+      ],
+      "next": [
+        "thorn_hollow",
+        "honey_cellar"
+      ]
+    },
+    {
+      "id": "thorn_hollow",
+      "layouts": [
+        {
+          "id": "hollow",
+          "cells": [
+            {
+              "x": 0,
+              "y": 0,
+              "kind": "fight"
+            },
+            {
+              "x": 1,
+              "y": 0,
+              "kind": "trial"
+            },
+            {
+              "x": 2,
+              "y": 0,
+              "kind": "fight"
+            },
+            {
+              "x": 3,
+              "y": 0,
+              "kind": "elite"
+            },
+            {
+              "x": 4,
+              "y": 0,
+              "kind": "boss"
+            }
+          ]
+        }
+      ],
+      "next": []
+    },
+    {
+      "id": "honey_cellar",
+      "layouts": [
+        {
+          "id": "cellar",
+          "cells": [
+            {
+              "x": 0,
+              "y": 0,
+              "kind": "treasure"
+            },
+            {
+              "x": 1,
+              "y": 0,
+              "kind": "fight"
+            },
+            {
+              "x": 2,
+              "y": 0,
+              "kind": "elite"
+            },
+            {
+              "x": 3,
+              "y": 0,
+              "kind": "treasure"
+            },
+            {
+              "x": 4,
+              "y": 0,
+              "kind": "boss"
+            }
+          ]
+        }
+      ],
+      "next": []
+    }
+  ]
 }

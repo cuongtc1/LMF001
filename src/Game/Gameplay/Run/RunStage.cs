@@ -95,6 +95,14 @@ public partial class RunStage : Node2D
     private RunDef _run = null!;
     private RoomDef _room = null!;
     private StageMap _map = new([]);
+
+    /// <summary>The area Lumi is in (null: the run is one map without areas).</summary>
+    private AreaDef? _area;
+
+    /// <summary>Rooms of earlier areas, so the next area never repeats one.</summary>
+    private HashSet<string> _usedRooms = [];
+    private const float DoorLabelLift = 60;
+    private const int DoorLabelFont = 30;
     private GameFeel _gameFeel = null!;
     private PlayerController _player = null!;
     private PrototypeHud _hud = null!;
@@ -264,7 +272,15 @@ public partial class RunStage : Node2D
     {
         var seed = AutoplayRunner.RequestedScript() is null ? Time.GetTicksUsec() : GameConstants.ScriptedRunSeed;
         _random = new SeededRandom(seed);
-        _map = StageMap.Generate(_run, seed, GameServices.MerchantMet);
+        AutoplayRunner.ClimbTarget = () =>
+            _room.Up is { } up && _map.Neighbor(_map.Current, 0, -1) is var above && above >= 0 && !_map.State(above).Visited
+                ? new Vector2(up.X, _room.Height > RoomDef.ScreenHeight ? 300 : 0)
+                : null;
+        _usedRooms = [];
+        _area = _run.Areas?[0];
+        _map = _area is null
+            ? StageMap.Generate(_run, seed, GameServices.MerchantMet)
+            : StageMap.Generate(_run, _area.Layouts, _random, GameServices.MerchantMet, _usedRooms);
         _wallet = new RunWallet();
         _player.Loadout.Clear();
         _player.Modifiers.Clear();
@@ -391,8 +407,9 @@ public partial class RunStage : Node2D
         _goldInFlight = 0; // coins of the last room were freed with it; the wallet already has their gold
         BuildProps();
         BuildShop();
+        BuildDoors();
         var messages = GameServices.Messages;
-        _hud.ShowStatus(messages.Get(InBossRoom ? MessageKeys.HudBoss : MessageKeys.RunArea));
+        _hud.ShowStatus(InBossRoom ? messages.Get(MessageKeys.HudBoss) : AreaName);
         if (State.Cleared || _challenge is { NeedsLever: true })
         {
             SetOpen(true);
@@ -493,7 +510,7 @@ public partial class RunStage : Node2D
             (messages.Get(MessageKeys.MapShop), ShopColor),
             (messages.Get(MessageKeys.MapBoss), BossColor),
         };
-        _mapScreen.Open(_map, messages.Get(MessageKeys.RunArea), messages.Get(MessageKeys.MapHint), Accents(), legend, Warp);
+        _mapScreen.Open(_map, AreaName, messages.Get(MessageKeys.MapHint), Accents(), legend, Warp);
     }
 
     /// <summary>Warp from an open room to a healed room already visited (Little Noah allows the same).</summary>
@@ -511,7 +528,10 @@ public partial class RunStage : Node2D
         return true;
     }
 
-    private void ShowMinimap() => _minimap.Show(_map, GameServices.Messages.Get(MessageKeys.RunArea), Accents());
+    private void ShowMinimap() => _minimap.Show(_map, AreaName, Accents());
+
+    /// <summary>The area's own name over the map (Little Noah shows "Breezy Fields"), or the run's name without areas.</summary>
+    private string AreaName => GameServices.Messages.Get(_area is null ? MessageKeys.RunArea : MessageKeys.AreaPrefix + _area.Id + MessageKeys.AreaTitleSuffix);
 
     private Dictionary<int, Color> Accents()
     {
@@ -749,6 +769,52 @@ public partial class RunStage : Node2D
             picture.Visible = false;
             price.Text = GameServices.Messages.Get(MessageKeys.ShopSoldOut);
         };
+    }
+
+    /// <summary>
+    /// The gate room at the end of an area: one door per next area with its name above (Little Noah 18:55). Hitting a
+    /// door leads into that area's first room; the area's own map replaces the old one.
+    /// </summary>
+    private void BuildDoors()
+    {
+        if (_room.Kind != RoomKinds.Gate || _area is null || _room.Doors is null)
+        {
+            return;
+        }
+
+        var messages = GameServices.Messages;
+        for (var i = 0; i < _area.Next.Count && i < _room.Doors.Count; i++)
+        {
+            var next = _area.Next[i];
+            var x = _room.Doors[i];
+            var door = new HittableProp();
+            RoomNode.AddChild(door);
+            door.Setup(_run.GateSprite, _run.GateHeight, new Vector2(x, _room.GroundY), 1);
+            var label = UiCommon.OutlinedLabel(DoorLabelFont, messages.Get(MessageKeys.AreaPrefix + next));
+            label.HorizontalAlignment = HorizontalAlignment.Center;
+            label.Size = new Vector2(420, 0);
+            label.Position = new Vector2(x - 210, _room.GroundY - _run.GateHeight - DoorLabelLift - DoorLabelFont);
+            label.ZIndex = 4;
+            RoomNode.AddChild(label);
+            door.Broken += _ => EnterArea(next);
+        }
+
+        _hud.ShowStatus(messages.Get(MessageKeys.AreaChoose));
+    }
+
+    private void EnterArea(string id)
+    {
+        _area = _run.Areas!.First(area => area.Id == id);
+        foreach (var room in _map.Rooms)
+        {
+            _usedRooms.Add(room);
+        }
+
+        _map = StageMap.Generate(_run, _area.Layouts, _random, GameServices.MerchantMet, _usedRooms);
+        GameLog.Info(MessageKeys.AreaEntered, id, string.Join(' ', _map.Rooms));
+        _fade.Modulate = Colors.White;
+        CreateTween().TweenProperty(_fade, "modulate:a", 0f, FadeSeconds);
+        EnterRoom(0, Entry.Start);
     }
 
     /// <summary>The Raccoon waves when Lumi first comes near and holds up a coin after each sale, then stands idle.</summary>

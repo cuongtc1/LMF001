@@ -68,6 +68,10 @@ public static class MessageKeys
     public const string ShopHeal = "shop.heal";
     public const string ShopKey = "shop.key";
     public const string ShopLeave = "shop.leave";
+    public const string AreaPrefix = "area.";
+    public const string AreaChoose = "area.choose";
+    public const string AreaTitleSuffix = ".title";
+    public const string AreaEntered = "run.area_entered";
     public const string ShopHealDescription = "shop.heal.desc";
     public const string ShopKeyDescription = "shop.key.desc";
     public const string MapTrial = "map.trial";
@@ -103,7 +107,7 @@ public static class MessageKeys
     [
         DataFileMissing, DataFileInvalid, DataUnknownId, DataDuplicateId, DataBadValue, DataLoaded, DataReloaded,
         GameBooted, StageLoaded, AssetMissing, CombatPlayerHit, CombatMonsterHit, CombatMonsterHealed,
-        AutoplayStarted, AutoplayFinished, DebugTitle, DebugDifficulty, DebugTier, DebugGodMode, DebugAirJump, DebugHeal, DebugArena, CombatStoic, CombatDizzy, CombatFlank, CombatPhaseTwo, CombatGuardBlock, CombatGuardPerfect, HudBoss, RunArea, RunShrinePrompt, RunRoomHealed, RunMoved, MapHere, MapShrine, MapTreasure, MapLair, MapElite, RunChestLocked, RunKeyFound, RunKeyUsed, MapShop, HudGold, ShopWelcome, ShopItem, ShopPoor, ShopBought, ShopSoldOut, ShopHeal, ShopKey, ShopLeave, ShopHealDescription, ShopKeyDescription, MapTrial, MapBoss, MapHint, RunStarted, RunCleared, RewardPicked, DebugPrototype, RewardSkill, RewardAmulet, HudSkillSlot, HudSkillReady, HudSkillCooldown, HudSkillEmpty, HudWave, HudClear, ArenaWave, ArenaCleared,
+        AutoplayStarted, AutoplayFinished, DebugTitle, DebugDifficulty, DebugTier, DebugGodMode, DebugAirJump, DebugHeal, DebugArena, CombatStoic, CombatDizzy, CombatFlank, CombatPhaseTwo, CombatGuardBlock, CombatGuardPerfect, HudBoss, RunArea, RunShrinePrompt, RunRoomHealed, RunMoved, MapHere, MapShrine, MapTreasure, MapLair, MapElite, RunChestLocked, RunKeyFound, RunKeyUsed, MapShop, HudGold, ShopWelcome, ShopItem, ShopPoor, ShopBought, ShopSoldOut, ShopHeal, ShopKey, ShopLeave, ShopHealDescription, ShopKeyDescription, AreaChoose, AreaEntered, MapTrial, MapBoss, MapHint, RunStarted, RunCleared, RewardPicked, DebugPrototype, RewardSkill, RewardAmulet, HudSkillSlot, HudSkillReady, HudSkillCooldown, HudSkillEmpty, HudWave, HudClear, ArenaWave, ArenaCleared,
         DebugRespawn, DebugReload, DebugHelp, HudCombo,
         ResultDefeatTitle, ResultDefeatLine, ResultClearTitle, ResultClearLine, ResultTime, ResultRooms, ResultHealed, ResultCombo, ResultLoadout, ResultRetry, ResultAgain, RunDefeated,
         TrialOffer, TrialStarted, TrialLair, TrialNoHit, TrialWon, TrialBonusLost,

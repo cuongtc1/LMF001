@@ -28,6 +28,10 @@ public partial class AutoplayRunner : Node, IPlayerInput
     private const int HuntStuckTicks = 180;
     private const int HuntReportTicks = 600;
     private int _stuckTicks;
+    private int _idleTicks;
+
+    /// <summary>Where the bot is lifted when the way on is up (set by the run; null: walk right).</summary>
+    public static System.Func<Vector2?>? ClimbTarget { get; set; }
 
     /// <summary>Room id a run script starts in (the boss den, say), or null for the first room.</summary>
     public string? StartRoom { get; private set; }
@@ -217,6 +221,15 @@ public partial class AutoplayRunner : Node, IPlayerInput
             .FirstOrDefault();
         if (target is null)
         {
+            // the bot cannot climb: in a cleared climb room whose way on is up, it is lifted to the exit (timing only)
+            _idleTicks++;
+            if (_idleTicks > HuntStuckTicks && ClimbTarget?.Invoke() is { } exit)
+            {
+                _idleTicks = 0;
+                _player.MoveTo(exit);
+                return;
+            }
+
             _held.Add(InputActions.MoveRight);
             if (_tick % HuntSwingTicks == 0)
             {
@@ -226,6 +239,7 @@ public partial class AutoplayRunner : Node, IPlayerInput
             return;
         }
 
+        _idleTicks = 0;
         var delta = target.GlobalPosition - _player.GlobalPosition;
         // the bot cannot plan a climb: after a few seconds out of reach it hops onto the monster's level (timing only)
         _stuckTicks = Mathf.Abs(delta.Y) > HuntJumpHeight ? _stuckTicks + 1 : 0;

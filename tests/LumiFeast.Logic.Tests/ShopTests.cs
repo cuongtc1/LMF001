@@ -41,10 +41,12 @@ public class ShopTests
     {
         var run = TestData.Game.Run("honey_labyrinth_stage_1");
         var shops = run.Rooms.Where(room => room.Kind == RoomKinds.Shop).Select(room => room.Id).ToHashSet();
+        var withStall = run.Areas!.SelectMany(area => area.Layouts).Where(layout => layout.Cells.Any(cell => cell.Kind == RoomKinds.Shop)).ToList();
+        Assert.NotEmpty(withStall);
         for (ulong seed = 0; seed < 30; seed++)
         {
-            Assert.DoesNotContain(StageMap.Generate(run, seed, withShop: false).Rooms, shops.Contains);
-            Assert.Contains(StageMap.Generate(run, seed, withShop: true).Rooms, shops.Contains);
+            Assert.DoesNotContain(StageMap.Generate(run, withStall, new SeededRandom(seed), withShop: false, []).Rooms, shops.Contains);
+            Assert.Contains(StageMap.Generate(run, withStall, new SeededRandom(seed), withShop: true, []).Rooms, shops.Contains);
         }
     }
 

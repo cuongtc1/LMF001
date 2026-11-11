@@ -32,7 +32,7 @@
   },
   "combat": {
     "attack_set": "lumi_sword",
-    "mp_per_second": 1,
+    "mp_per_second": 0,
     "attack_buffer_ticks": 18,
     "skill_set": "lumi_skills"
   },

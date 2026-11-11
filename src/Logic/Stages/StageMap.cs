@@ -20,7 +20,10 @@ public static class RoomKinds
     /// <summary>Ledges over open sky, no monsters; reached by climbing out of the room below.</summary>
     public const string Sky = "sky";
 
-    public static readonly string[] All = [Entrance, Fight, Treasure, Trial, Boss, Sky, Elite, Shop];
+    /// <summary>The last room of an area: one door per next area.</summary>
+    public const string Gate = "gate";
+
+    public static readonly string[] All = [Entrance, Fight, Treasure, Trial, Boss, Sky, Elite, Shop, Gate];
 }
 
 /// <summary>What a room looks like when Lumi comes back to it.</summary>
@@ -113,12 +116,14 @@ public sealed class StageMap
     /// top gap; a cell with a cell below needs an open bottom. The same seed gives the same map.
     /// </summary>
     /// <param name="withShop">False before the Raccoon has been healed: shop cells take a treasure room.</param>
-    public static StageMap Generate(RunDef run, ulong seed, bool withShop = true)
+    public static StageMap Generate(RunDef run, ulong seed, bool withShop = true) =>
+        Generate(run, run.Layouts, new SeededRandom(seed), withShop, []);
+
+    /// <summary>One area's map; <paramref name="used"/> keeps rooms of earlier areas from coming back.</summary>
+    public static StageMap Generate(RunDef run, IReadOnlyList<LayoutDef> layouts, SeededRandom random, bool withShop, HashSet<string> used)
     {
-        var random = new SeededRandom(seed);
-        var layout = run.Layouts[random.NextInt(0, run.Layouts.Count)];
+        var layout = layouts[random.NextInt(0, layouts.Count)];
         var cells = layout.Cells.Select(cell => (cell.X, cell.Y)).ToList();
-        var used = new HashSet<string>();
         var rooms = new List<string>();
         foreach (var cell in layout.Cells)
         {

@@ -192,19 +192,31 @@ room("pantry", "treasure", 2400, "wall_b", platforms=[plat("ledge_wide", 1200, L
      chest_x=1200, chest_y=LOW, reward_on_clear=False)
 
 
+# round 74: a gate room ends area 1; its doors lead to the next areas (Little Noah 18:55)
+room("crossroads", "gate", 2400, "wall_a", doors=[1350, 1950], reward_on_clear=False)
+# keys on the way up the climb rooms open the locked chest in the sky room right above (no walking back)
+rooms["climb_a"]["keys"] = [{"x": 2350, "y": tiers[4]}]
+rooms["climb_b"]["keys"] = [{"x": 500, "y": tiers[4]}]
+
+
 def cells(*items):
     return [{"x": x, "y": y, "kind": kind} for x, y, kind in items]
 
 
-E, F, T, R, S, B, M, H = "entrance", "fight", "trial", "treasure", "sky", "boss", "elite", "shop"
-data["layouts"] = [
-    {"id": "long_nest", "cells": cells((0, 0, E), (1, 0, F), (2, 0, F), (3, 0, T), (4, 0, F), (4, -1, S), (5, 0, F), (6, 0, H),
-                                       (7, 0, M), (8, 0, F), (9, 0, T), (10, 0, F), (11, 0, R), (12, 0, B))},
-    {"id": "long_high_road", "cells": cells((0, 0, E), (1, 0, F), (2, 0, T), (3, 0, F), (3, -1, S), (4, -1, S), (4, 0, F), (5, 0, H),
-                                            (6, 0, F), (7, 0, M), (8, 0, T), (9, 0, F), (10, 0, R), (11, 0, B))},
-    {"id": "long_climbs", "cells": cells((0, 0, E), (1, 0, F), (1, -1, S), (2, 0, F), (3, 0, H), (4, 0, T), (5, 0, F), (6, 0, M),
-                                         (7, 0, F), (7, -1, S), (8, 0, T), (9, 0, F), (10, 0, R), (11, 0, B))},
+E, F, T, R, S, B, M, H, G = "entrance", "fight", "trial", "treasure", "sky", "boss", "elite", "shop", "gate"
+# Areas (round 74, Little Noah): area 1 is a small grid with a treasure dead end, a climb up to the sky rooms and a
+# gate room with two doors; the second area is chosen at that gate: more fights, or more chests.
+garden = [
+    {"id": "garden_stairs", "cells": cells((0, 0, E), (-1, 0, R), (1, 0, F), (2, 0, F), (2, -1, S), (3, -1, S), (4, -1, T),
+                                           (5, -1, F), (6, -1, G))},
+    {"id": "garden_tower", "cells": cells((0, 0, E), (1, 0, F), (2, 0, T), (3, 0, F), (3, -1, S), (4, 0, F), (5, 0, H), (6, 0, G))},
 ]
+data["areas"] = [
+    {"id": "bloom_garden", "layouts": garden, "next": ["thorn_hollow", "honey_cellar"]},
+    {"id": "thorn_hollow", "layouts": [{"id": "hollow", "cells": cells((0, 0, F), (1, 0, T), (2, 0, F), (3, 0, M), (4, 0, B))}], "next": []},
+    {"id": "honey_cellar", "layouts": [{"id": "cellar", "cells": cells((0, 0, R), (1, 0, F), (2, 0, M), (3, 0, R), (4, 0, B))}], "next": []},
+]
+data["layouts"] = garden
 data["rooms"] = list(rooms.values())
 
 json.dump(data, open(path, "w", encoding="utf-8"), indent=2, ensure_ascii=False)
