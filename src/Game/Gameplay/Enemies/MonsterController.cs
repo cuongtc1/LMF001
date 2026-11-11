@@ -401,7 +401,41 @@ public partial class MonsterController : CharacterBody2D, IDamageable, IBodyBloc
 
         StepStrike();
         StepLanding();
+        StepDanger();
         ShowState();
+    }
+
+    private Label? _danger;
+    private const int DangerFont = 46;
+    private static readonly Color DangerColor = new("ff4d4d");
+
+    /// <summary>A big move shows "DANGER!" over the monster for its whole windup (round 84, Raccoon's Grand Heist).</summary>
+    private void StepDanger()
+    {
+        var warn = _brain.State == MonsterState.Windup && _brain.CurrentMove is { Danger: true };
+        if (warn && _danger is null)
+        {
+            _danger = UiCommon.OutlinedLabel(DangerFont, GameServices.Messages.Get(MessageKeys.CombatDanger));
+            _danger.AddThemeColorOverride("font_color", DangerColor);
+            _danger.HorizontalAlignment = HorizontalAlignment.Center;
+            _danger.Size = new Vector2(400, 0);
+            _danger.Position = new Vector2(-200, -_def.Art.Height - DangerFont * 2);
+            _danger.ZIndex = 10;
+            AddChild(_danger);
+            AudioService.Play(SoundIds.GateShut);
+            _gameFeel.Shake(5);
+            GameLog.Info(MessageKeys.CombatDangerMove, _def.Id, _brain.CurrentMove!.Id);
+        }
+        else if (!warn && _danger is not null)
+        {
+            _danger.QueueFree();
+            _danger = null;
+        }
+
+        if (_danger is not null)
+        {
+            _danger.Scale = Vector2.One * (1 + 0.08f * Mathf.Sin(_age * 0.4f));
+        }
     }
 
     /// <summary>Called with a monster id and a position for each helper it summons (the run spawns them).</summary>

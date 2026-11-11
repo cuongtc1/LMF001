@@ -31,7 +31,7 @@
     "stagger_damage_scale": 1.5,
     "front_guard_scale": 1.0,
     "bounces_off_walls": false,
-    "phase_two_hp": 0.65,
+    "phase_two_hp": 0.66,
     "phase_two_speed": 1.3,
     "moves": [
       {
@@ -107,7 +107,8 @@
         "projectile_ticks": 54,
         "projectile_gravity": 2400,
         "projectile_height": 90,
-        "marker_ticks": 0
+        "marker_ticks": 0,
+        "from_hp": 0.66
       },
       {
         "id": "ambush",
@@ -132,7 +133,36 @@
         "projectile_ticks": 0,
         "projectile_gravity": 0,
         "projectile_height": 0,
-        "marker_ticks": 34
+        "marker_ticks": 34,
+        "from_hp": 0.66
+      },
+      {
+        "id": "grand_heist",
+        "kind": "strike",
+        "min_range": 0,
+        "max_range": 2400,
+        "weight": 2,
+        "windup_ticks": 75,
+        "active_ticks": 110,
+        "recovery_ticks": 80,
+        "lunge_speed": 1150,
+        "damage_multiplier": 1.0,
+        "hitbox": {
+          "x": -60,
+          "y": -240,
+          "width": 280,
+          "height": 240
+        },
+        "knockdown": true,
+        "steal_mp": 10,
+        "projectile_sprite": null,
+        "projectile_ticks": 0,
+        "projectile_gravity": 0,
+        "projectile_height": 0,
+        "marker_ticks": 0,
+        "from_hp": 0.34,
+        "danger": true,
+        "bounces": true
       }
     ],
     "climbs": true,

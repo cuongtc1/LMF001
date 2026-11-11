@@ -106,6 +106,7 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats, ulong seed
     /// <summary>Armor from the hit count, an HP mark, or standing up. Counts only hits outside armor.</summary>
     public bool RegisterHit(float hpFraction)
     {
+        _hpFraction = hpFraction;
         if (_stoicTimer > 0)
         {
             return false;
@@ -147,7 +148,7 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats, ulong seed
             return;
         }
 
-        if (ai.BouncesOffWalls && State == MonsterState.Attack)
+        if ((ai.BouncesOffWalls || CurrentMove is { Bounces: true }) && State == MonsterState.Attack)
         {
             Facing = -Facing;
         }
@@ -386,6 +387,7 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats, ulong seed
     }
 
     private int _turnTimer;
+    private float _hpFraction = 1;
     private bool _counterPending;
 
     private void EnterStoic(int ticks)
@@ -413,7 +415,8 @@ public sealed class MonsterBrain(MonsterAiDef ai, MonsterStats stats, ulong seed
     private void ThinkBoss(IReadOnlyList<MonsterMoveDef> moves, float distance)
     {
         State = MonsterState.Chase;
-        var choices = moves.Where(move => distance >= move.MinRange && distance <= move.MaxRange && !(move.Id == _lastMove && _moveRepeats >= 2)).ToList();
+        var choices = moves.Where(move => distance >= move.MinRange && distance <= move.MaxRange && _hpFraction <= move.FromHp
+            && !(move.Id == _lastMove && _moveRepeats >= 2)).ToList();
         if (_cooldown == 0 && choices.Count > 0)
         {
             CurrentMove = PickWeighted(choices);

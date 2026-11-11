@@ -160,6 +160,9 @@ public sealed record AttackSetDef(string Id, string First, string FirstAir, stri
 public sealed record MonsterStatsDef(int MaxHp, int Attack, float Defense, float Speed);
 
 /// <summary>One boss move. Kind says how the game plays it; numbers come from here.</summary>
+/// <param name="FromHp">The move is used only once HP is at or below this share (boss phases).</param>
+/// <param name="Danger">A big move: a "DANGER!" warning shows over the monster during its windup (Elsword 6-4, 9:20).</param>
+/// <param name="Bounces">The charge turns at walls and keeps going until its active time ends.</param>
 public sealed record MonsterMoveDef(
     string Id,
     string Kind,
@@ -179,7 +182,10 @@ public sealed record MonsterMoveDef(
     float ProjectileGravity,
     float ProjectileHeight,
     int MarkerTicks,
-    string? Vfx = null);
+    string? Vfx = null,
+    float FromHp = 1,
+    bool Danger = false,
+    bool Bounces = false);
 
 /// <param name="SuperArmor">Armored during its own windup and strike.</param>
 /// <param name="StoicThreshold">Hits before it armors up and fights back; 0 means never.</param>
